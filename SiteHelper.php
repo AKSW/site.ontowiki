@@ -1,4 +1,7 @@
 <?php
+
+require_once 'MarkupInterface.php';
+
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
@@ -104,6 +107,18 @@ class SiteHelper extends OntoWiki_Component_Helper
     // http://localhost/OntoWiki/SiteTest/
     public function onShouldLinkedDataRedirect($event)
     {
+        if ($event->type) {
+            // Supported type?
+            $requestUri = $event->request->getServer('REQUEST_URI');
+            $parts = explode('.', $requestUri);
+            if ($parts[count($parts)-1] != $event->type) {
+                header('Location: ' . $event->uri . '.' . $event->type, true, 302);
+                exit;
+            }
+        } else {
+            return false;
+        }
+
         if ($event->type === 'html') {
             $event->request->setControllerName('site');
             $event->request->setActionName($this->_privateConfig->defaultSite);
