@@ -2,9 +2,7 @@
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
- * @category   OntoWiki
- * @package    OntoWiki_extensions_components_site
- * @copyright Copyright (c) 2009, {@link http://aksw.org AKSW}
+ * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
  * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
 
@@ -14,9 +12,6 @@
  *
  * @category   OntoWiki
  * @package    OntoWiki_extensions_components_site
- * @copyright  Copyright (c) 2009 {@link http://aksw.org aksw}
- * @license    http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
- * @subpackage component
  */
 class SiteController extends OntoWiki_Controller_Component
 {

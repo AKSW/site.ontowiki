@@ -1,24 +1,18 @@
 <?php
-
-require_once 'MarkupInterface.php';
-
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
- * @category   OntoWiki
- * @package    OntoWiki_extensions_components_site
- * @copyright Copyright (c) 2009, {@link http://aksw.org AKSW}
+ * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
  * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
+
+require_once 'MarkupInterface.php';
 
 /**
  * A helper class for the site component.
  *
  * @category   OntoWiki
  * @package    OntoWiki_extensions_components_site
- * @copyright  Copyright (c) 2009, {@link http://aksw.org AKSW}
- * @license    http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
- * @subpackage component
  */
 class SiteHelper extends OntoWiki_Component_Helper
 {
