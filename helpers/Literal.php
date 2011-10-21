@@ -96,6 +96,9 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
             $firstLiteral = $description[$mainProperty][0];
             $content = $firstLiteral['value'];
 
+            // execute the helper markup on the content (after the extensions)
+            $content = $this->view->executeHelperMarkup($content);
+
             // filter by using available extensions
             if (isset($firstLiteral['datatype'])) {
                 $datatype = $firstLiteral['datatype'];
@@ -103,9 +106,6 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
             } else {
                 $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
             }
-
-            // execute the helper markup on the content (after the extensions)
-            $content = $this->view->executeHelperMarkup($content);
 
             $curie = $this->view->curie($mainProperty);
             return "$prefix<$tag class='$class' property='$curie'>$iprefix$content$isuffix</$tag>$suffix";
