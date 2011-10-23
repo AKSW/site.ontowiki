@@ -34,14 +34,15 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
 
     /*
      * the main tah method, mentioned parameters are:
-     * - uri - which resource the literal is from (empty means selected * Resource)
+     * - uri      - which resource the literal is from (empty means selected * Resource)
      * - property - qname/uri of property to use
-     * - class (css class)
-     * - tag (the used tag, e.g. span)
-     * - prefix - string at the beginning
-     * - suffix - string at the end
-     * - iprefix - string between tag and content at the beginning
-     * - isuffix - string betwee content and tag at the end
+     * - class    - css class
+     * - tag      - the used tag, e.g. span
+     * - prefix   - string at the beginning
+     * - suffix   - string at the end
+     * - iprefix  - string between tag and content at the beginning
+     * - isuffix  - string betwee content and tag at the end
+     * - plain    - outputs the literal only (no html)
      */
     public function literal($options = array())
     {
@@ -56,6 +57,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $suffix  = (isset($options['suffix']))  ? $options['suffix']  : '';
         $iprefix = (isset($options['iprefix'])) ? $options['iprefix'] : '';
         $isuffix = (isset($options['isuffix'])) ? $options['isuffix'] : '';
+        $plain   = (isset($options['plain']))   ? true                : false;
 
         // choose, which uri to use: option over helper default over view value
         $uri = (isset($this->resourceUri))           ? $this->resourceUri : null;
@@ -96,19 +98,23 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
             $firstLiteral = $description[$mainProperty][0];
             $content = $firstLiteral['value'];
 
-            // execute the helper markup on the content (after the extensions)
-            $content = $this->view->executeHelperMarkup($content);
-
-            // filter by using available extensions
-            if (isset($firstLiteral['datatype'])) {
-                $datatype = $firstLiteral['datatype'];
-                $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
+            if ($plain) {
+                return $content;
             } else {
-                $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
-            }
+                // execute the helper markup on the content (after the extensions)
+                $content = $this->view->executeHelperMarkup($content);
 
-            $curie = $this->view->curie($mainProperty);
-            return "$prefix<$tag class='$class' property='$curie'>$iprefix$content$isuffix</$tag>$suffix";
+                // filter by using available extensions
+                if (isset($firstLiteral['datatype'])) {
+                    $datatype = $firstLiteral['datatype'];
+                    $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
+                } else {
+                    $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
+                }
+
+                $curie = $this->view->curie($mainProperty);
+                return "$prefix<$tag class='$class' property='$curie'>$iprefix$content$isuffix</$tag>$suffix";
+            } 
         } else {
             return '';
         }
