@@ -46,7 +46,6 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
      */
     public function literal($options = array())
     {
-        $store       = OntoWiki::getInstance()->erfurt->getStore();
         $model       = OntoWiki::getInstance()->selectedModel;
         $titleHelper = new OntoWiki_Model_TitleHelper($model);
 

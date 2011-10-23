@@ -38,7 +38,6 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
      */
     public function link($options = array())
     {
-        $store       = OntoWiki::getInstance()->erfurt->getStore();
         $model       = OntoWiki::getInstance()->selectedModel;
         $titleHelper = new OntoWiki_Model_TitleHelper($model);
 
@@ -83,7 +82,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
                 FILTER (REGEX(?literal, "^'.$literal.'$", "i"))
                 }  LIMIT 1';
 
-            $result = $store->sparqlQuery($query);
+            $result = $model->sparqlQuery($query);
             if (!$result) {
                 // resource not found, so return plain literal or given text
                 return (isset($text)) ? $text : $literal;
