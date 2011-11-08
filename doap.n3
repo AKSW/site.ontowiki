@@ -1,0 +1,36 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owconfig: <http://ns.ontowiki.net/SysOnt/ExtensionConfig/> .
+@prefix extension: <http://ns.ontowiki.net/Extensions/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix event: <http://ns.ontowiki.net/SysOnt/Events/> .
+@prefix : <https://raw.github.com/AKSW/site.ontowiki/master/doap.rdf#> .
+
+<> foaf:primaryTopic :site .
+:site a doap:Project ;
+
+  owconfig:privateNamespace <http://ns.ontowiki.net/Extensions/ontowiki/> ;
+  owconfig:enabled "true"^^xsd:boolean ;
+
+  doap:name "Site Rendering" ;
+  doap:description "A component which renders custom HTML views for linked data resource and thus creates rdf-based web sites." ;
+  doap:maintainer <http://aksw.org/SebastianTramp>;  
+  owconfig:authorLabel "AKSW" ;
+  owconfig:templates "sites" ;
+  owconfig:helpers "helpers" ;
+
+  owconfig:helperEvent event:onPostBootstrap ;
+  owconfig:helperEvent event:onShouldLinkedDataRedirect ;
+  owconfig:helperEvent event:onBuildUrl ;
+  owconfig:helperEvent event:onIsDispatchable ;
+
+  owconfig:requiresExtension extension:linkeddataserver;
+
+  :defaultSite "generic" ;
+  doap:release :v1-0 .
+
+:v1-0 a doap:Version ;
+  doap:revision "1.0" .
+
+:defaultSite rdfs:label "The site identifier which is used for the site rendering".

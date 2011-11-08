@@ -49,7 +49,7 @@ class SiteController extends OntoWiki_Controller_Component
      */
     private $_site = null;
 
-	public function init()
+    public function init()
     {
         parent::init();
         $this->_helper->viewRenderer->setNoRender();
