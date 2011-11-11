@@ -43,6 +43,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
      * - iprefix  - string between tag and content at the beginning
      * - isuffix  - string betwee content and tag at the end
      * - plain    - outputs the literal only (no html)
+     * - array    - returns an array of the values (not suitable for template markup)
      */
     public function literal($options = array())
     {
@@ -57,6 +58,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $iprefix = (isset($options['iprefix'])) ? $options['iprefix'] : '';
         $isuffix = (isset($options['isuffix'])) ? $options['isuffix'] : '';
         $plain   = (isset($options['plain']))   ? true                : false;
+        $array   = (isset($options['array']))   ? true                : false;
 
         // choose, which uri to use: option over helper default over view value
         $uri = (isset($this->resourceUri))           ? $this->resourceUri : null;
@@ -97,7 +99,13 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
             $firstLiteral = $description[$mainProperty][0];
             $content = $firstLiteral['value'];
 
-            if ($plain) {
+            if ($array) {
+                $return = array();
+                foreach ($description[$mainProperty] as $key => $value) {
+                    $return[] = $value['value'];
+                };
+                return $return;
+            } else if ($plain) {
                 return $content;
             } else {
                 // execute the helper markup on the content (after the extensions)
