@@ -1,14 +1,14 @@
 <?php
 // this is the standard template data
 $templateData = array(
-                'title' => $this->title,
-                'resourceUri' => $this->resourceUri,
-                'description' => $this->description,
-                'descriptionHelper' => $this->descriptionHelper,
-        );
+    'title' => $this->title,
+    'resourceUri' => $this->resourceUri,
+    'description' => $this->description,
+    'descriptionHelper' => $this->descriptionHelper,
+);
 ?>
 
-<?php if ($content = trim($this->partial( 'lod2/content.phtml', $templateData))): ?>
+<?php if ($content = trim($this->partial('lod2/content.phtml', $templateData))): ?>
     
 <div class="maincontent">
     <div class="section">
@@ -20,5 +20,4 @@ $templateData = array(
 </div>
 
 <?php endif; ?>
-
 
