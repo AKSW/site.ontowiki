@@ -1,5 +1,8 @@
 <?php
 
+define('LOD2_PRESS_CLIPPING', 1);
+define('LOD2_PRESS_RELEASE', 2);
+
 $templateData = array(
     'title'             => $this->title,
     'resourceUri'       => $this->resourceUri,
@@ -12,6 +15,13 @@ $languages = array(
     'en' => 'English', 
     'nl' => 'Dutch'
 );
+
+$type = 0;
+if (isset($this->types['http://lod2.eu/schema/PressRelease'])) {
+    $type = LOD2_PRESS_RELEASE;
+} else if (isset($this->types['http://lod2.eu/schema/PressClipping'])) {
+    $type = LOD2_PRESS_CLIPPING;
+}
 
 $renderData = array();
 
@@ -32,7 +42,9 @@ if (isset($this->description['http://lod2.eu/schema/publishedBy'][0]['value'])) 
 
 if (isset($this->description['http://www.w3.org/2000/01/rdf-schema#seeAlso'][0]['value'])) {
     $link = $this->description['http://www.w3.org/2000/01/rdf-schema#seeAlso'][0]['value'];
-    $renderData['Link'] = '<a href="' . $link . '">View clipping</a>';
+    $renderData['Link'] = '<a href="' . $link . '">View';
+    $renderData['Link'] .= $type == LOD2_PRESS_CLIPPING ? ' press clipping' : ' press release';
+    $renderData['Link'] .= '</a>';
 }
 
 ?>

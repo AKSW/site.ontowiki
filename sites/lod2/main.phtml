@@ -23,6 +23,8 @@ if (isset($this->description['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'])
         }
     }
 
+    $templateData = array_merge($templateData, array('types' => $types));
+
     switch (true) {
         case (isset($types['http://lod2.eu/schema/WorkPackage'])):
             echo $this->partial('lod2/types/workpackage.phtml', $templateData);
@@ -53,6 +55,7 @@ if (isset($this->description['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'])
         case (isset($types['http://lod2.eu/schema/Testimonial'])):
             echo $this->partial('lod2/types/testimonial.phtml', $templateData);
             break;
+        case (isset($types['http://lod2.eu/schema/PressRelease'])):
         case (isset($types['http://lod2.eu/schema/PressClipping'])):
             echo $this->partial('lod2/types/press.phtml', $templateData);
             break;
