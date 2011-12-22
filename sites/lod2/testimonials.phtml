@@ -1,6 +1,12 @@
 <?php
 
-$querUri          = time() % 2 == 0 ? 'http://lod2.eu/Query/Testimonials' : 'http://lod2.eu/Query/Demos';
+$queries = array(
+    'http://lod2.eu/Query/Testimonials',
+    'http://lod2.eu/Query/Demos',
+    'http://lod2.eu/Query/Webinars'
+);
+
+$querUri          = $queries[time() % count($queries)];
 $queryInstance    = new OntoWiki_Resource($querUri, OntoWiki::getInstance()->selectedModel);
 $queryDescription = $queryInstance->getDescription();
 $queryDescription = $queryDescription[$querUri];
@@ -24,8 +30,16 @@ if (empty($title)) {
             setTimeout(arguments.callee, 10);
             return;
         }
-        
+<?php if ($querUri != 'http://lod2.eu/Query/Webinars'): ?>
         var results = $('.random-results').find('.result').cycle();
+<?php else: ?>
+        $('.random-results .result').hide();
+        var randomSize = $('.random-results .result').size(),
+            randomIndex = Math.floor(Math.random() * randomSize);
+console.log(randomSize);
+console.log(randomIndex);
+        $('.random-results .result').eq(randomIndex).show();
+<?php endif; ?>
     });
     </script>
     <h3><?php echo $title ?></h3>

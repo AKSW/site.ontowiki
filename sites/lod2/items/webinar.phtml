@@ -1,0 +1,21 @@
+<?php
+
+$templateData = array(
+    'title'             => $this->title,
+    'resourceUri'       => $this->resourceUri,
+    'description'       => $this->description,
+    'descriptionHelper' => $this->descriptionHelper,
+);
+
+$embed = isset($this->description['http://lod2.eu/schema/embedURL'][0]['value'])
+         ? $this->description['http://lod2.eu/schema/embedURL'][0]['value']
+         : null;
+
+
+?>
+<div class="result">
+    <h4><a href="<?php echo $this->url($this->resourceUri); ?>"><?php echo $this->title; ?></a></h4>
+        <?php if ($embed): ?>
+            <iframe src="<?php echo $embed; ?>" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+        <?php endif; ?>
+</div>
