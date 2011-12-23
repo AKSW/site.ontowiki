@@ -11,11 +11,13 @@ class Site_View_Helper_SkosNavigation extends OntoWiki_Component_Helper
     {
         $this->_store = OntoWiki::getInstance()->erfurt->getStore();
         $this->_selectedModel = OntoWiki::getInstance()->selectedModel;
+        // We use our own title helper and ignore the injected one.
+        $this->_titleHelper = new OntoWiki_Model_TitleHelper($this->_selectedModel);
     }
 
     public function skosNavigation($titleHelper)
     {
-        $this->_titleHelper = $titleHelper;
+        // $this->_titleHelper = $titleHelper;
         return ($this->_renderNavigation($this->_skosNavigationAsArray()));
     }
 
@@ -36,9 +38,9 @@ class Site_View_Helper_SkosNavigation extends OntoWiki_Component_Helper
                  ? $navigationItem->page 
                  : $this->_view->url($navigationItem->uri);
 
-            $label = isset($navigationItem->altLabel)
-                   ? $navigationItem->altLabel
-                   : $this->_titleHelper->getTitle($navigationItem->uri);
+            $label = $this->_titleHelper->getTitle($navigationItem->uri);
+
+            // var_dump($this->_titleHelper->getResources());
 
             $rendered .= sprintf('<li><a href="%s">%s</a>%s</li>%s', 
                                  $url,
@@ -56,16 +58,13 @@ class Site_View_Helper_SkosNavigation extends OntoWiki_Component_Helper
         $query = '
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX sysont: <http://ns.ontowiki.net/SysOnt/>
-            SELECT ?topConcept ?altLabel
+            SELECT ?topConcept 
             FROM <' . (string)$this->_selectedModel . '>
             WHERE {
                 ?cs a skos:ConceptScheme .
                 ?topConcept skos:topConceptOf ?cs
                 OPTIONAL {
                     ?topConcept sysont:order ?order
-                }
-                OPTIONAL {
-                    ?topConcept skos:altLabel ?altLabel
                 }
             }
             ORDER BY ASC(?order)
@@ -79,23 +78,16 @@ class Site_View_Helper_SkosNavigation extends OntoWiki_Component_Helper
 
                 $this->_titleHelper->addResource($topConcept->uri);
 
-                if ($row['altLabel'] != null) {
-                    $topConcept->altLabel = $row['altLabel'];
-                }
-
                 $subQuery = '
                     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
                     PREFIX sysont: <http://ns.ontowiki.net/SysOnt/>
                     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                    SELECT ?subConcept ?altLabel ?page
+                    SELECT ?subConcept ?page
                     FROM <' . (string)$this->_selectedModel . '>
                     WHERE {
                         ?subConcept skos:broader <' . $topConcept->uri . '>
                         OPTIONAL {
                             ?subConcept sysont:order ?order .
-                        }
-                        OPTIONAL {
-                            ?subConcept skos:altLabel ?altLabel .
                         }
                         OPTIONAL {
                           ?subConcept foaf:page ?page .
@@ -109,10 +101,6 @@ class Site_View_Helper_SkosNavigation extends OntoWiki_Component_Helper
                         $subConcept = new stdClass;
                         $subConcept->uri = $subConceptRow['subConcept'];
                         $subConcept->subConcepts = array();
-
-                        if ($subConceptRow['altLabel'] != null) {
-                            $subConcept->altLabel = $subConceptRow['altLabel'];
-                        }
 
                         if ($subConceptRow['page'] != null) {
                             $subConcept->page = $subConceptRow['page'];
