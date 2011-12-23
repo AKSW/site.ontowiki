@@ -38,3 +38,38 @@ $templateData = array(
 <?php endif; ?>
 
 
+<?php // Webinars
+
+$query = <<<EOT
+PREFIX lod2: <http://lod2.eu/schema/>
+PREFIX sysont: <http://ns.ontowiki.net/SysOnt/>
+SELECT DISTINCT ?resourceUri
+WHERE {
+    ?resourceUri lod2:project <{$this->resourceUri}> .
+    ?resourceUri a lod2:Webinar .
+    OPTIONAL {
+        ?resourceUri sysont:order ?order.
+    }
+    FILTER (!isBLANK(?resourceUri))
+}
+ORDER BY ASC(?order)
+EOT;
+
+$webinars = trim($this->querylist($query, 'lod2/items/li.phtml'));
+
+?>
+
+<?php if ($webinars): ?>
+<div class="subcolumns">
+    <?php if ($webinars): ?>
+    <div class="c50l">
+        <div class="subcl widget-deeplink">
+            <h3>Webinars</h3>
+             <ul>
+                <?php echo $webinars; ?>
+             </ul>
+        </div>
+    </div>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
