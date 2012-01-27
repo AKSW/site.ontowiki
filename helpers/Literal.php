@@ -9,7 +9,7 @@
 /**
  * OntoWiki Literal view helper
  *
- * returns the content of a specific property of a given resource as an RDFa 
+ * returns the content of a specific property of a given resource as an RDFa
  * annotated tag with (optional) given css classes and other parameters
  * this helper is usable as {{literal ...}} markup in combination with
  * ExecuteHelperMarkup
@@ -121,9 +121,13 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
 
                 $curie = $this->view->curie($mainProperty);
                 return "$prefix<$tag class='$class' property='$curie'>$iprefix$content$isuffix</$tag>$suffix";
-            } 
+            }
         } else {
-            return '';
+            if ($array) {
+                return array();
+            } else {
+                return '';
+            }
         }
 
     }
