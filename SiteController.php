@@ -90,11 +90,10 @@ class SiteController extends OntoWiki_Controller_Component
             $this->_loadModel();
             $this->_loadResource();
 
-            /* Here we start the object cache with id = requesturi + site*/
-            $requestParameters = $this->_request->getParams();
-            ksort($requestParameters);
-            $siteModuleObjectCacheIdSource = $this->_site . ':' . $this->_resourceUri . ':' . serialize($requestParameters);
+            // Here we start the object cache id
+            $siteModuleObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             $siteModuleObjectCacheId = 'site_' . md5($siteModuleObjectCacheIdSource);
+
             // try to load the cached value
             $erfurtObjectCache = OntoWiki::getInstance()->erfurt->getCache();
             $erfurtQueryCache  = OntoWiki::getInstance()->erfurt->getQueryCache();
@@ -129,7 +128,7 @@ class SiteController extends OntoWiki_Controller_Component
             $bodyContent = $this->view->render($mainTemplate);
 
             // save the page body as an object value for the object cache
-            $erfurtObjectCache->save ($bodyContent, $siteModuleObjectCacheId) ;
+            $erfurtObjectCache->save($bodyContent, $siteModuleObjectCacheId);
             // close the object cache transaction
             $erfurtQueryCache->endTransaction($siteModuleObjectCacheId);
 
@@ -176,7 +175,6 @@ class SiteController extends OntoWiki_Controller_Component
             'descriptionHelper' => $this->_resource->getDescriptionHelper(),
         );
 
-
         return $templateData;
     }
 
@@ -189,7 +187,9 @@ class SiteController extends OntoWiki_Controller_Component
         if ((!isset($this->_request->m)) && (!$this->_owApp->selectedModel)) {
             // TODO: what if no site model configured?
             if (!Erfurt_Uri::check($siteConfig['model'])) {
-                throw new OntoWiki_Exception('No model pre-selected model, no parameter m (model) and no configured site model!');
+                throw new OntoWiki_Exception(
+                    'No model pre-selected model, no parameter m (model) and no configured site model!'
+                );
             } else {
                 // setup the model
                 $this->_modelUri = $siteConfig['model'];
