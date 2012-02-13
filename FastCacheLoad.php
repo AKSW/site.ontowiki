@@ -33,7 +33,7 @@ function GetCachedContent_ZendDB($cacheId, $config)
         exit('Can\'t use foo : ' . mysql_error());
     }
 
-    $query = 'SELECT content FROM `ef_cache` WHERE id = "' . $siteModuleObjectCacheId . '"';
+    $query = 'SELECT content FROM `ef_cache` WHERE id = "' . $cacheId . '"';
     // Perform Query
     $result = mysql_query($query);
 
