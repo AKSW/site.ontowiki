@@ -17,36 +17,89 @@
  * @author Sebastian Tramp <tramp@informatik.uni-leipzig.de>
  */
 
+function GetCachedContent_ZendDB($cacheId, $config)
+{
+    $dbuser = $config['store.zenddb.username'];
+    $dbpass = $config['store.zenddb.password'];
+    $dbname = $config['store.zenddb.dbname'];
+
+    $link = mysql_connect($dbhost, $dbuser, $dbpass);
+    if (!$link) {
+        exit('Could not connect: ' . mysql_error());
+    }
+    $selectedDatabase = mysql_select_db($dbname, $link);
+    if (!$selectedDatabase) {
+        exit('Can\'t use foo : ' . mysql_error());
+    }
+
+    $query = 'SELECT content FROM `ef_cache` WHERE id = "' . $siteModuleObjectCacheId . '"';
+    // Perform Query
+    $result = mysql_query($query);
+
+    // Check result
+    if ($result && (mysql_num_rows($result) == 1)) {
+        $result  = mysql_fetch_row($result);
+        $content = unserialize($result[0]);
+
+        return $content;
+    }
+}
+
+function GetCachedContent_Virtuoso($cacheId, $config)
+{
+    $virtUser = $config['store.virtuoso.username'];
+    $virtPass = $config['store.virtuoso.password'];
+    $virtDsn  = $config['store.virtuoso.dsn'];
+
+    $connection = @odbc_connect($virtDsn, $virtUser, $virtPass);
+    if ($connection == false) {
+        // Could not connect
+        return;
+    }
+
+    $query = "SELECT content
+        FROM DB.DBA.ef_cache
+        WHERE id = '$cacheId'";
+
+    $resultId = odbc_exec($connection, $query);
+    if ($resultId == false) {
+        // Erroneous query
+        return;
+    }
+
+    if (odbc_num_rows($resultId) == 1) {
+        $serialized = '';
+        while ($segment = odbc_result($resultId, 1)) {
+            $serialized .= (string)$segment;
+        }
+        return unserialize($serialized);
+    }
+}
+
 // @todo: fetch from config.ini
-$ini = parse_ini_file('config.ini');
+$config = parse_ini_file('config.ini');
 
-$host = 'localhost';;
-$user = $ini['store.zenddb.username'];
-$pass = $ini['store.zenddb.password'];
-$database = $ini['store.zenddb.dbname'];
-
-$link = mysql_connect($host, $user, $pass);
-if (!$link) {
-    die('Could not connect: ' . mysql_error());
-}
-$selectedDatabase = mysql_select_db($database, $link);
-if (!$selectedDatabase) {
-    die ('Can\'t use foo : ' . mysql_error());
-}
+$host    = 'localhost';
+$backend = $config['store.backend'];
 
 $siteModuleObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $siteModuleObjectCacheId = 'site_' . md5($siteModuleObjectCacheIdSource);
 
-$query = 'SELECT content FROM `ef_cache` WHERE id = "'.$siteModuleObjectCacheId.'"';
-// Perform Query
-$result = mysql_query($query);
+$content = null;
+switch ($backend) {
+case 'zenddb':
+    $content = GetCachedContent_ZendDB($siteModuleObjectCacheId, $config);
+    break;
+case 'virtuoso':
+    $content = GetCachedContent_Virtuoso($siteModuleObjectCacheId, $config);
+    break;
+default:
+    // nothing to do
+}
 
-// Check result
-if ($result && (mysql_num_rows($result) == 1)) {
-    $result = mysql_fetch_row($result);
-    $content = unserialize($result[0]);
+// Cache hit: send response and exit
+if ($content) {
     echo $content;
-    //die(microtime(true) - REQUEST_START);
-    die();
+    exit;
 }
 
