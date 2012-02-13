@@ -7,8 +7,9 @@
  */
 
 /**
- * Dummy interace for a view helper to declare it
- * supports the markup helper interface.
+ * Dummy interface for a view helper to declare it supports the
+ * markup helper interface.
+ *
  * TODO: document this interface.
  */
 interface Site_View_Helper_MarkupInterface

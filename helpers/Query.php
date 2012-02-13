@@ -28,6 +28,8 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
      * - where
      * - template
      * - limit
+     * - prefix
+     * - suffix
      */
     public function query($options = array())
     {
@@ -40,6 +42,8 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
         $where    = (isset($options['where']))    ? $options['where']    : '?resourceUri a foaf:Project.';
         $template = (isset($options['template'])) ? $options['template'] : 'li';
         $limit    = (isset($options['limit']))    ? $options['limit']    : 100;
+        $prefix   = (isset($options['prefix']))   ? $options['prefix']   : '';
+        $suffix   = (isset($options['suffix']))   ? $options['suffix']   : '';
 
         // create template name {site}/items/{name}.phtml
         $siteId   = $this->templateData['siteId'];
@@ -47,14 +51,20 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
 
         // build the query including PREFIX declarations
         $query = '';
-        foreach ($model->getNamespaces() as $ns => $prefix) {
-            $query .= 'PREFIX ' . $prefix . ': <' . $ns . '>' . PHP_EOL;
+        foreach ($model->getNamespaces() as $ns => $usedPrefix) {
+            $query .= 'PREFIX ' . $usedPrefix . ': <' . $ns . '>' . PHP_EOL;
         }
         $query .= 'SELECT DISTINCT ?resourceUri WHERE {' . PHP_EOL;
         $query .= $where . PHP_EOL;
         $query .= 'FILTER (!isBLANK(?resourceUri))' . PHP_EOL;
         $query .= '}  LIMIT ' . $limit . PHP_EOL;
-        return $this->view->querylist($query, $template, $options);
+
+        // prepare the result string
+        $result = $this->view->querylist($query, $template, $options);
+        if ($result != '') {
+            $result = $prefix . $result . $suffix;
+        }
+        return $result;
     }
 
     /*

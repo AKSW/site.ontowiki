@@ -16,23 +16,72 @@
  */
 class Site_View_Helper_HeadScriptExhibit extends Zend_View_Helper_Abstract
 {
-    // current view, injected with setView from Zend
+    /*
+     * current view, injected with setView from Zend
+     */
     public $view;
 
-    public function headScriptExhibit($dataProperty = 'http://lod2.eu/schema/exhibitData')
+    private $defaultPropertyInfo = array(
+        array ('uri' => 'http://lod2.eu/schema/exhibitData')
+    );
+
+    private $exhibitScript = 'http://static.simile.mit.edu/exhibit/api-2.0/exhibit-api.js';
+
+    /*
+     * Parameter propertyInfo:
+     *   an array of arrays which has uri and mod key
+     *     uri: property uri to use
+     *     sprintf : a format string to transform literal values into a data URI
+     *  OR
+     *   simply a property string
+     *  OR
+     *   nothing, to use the default
+     *
+     */
+    public function headScriptExhibit($propertyInfo = null)
     {
-        if ($dataProperty == null) {
+        if ($propertyInfo == null) {
+            // set default info 
+            $propertyInfo = $this->defaultPropertyInfo;
+        } else if (is_string($propertyInfo)) {
+            // transform string to array
+            $propertyInfo = array(
+                array('uri' => $propertyInfo)
+            );
+        } else if (is_array($propertyInfo) && (isset($propertyInfo['uri']))) {
+            // transform single level array to multi-hierarchy form
+            $propertyInfo = array($propertyInfo);
+        }
+
+        // if we have something completly different as option
+        if (!is_array($propertyInfo)) {
             return;
-        } else {
-            $description = $this->view->description;
-            $resourceUri = $this->view->resourceUri;
-            // check for exhibit data URI and integrate this as well as exhibit
-            if (isset($description[$resourceUri][$dataProperty])) {
-                echo '    <script src="http://static.simile.mit.edu/exhibit/api-2.0/exhibit-api.js" type="text/javascript"></script>' . PHP_EOL;
-                foreach ($description[$resourceUri][$dataProperty] as $property) {
-                    if (isset($property['value'])) {
-                        echo '    <link href="'.$property['value'].'" type="application/jsonp" rel="exhibit/data" ex:jsonp-callback="cb" />' .PHP_EOL;
+        }
+
+        $description = new Erfurt_Rdf_MemoryModel($this->view->description);
+        $resourceUri = $this->view->resourceUri;
+        $propertyUri = null;
+        $literalMod  = null;
+
+        // the main loop to search for a valid property value
+        // first hit is taken and every other value is not used
+        foreach ($propertyInfo as $info) {
+            if (isset($info['uri'])) {
+                $propertyUri = $info['uri'];
+                $literalMod = isset($info['sprintf']) ? $info['sprintf'] : null;
+
+                // check for exhibit data URI and integrate this as well as exhibit
+                if ($description->hasSP($resourceUri, $propertyUri)) {
+                    // we've found something, so we can add the exhibit script
+                    echo '    <script src="'.$this->exhibitScript.'" type="text/javascript"></script>' . PHP_EOL;
+                    $value = $description->getValue($resourceUri, $propertyUri);
+                    if ($literalMod != null) {
+                        $value = sprintf($literalMod, $value);
                     }
+
+                    // output the data script and return
+                    echo '    <link href="'.$value.'" type="application/jsonp" rel="exhibit/data" ex:jsonp-callback="cb" />' .PHP_EOL;
+                    return;
                 }
             }
         }

@@ -1,24 +1,18 @@
 <?php
-
-require_once 'MarkupInterface.php';
-
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
- * @category   OntoWiki
- * @package    OntoWiki_extensions_components_site
- * @copyright Copyright (c) 2009, {@link http://aksw.org AKSW}
+ * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
  * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
+
+require_once 'MarkupInterface.php';
 
 /**
  * A helper class for the site component.
  *
  * @category   OntoWiki
  * @package    OntoWiki_extensions_components_site
- * @copyright  Copyright (c) 2009, {@link http://aksw.org AKSW}
- * @license    http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
- * @subpackage component
  */
 class SiteHelper extends OntoWiki_Component_Helper
 {
@@ -44,7 +38,7 @@ class SiteHelper extends OntoWiki_Component_Helper
      * @var string
      */
     protected $_currentSuffix = '';
-
+    
     public function onPostBootstrap($event)
     {
         $router     = $event->bootstrap->getResource('Router');
@@ -98,13 +92,16 @@ class SiteHelper extends OntoWiki_Component_Helper
 
             $toolbar = OntoWiki_Toolbar::getInstance();
             $toolbar->prependButton(OntoWiki_Toolbar::SEPARATOR)
-                    ->prependButton(OntoWiki_Toolbar::SUBMIT, array(
-                        'name' => 'Back to Site',
-                        'url' => $resourceUrl));
+                    ->prependButton(
+                        OntoWiki_Toolbar::SUBMIT, 
+                        array(
+                            'name' => 'Back to Site',
+                            'url' => $resourceUrl
+                        )
+                    );
         }
     }
 
-    // http://localhost/OntoWiki/SiteTest/
     public function onShouldLinkedDataRedirect($event)
     {
         if ($event->type) {
@@ -139,10 +136,9 @@ class SiteHelper extends OntoWiki_Component_Helper
     }
 
     public function onIsDispatchable($event)
-    {#return false; /* TODO: method is broken! "Fatal error: Call to undefined method Erfurt_Event::getValue() in /var/www/ontowiki/extensions/components/site/SiteHelper.php on line 128 " */
+    {
         if (!$event->getValue()) {
             // linked data plug-in returned false --> 404
-
             $config = $this->getSiteConfig();
             if (isset($config['error'])) {
                 $errorResource = $config['error'];
@@ -160,7 +156,7 @@ class SiteHelper extends OntoWiki_Component_Helper
                         OntoWiki::getInstance()->selectedModel    = $siteModel;
                         OntoWiki::getInstance()->selectedResource = new OntoWiki_Resource($errorResource, $siteModel);
 
-                        $request = $response = Zend_Controller_Front::getInstance()->getRequest();
+                        $request = Zend_Controller_Front::getInstance()->getRequest();
                         $request->setControllerName('site');
                         $request->setActionName($this->_privateConfig->defaultSite);
 

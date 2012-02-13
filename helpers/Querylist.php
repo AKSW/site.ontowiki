@@ -26,10 +26,11 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
     {
         $owapp       = OntoWiki::getInstance();
         $store       = $owapp->erfurt->getStore();
-        $titleHelper = new OntoWiki_Model_TitleHelper($owapp->selectedModel);
+        $model       = $owapp->selectedModel;
+        $titleHelper = new OntoWiki_Model_TitleHelper($model);
 
         try {
-            $result = $store->sparqlQuery($query);
+            $result = $model->sparqlQuery($query);
         } catch (Exception $e) {
             // executions failed (return nothing)
             return $e->getMessage();

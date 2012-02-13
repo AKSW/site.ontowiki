@@ -202,8 +202,15 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
             $return .= '</li>' . PHP_EOL;
         }
 
+        // prepare the class attribute of the list
+        if ($this->listClass != '') {
+            $class = ' class="'. $this->listClass .'" ';
+        } else {
+            $class = '';
+        }
+
         // surround the list items with ul or ol tag
-        $return  = '<' . $this->listTag . '>' . PHP_EOL . $return;
+        $return  = '<' . $this->listTag . $class . '>' . PHP_EOL . $return;
         $return .= '</' . $this->listTag . '>' . PHP_EOL;
 
         // surround the list with prefix/suffix
