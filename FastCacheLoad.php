@@ -22,6 +22,7 @@ function GetCachedContent_ZendDB($cacheId, $config)
     $dbuser = $config['store.zenddb.username'];
     $dbpass = $config['store.zenddb.password'];
     $dbname = $config['store.zenddb.dbname'];
+    $dbhost = 'localhost';
 
     $link = mysql_connect($dbhost, $dbuser, $dbpass);
     if (!$link) {
@@ -77,9 +78,7 @@ function GetCachedContent_Virtuoso($cacheId, $config)
 }
 
 // @todo: fetch from config.ini
-$config = parse_ini_file('config.ini');
-
-$host    = 'localhost';
+$config  = parse_ini_file('config.ini');
 $backend = $config['store.backend'];
 
 $siteModuleObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
