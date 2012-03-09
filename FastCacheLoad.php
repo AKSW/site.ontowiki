@@ -77,24 +77,29 @@ function GetCachedContent_Virtuoso($cacheId, $config)
     }
 }
 
-// @todo: fetch from config.ini
-$config  = parse_ini_file('config.ini');
-$backend = $config['store.backend'];
+function GetCacheContent ($id)
+{
+    $config  = parse_ini_file('config.ini');
+    $backend = $config['store.backend'];
 
-$siteModuleObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-$siteModuleObjectCacheId = 'site_' . md5($siteModuleObjectCacheIdSource);
-
-$content = null;
-switch ($backend) {
-case 'zenddb':
-    $content = GetCachedContent_ZendDB($siteModuleObjectCacheId, $config);
-    break;
-case 'virtuoso':
-    $content = GetCachedContent_Virtuoso($siteModuleObjectCacheId, $config);
-    break;
-default:
-    // nothing to do
+    $content = null;
+    switch ($backend) {
+    case 'zenddb':
+        $content = GetCachedContent_ZendDB($id, $config);
+        break;
+    case 'virtuoso':
+        $content = GetCachedContent_Virtuoso($id, $config);
+        break;
+    default:
+        // nothing to do
+    }
+    return $content;
 }
+
+// prepare the cacheid and fetch the cache content
+$siteModuleObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$siteModuleObjectCacheId       = 'site_' . md5($siteModuleObjectCacheIdSource);
+$content = GetCacheContent($siteModuleObjectCacheId);
 
 // Cache hit: send response and exit
 if ($content) {
