@@ -2,7 +2,7 @@
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
- * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
+ * @copyright Copyright (c) 2012, {@link http://aksw.org AKSW}
  * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
 
@@ -86,19 +86,25 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
      */
     private function selectTemplate()
     {
-        $mappings = $this->getMappings();
         $description = $this->getDescription();
-
-        // try to map each rdf:type property value
-        if (isset($description[$this->typeProp])) {
-            foreach ($description[$this->typeProp] as $class) {
-                $classUri = $class['value'];
-                if (isset($mappings[$classUri])) {
-                    // overwrite, if class has an template entry
-                    $this->template = $this->view->siteId .'/types/'. $mappings[$classUri] .'.phtml';
+        // if we have specific template on the resource, use it
+        if (isset($description[$this->templatePropResource][0]['value'])) {
+            $templateName   = $description[$this->templatePropResource][0]['value'];
+        } else {
+            // try template hints on classes
+            $mappings = $this->getMappings();
+            // try to map each rdf:type property value
+            if (isset($description[$this->typeProp])) {
+                foreach ($description[$this->typeProp] as $class) {
+                    $classUri = $class['value'];
+                    if (isset($mappings[$classUri])) {
+                        // overwrite, if class has an template entry
+                        $templateName = $mappings[$classUri];
+                    }
                 }
             }
         }
+        $this->template = $this->view->siteId .'/types/'. $templateName .'.phtml';
         return $this->template;
     }
 
