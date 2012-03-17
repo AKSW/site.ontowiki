@@ -13,7 +13,7 @@
   owconfig:privateNamespace <http://ns.ontowiki.net/Extensions/ontowiki/> ;
   owconfig:enabled "true"^^xsd:boolean ;
 
-  rdfs:title "Site Rendering" ;
+  rdfs:label "Site Rendering" ;
   doap:name "site" ;
   doap:description "A component which renders custom HTML views for linked data resource and thus creates rdf-based web sites." ;
   doap:maintainer <http://aksw.org/SebastianTramp>;  
