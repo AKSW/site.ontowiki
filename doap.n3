@@ -14,7 +14,7 @@
   owconfig:enabled "true"^^xsd:boolean ;
 
   rdfs:title "Site Rendering" ;
-  doap:name "site.ontowiki" ;
+  doap:name "site" ;
   doap:description "A component which renders custom HTML views for linked data resource and thus creates rdf-based web sites." ;
   doap:maintainer <http://aksw.org/SebastianTramp>;  
   owconfig:authorLabel "AKSW" ;
