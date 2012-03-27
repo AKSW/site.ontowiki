@@ -187,8 +187,11 @@ class SiteController extends OntoWiki_Controller_Component
         if ((!isset($this->_request->m)) && (!$this->_owApp->selectedModel)) {
             // TODO: what if no site model configured?
             if (!Erfurt_Uri::check($siteConfig['model'])) {
+                $site = $this->_privateConfig->defaultSite;
+                $root = $this->getComponentHelper()->getComponentRoot();
+                $configFilePath = sprintf('%ssites/%s/%s', $root, $site, SiteHelper::SITE_CONFIG_FILENAME);
                 throw new OntoWiki_Exception(
-                    'No model pre-selected model, no parameter m (model) and no configured site model!'
+                    'No model selected! Please, configure a site model by setting the option "model=..." in "' . $configFilePath . '" or specify parameter m in the URL.'
                 );
             } else {
                 // setup the model
