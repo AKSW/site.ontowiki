@@ -191,7 +191,8 @@ class SiteController extends OntoWiki_Controller_Component
                 $root = $this->getComponentHelper()->getComponentRoot();
                 $configFilePath = sprintf('%ssites/%s/%s', $root, $site, SiteHelper::SITE_CONFIG_FILENAME);
                 throw new OntoWiki_Exception(
-                    'No model selected! Please, configure a site model by setting the option "model=..." in "' . $configFilePath . '" or specify parameter m in the URL.'
+                    'No model selected! Please, configure a site model by setting the option '
+                    . '"model=..." in "' . $configFilePath . '" or specify parameter m in the URL.'
                 );
             } else {
                 // setup the model
