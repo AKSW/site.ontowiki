@@ -15,9 +15,10 @@
 
   rdfs:label "Site Rendering" ;
   doap:name "site" ;
+  doap:homepage <https://github.com/AKSW/site.ontowiki>;
   doap:description "A component which renders custom HTML views for linked data resource and thus creates rdf-based web sites." ;
   doap:maintainer <http://aksw.org/SebastianTramp>;  
-  owconfig:authorLabel "AKSW" ;
+  owconfig:registeredAt <http://extensions.ontowiki.net/repository> ;
   owconfig:templates "sites" ;
   owconfig:helpers "helpers" ;
 
@@ -32,6 +33,13 @@
   doap:release :v1-0 .
 
 :v1-0 a doap:Version ;
-  doap:revision "1.0" .
+  doap:revision "1.0" ;
+  doap:created "2011-01-01" ;
+  doap:file-release <https://github.com/AKSW/site.ontowiki/zipball/master> .
 
 :defaultSite rdfs:label "The site identifier which is used for the site rendering".
+
+<http://aksw.org/SebastianTramp> a foaf:Person;
+  foaf:name "Sebastian Tramp";
+  foaf:homepage <http://aksw.org/SebastianTramp>;
+  foaf:mbox <mailto:tramp@informatik.uni-leipzig.de> .
