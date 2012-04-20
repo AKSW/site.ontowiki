@@ -10,8 +10,9 @@
  * this files parses the config ini generates the cache id and directly
  * looks for the object cache and outputs it. put this to your htacess:
  *
- * php_value auto_prepend_file 'extensions/site/FastCacheLoad.php'
- *
+ * <Files "index.php">
+ *     php_value auto_prepend_file 'extensions/site/FastCacheLoad.php'
+ * </Files>
  *
  * @category OntoWiki
  * @author Sebastian Tramp <tramp@informatik.uni-leipzig.de>
