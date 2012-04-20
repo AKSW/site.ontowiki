@@ -50,7 +50,8 @@ class Site_View_Helper_Lastchange extends Zend_View_Helper_Abstract
         $return['timeIso8601'] = date('c',$history[0]['tstamp']); // ISO 8601 format
 
         try {
-            $return['timeDuration'] = OntoWiki_Utils::dateDifference($history[0]['tstamp'], null, 3); // x days ago
+            // x days ago
+            $return['timeDuration'] = OntoWiki_Utils::dateDifference((int)$history[0]['tstamp'], null, 3);
         } catch (Exception $e) {
             $return['timeDuration'] = '';
         }
