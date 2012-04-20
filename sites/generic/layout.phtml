@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?= '<?xml version="1.0" encoding="UTF-8"?>' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en"
     xmlns:dc="http://purl.org/dc/terms/"
@@ -6,7 +6,7 @@
 <head>
     <meta name="generator" content="<?php echo $this->generator ?>" />
     <link rel="alternate" type="application/rdf+xml" href="<?php echo $this->resourceUri ?>.rdf" />
-    <link rel="pingback" href="<?php echo $this->pingbackUri ?>" />
+    <link rel="pingback" href="<?php echo $this->pingbackUrl ?>" />
 
     <link
         rel="<?php echo $this->curie('http://xmlns.com/foaf/0.1/primaryTopic') ?>"
@@ -82,11 +82,10 @@
         <h2 id="page-heading"></h2>
     </div>
 
-
     <div class="grid_11">
-        <?php echo $this->partial('lod2/main.phtml', $templateData) ?>
-        <?php echo $this->partial('lod2/query.phtml', $templateData) ?>
-        <?php echo $this->partial('lod2/feed.phtml', $templateData) ?>
+        <?php echo $this->partial($this->siteId . '/main.phtml', $templateData) ?>
+        <?php echo $this->partial($this->siteId . '/query.phtml', $templateData) ?>
+        <?php echo $this->partial($this->siteId . '/feed.phtml', $templateData) ?>
     <div class="clear"></div>
 
         <div class="box">
@@ -141,7 +140,7 @@
                 <li>Wie wird die Startseite erreichbar (also eigentlich das OW basedir)
                     <pre>
             index.default.controller = "site"
-            index.default.action = "lod2"
+            index.default.action = "example"
                     </pre>
                     SiteHelper reagiert auf Event <code>onPostBootstrap</code> und injiziert SiteController und aktuell aktive
                     Site als Standard-Route in den Router.
@@ -170,9 +169,9 @@
                 <li>Norm: Wie wird modul-content gerendert (eigener context)</li>
                     <pre>
             echo $this->module('ttt', array('noChrome' => true)); // ein bestimtes Modul oder
-            echo $this->modules('sites.lod2', array('noChrome' => true)); // alle Module für Context 'sites.lod2'
+            echo $this->modules('sites.example', array('noChrome' => true)); // alle Module für Context 'sites.example'
                     </pre>
-                    Beispiel: <?php echo $this->modules('sites.lod2', array('noChrome' => true, 'foo' => 'ttt')) ?>
+                    Beispiel: <?php echo $this->modules('sites.example', array('noChrome' => true, 'foo' => 'ttt')) ?>
                     TODO: Was ist mit Titel, Menüs, Modulen mit Tabbed Content?
                 <li>Jonas: Wie werden Bilder aus dem CSS referenziert</li>
                     <pre>

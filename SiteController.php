@@ -173,6 +173,13 @@ class SiteController extends OntoWiki_Controller_Component
             'resourceUri'       => (string) $this->_resourceUri,
             'description'       => $this->_resource->getDescription(),
             'descriptionHelper' => $this->_resource->getDescriptionHelper(),
+
+            'site'              => array(
+                                            'index' => 0,
+                                            'name' => 'Home'
+                                        ),
+            'navigation'        => array(),
+            'options'           => array(),
         );
 
         return $templateData;

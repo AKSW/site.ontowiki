@@ -14,9 +14,10 @@ $templateData = array(
     </h2>
     <div class="block">
         <div class="article first">
-            <?php echo $this->partial( 'lod2/content.phtml', $templateData); ?>
+            <?php //TODO: fix this path ?>
+            <?php echo $this->partial('generic/content.phtml', $templateData); ?>
             <p class="meta">
-                <?php echo $this->partial( 'lod2/lastchange.phtml', $this->lastchange($this->resourceUri)); ?>
+                <?php echo $this->partial('generic/lastchange.phtml', $this->lastchange($this->resourceUri)); ?>
             </p>
         </div>
     </div>
