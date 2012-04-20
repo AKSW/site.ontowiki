@@ -17,11 +17,15 @@
  * @author Sebastian Tramp <tramp@informatik.uni-leipzig.de>
  */
 
+/*
+ * only mysql supported
+ */
 function GetCachedContent_ZendDB($cacheId, $config)
 {
     $dbuser = $config['store.zenddb.username'];
     $dbpass = $config['store.zenddb.password'];
     $dbname = $config['store.zenddb.dbname'];
+    $dbhost = 'localhost';
 
     $link = mysql_connect($dbhost, $dbuser, $dbpass);
     if (!$link) {
@@ -32,7 +36,7 @@ function GetCachedContent_ZendDB($cacheId, $config)
         exit('Can\'t use foo : ' . mysql_error());
     }
 
-    $query = 'SELECT content FROM `ef_cache` WHERE id = "' . $siteModuleObjectCacheId . '"';
+    $query = 'SELECT content FROM `ef_cache` WHERE id = "' . $cacheId . '"';
     // Perform Query
     $result = mysql_query($query);
 
@@ -45,6 +49,9 @@ function GetCachedContent_ZendDB($cacheId, $config)
     }
 }
 
+/*
+ * fetch virtuoso based cache
+ */
 function GetCachedContent_Virtuoso($cacheId, $config)
 {
     $virtUser = $config['store.virtuoso.username'];
@@ -53,8 +60,7 @@ function GetCachedContent_Virtuoso($cacheId, $config)
 
     $connection = @odbc_connect($virtDsn, $virtUser, $virtPass);
     if ($connection == false) {
-        // Could not connect
-        return;
+        exit('Could not connect to virtuoso');
     }
 
     $query = "SELECT content
@@ -70,35 +76,42 @@ function GetCachedContent_Virtuoso($cacheId, $config)
     if (odbc_num_rows($resultId) == 1) {
         $serialized = '';
         while ($segment = odbc_result($resultId, 1)) {
-            $serialized .= (string)$segment;
+            $serialized .= (string) $segment;
         }
         return unserialize($serialized);
     }
 }
 
-// @todo: fetch from config.ini
-$config = parse_ini_file('config.ini');
+function GetCacheContent ($id)
+{
+    $config  = parse_ini_file('config.ini');
+    $backend = $config['store.backend'];
 
-$host    = 'localhost';
-$backend = $config['store.backend'];
-
-$siteModuleObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-$siteModuleObjectCacheId = 'site_' . md5($siteModuleObjectCacheIdSource);
+    $content = null;
+    switch ($backend) {
+    case 'zenddb':
+        $content = GetCachedContent_ZendDB($id, $config);
+        break;
+    case 'virtuoso':
+        $content = GetCachedContent_Virtuoso($id, $config);
+        break;
+    default:
+        // nothing to do
+    }
+    return $content;
+}
 
 $content = null;
-switch ($backend) {
-case 'zenddb':
-    $content = GetCachedContent_ZendDB($siteModuleObjectCacheId, $config);
-    break;
-case 'virtuoso':
-    $content = GetCachedContent_Virtuoso($siteModuleObjectCacheId, $config);
-    break;
-default:
-    // nothing to do
+
+// prepare the cacheid and fetch the cache content
+if (preg_match('/\.html$/', $_SERVER['REQUEST_URI'])) {
+    $siteModuleObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $siteModuleObjectCacheId       = 'site_' . md5($siteModuleObjectCacheIdSource);
+    $content = GetCacheContent($siteModuleObjectCacheId);
 }
 
 // Cache hit: send response and exit
-if ($content) {
+if ($content != null) {
     echo $content;
     exit;
 }

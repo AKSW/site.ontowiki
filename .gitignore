@@ -1,1 +1,4 @@
+syntax: glob
 default.ini
+sites/local
+Makefile
