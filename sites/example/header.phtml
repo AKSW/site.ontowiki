@@ -1,0 +1,40 @@
+<?php
+/**
+ * This file is part of the {@link http://ontowiki.net OntoWiki} project.
+ *
+ * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
+ * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
+ */
+
+/**
+ * aksw.org header template
+ */
+?>
+<header id="header">
+    <h1><a href="/"><img src="<?php echo $this->baseUri; ?>/images/logo-aksw.png" alt="Agile Knowledge Engineering and Semantic Web (AKSW) Research Group" /></a></h1>
+<?php
+$navOptions = array(
+    'navResource' => 'http://aksw.org/Navigation/Main',
+    'navId' => 'nav-main',
+    'suffix'    => '<!-- /#nav-main -->',
+    'activeUrl' => $this->resourceUri
+);
+echo $this->navigationList($navOptions);
+?>
+<?php
+$navOptions = array(
+    'navResource' => 'http://aksw.org/Navigation/Top',
+    'navId' => 'nav-top',
+    'suffix'    => '<!-- /#nav-top -->',
+    'activeUrl' => $this->resourceUri
+);
+echo $this->navigationList($navOptions);
+?>
+    <aside id="associations">
+        <h2 class="hideme">Associated with</h2>
+        <a href="http://www.uni-leipzig.de"><img src="<?php echo $this->baseUri; ?>/images/logo-unileipzig.png" alt="Universität Leipzig" /></a> <span>,</span>
+        <a href="http://infai.org"><img src="<?php echo $this->baseUri; ?>/images/logo-infai.png" alt="InfAI: Institut für Angewandte Informatik" /></a>
+    </aside> <!-- /#associations -->
+</header> <!-- /#header -->
+<hr class="hideme" />
+

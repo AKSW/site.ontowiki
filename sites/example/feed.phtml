@@ -1,0 +1,29 @@
+<?php
+/**
+ * This file is part of the {@link http://ontowiki.net OntoWiki} project.
+ *
+ * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
+ * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
+ */
+
+/**
+ * aksw.org feed template
+ *
+ * arranges the news feed for the resource
+ */
+
+
+// prepare module options
+$moduleOptions = array(
+    'noChrome' => true,
+    'template' => 'local/items/feedentry',
+    'fallbackFeed' => 'http://blog.aksw.org/feed/'
+);
+$moduleConfig = new Zend_Config($moduleOptions);
+$content = trim($this->module('feeds', $moduleConfig));
+?>
+
+<?php if (!empty($content)): ?>
+<h1>News</h1>
+<?php echo $content; ?>
+<?php endif; ?>
