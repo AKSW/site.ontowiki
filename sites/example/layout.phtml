@@ -77,6 +77,10 @@ $templateData           = $this->templateData;
     <div class="container">
 
       <?= $this->renderx(); ?>
+<!-- Example row of columns for a Feed -->
+<div class="row">
+<?= $this->partial('example/types/feed.phtml', $this->templateData) ?>
+</div>
       <hr>
       <footer>
         <p>&copy; AKSW 2012</p>
