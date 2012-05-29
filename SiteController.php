@@ -70,7 +70,7 @@ class SiteController extends OntoWiki_Controller_Component
             $defaultAction = $defaults['action'];
         }
 
-        if (empty($action) || (isset($defaultAction) && $action === $defaultAction)) {
+        if (empty($action) || (isset($defaultAction) && $action === $defaultAction) || $action === 'index') {
             // use default site for empty or default action (index)
             $this->_site = $this->_privateConfig->defaultSite;
         } else {
