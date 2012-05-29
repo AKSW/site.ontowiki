@@ -1,5 +1,8 @@
 <div class="hero-unit">
     <h1><?= $this->title ?></h1>
-    <p></p>
+<?php
+    // uses default content properties
+    echo $this->literal(array('tag' => 'div', 'class' => 'content'));
+?>
 </div>
 
