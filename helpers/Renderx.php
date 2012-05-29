@@ -28,12 +28,12 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
     /*
      * used erfurt model, taken from the view object
      */
-    private $model;
+    private $_model;
 
     /*
      * the default template (will be overwritten)
      */
-    private $template = '/types/default.phtml';
+    private $_template = '/types/default.phtml';
 
     /*
      * used templateData, taken from the view object
@@ -44,19 +44,19 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
     /*
      * URI of the to rendered resource
      */
-    private $resourceUri;
+    private $_resourceUri;
 
     /*
      * an array of mappings (key = class URI, value = template name)
      */
-    private $mappings = null;
+    private $_mappings = null;
 
     /*
      * used schema URIs
      */
-    protected $templatePropClass    = 'http://ns.ontowiki.net/SysOnt/Site/classTemplate';
-    protected $templatePropResource = 'http://ns.ontowiki.net/SysOnt/Site/template';
-    protected $typeProp             = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+    const templatePropClass    = 'http://ns.ontowiki.net/SysOnt/Site/classTemplate';
+    const templatePropResource = 'http://ns.ontowiki.net/SysOnt/Site/template';
+    const typeProp             = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
     /*
      * the main method, mentioned parameters are:
@@ -64,21 +64,37 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
      */
     public function renderx($options = array())
     {
-        $this->template =
-            (isset($options['template'])) ? $options['template'] : $this->selectTemplate();
+        // if we have a template option this option wins
+        if (isset($options['template'])) {
+            $this->_template = $options['template'];
+        } else {
+            // try to query a template name
+            $queriedTemplate = $this->selectTemplate();
+            if ($queriedTemplate !== false) {
+                $this->_template = $queriedTemplate;
+            }
+        }
 
         $this->prepareTemplateData();
 
         // try to do a partial or output error details
         try {
-            $return = $this->view->partial($this->template, $this->templateData);
+            $return = $this->view->partial($this->_template, $this->templateData);
         } catch (Exception $e) {
-            $summary = 'Error while trying to render "'.$this->resource->getTitle().'"';
-            $return  = '<details><summary>'.$summary.'</summary>' . PHP_EOL;
-            $return .= $e->getMessage() . PHP_EOL;
-            $return .= '</details>' . PHP_EOL;
+            $return = $this->renderError($e->getMessage());
         }
         return $return;
+    }
+
+    /*
+     * render an error with an HTML5 details/summary block
+     */
+    private function renderError($errorMessage)
+    {
+        $summary = 'Error while trying to render "'.$this->resource->getTitle().'"';
+        $return  = '<details><summary>'.$summary.'</summary>' . PHP_EOL;
+        $return .= (string) $errorMessage . PHP_EOL;
+        $return .= '</details>' . PHP_EOL;
     }
 
     /*
@@ -86,26 +102,32 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
      */
     private function selectTemplate()
     {
-        $description = $this->getDescription();
+        $description  = $this->getDescription();
+        $templateName = null;
+
         // if we have specific template on the resource, use it
-        if (isset($description[$this->templatePropResource][0]['value'])) {
-            $templateName   = $description[$this->templatePropResource][0]['value'];
+        if (isset($description[self::templatePropResource][0]['value'])) {
+            $templateName   = $description[self::templatePropResource][0]['value'];
         } else {
             // try template hints on classes
-            $mappings = $this->getMappings();
             // try to map each rdf:type property value
-            if (isset($description[$this->typeProp])) {
-                foreach ($description[$this->typeProp] as $class) {
+            if (isset($description[self::typeProp])) {
+                foreach ($description[self::typeProp] as $class) {
                     $classUri = $class['value'];
-                    if (isset($mappings[$classUri])) {
+                    if (isset($this->_mappings[$classUri])) {
                         // overwrite, if class has an template entry
-                        $templateName = $mappings[$classUri];
+                        $templateName = $this->_mappings[$classUri];
                     }
                 }
             }
         }
-        $this->template = $this->view->siteId .'/types/'. $templateName .'.phtml';
-        return $this->template;
+
+        if ($templateName != null) {
+            $this->_template = $this->view->siteId .'/types/'. $templateName .'.phtml';
+            return $this->_template;
+        } else {
+            return false;
+        }
     }
 
     /*
@@ -114,7 +136,7 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
     private function prepareTemplateData()
     {
         $this->templateData['title']       = $this->resource->getTitle();
-        $this->templateData['resourceUri'] = $this->resourceUri;
+        $this->templateData['resourceUri'] = $this->_resourceUri;
         $this->templateData['description'] = $this->getDescription();
     }
 
@@ -123,14 +145,14 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
      */
     public function getMappings()
     {
-        if ($this->mappings == null) {
+        if ($this->_mappings == null) {
             // prepare the sparql query
             // this query should be very cacheable ...
             $query = '
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                 SELECT DISTINCT ?class ?template
                 WHERE {
-                    ?class <'. $this->templatePropClass .'> ?template .
+                    ?class <'. self::templatePropClass .'> ?template .
                     }';
 
             // fetch results
@@ -138,15 +160,15 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
             $result = $store->sparqlQuery($query);
 
             // fill the mappings array
-            $this->mappings = array();
+            $this->_mappings = array();
             foreach ($result as $mapping) {
                 $uri      = $mapping['class'];
                 $template = $mapping['template'];
-                $this->mappings[$uri] = $template;
+                $this->_mappings[$uri] = $template;
             }
         }
 
-        return $this->mappings;
+        return $this->_mappings;
     }
 
     /*
@@ -154,9 +176,9 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
      */
     private function getDescription()
     {
-        $this->resource     = new OntoWiki_Resource($this->resourceUri, $this->model);
+        $this->resource     = new OntoWiki_Resource($this->_resourceUri, $this->_model);
         $this->description  = $this->resource->getDescription();
-        $this->description  = $this->description[$this->resourceUri];
+        $this->description  = $this->description[$this->_resourceUri];
         return $this->description;
     }
 
@@ -166,9 +188,9 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
     public function setView(Zend_View_Interface $view)
     {
         $this->view         = $view;
-        $this->model        = $view->model;
+        $this->_model       = $view->model;
         $this->templateData = $view->templateData;
-        $this->resourceUri  = (string) $view->resourceUri;
+        $this->_resourceUri = (string) $view->resourceUri;
     }
 
 }
