@@ -1,0 +1,81 @@
+# Exported with the Erfurt API - http://aksw.org/Projects/Erfurt
+
+@base <http://localhost/OntoWiki/Site> .
+@prefix sysont: <http://ns.ontowiki.net/SysOnt/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix site: <http://ns.ontowiki.net/SysOnt/Site/> .
+@prefix ns0: <http://localhost/OntoWiki/Site/Class/> .
+@prefix ns2: <http://open.vocab.org/terms/> .
+@prefix ns3: <http://aksw.org/schema/> .
+
+<http://localhost/OntoWiki/Site> a owl:Ontology .
+
+<http://localhost/OntoWiki/Site/About> a foaf:Document ;
+                                                 rdfs:label "About" ;
+                                                 site:content """
+
+The Research Group **Agile Knowledge Engineering and Semantic Web (AKSW)** is hosted by the Chair of
+[Business Information Systems](http://bis.informatik.uni-leipzig.de) (BIS) of the [Institute of Computer Science](http://www.informatik.uni-leipzig.de) (~IfI) / [University of Leipzig](http://www.uni-leipzig.de) as well as the [Institute for Applied Informatics](http://infai.org) (~InfAI).
+It consists of the three subgroups
+[Emergent Semantics](http://aksw.org/Groups/ES),
+[Machine Learning and Ontology Engineering](http://aksw.org/Groups/MOLE), and
+[Semantic Abstraction](http://aksw.org/Groups/SIMBA).
+"""^^sysont:Markdown .
+
+<http://localhost/OntoWiki/Site/Map> a foaf:Document ;
+                                               rdfs:label "Map Demo" .
+
+<http://localhost/OntoWiki/Site/Navigation/Main> a site:Navigation ;
+                                                           rdf:_1 <http://localhost/OntoWiki/Site/Welcome> ;
+                                                           rdf:_2 <http://localhost/OntoWiki/Site/Map> ;
+                                                           rdf:_3 <http://localhost/OntoWiki/Site/About> ;
+                                                           rdfs:label "Main Navigation" .
+
+<http://localhost/OntoWiki/Site/Welcome> a foaf:Document ;
+                                                   rdfs:label "Welcome"@en, "Willkommen"@de ;
+                                                   site:content """
+The Research Group **Agile Knowledge Engineering and Semantic Web (AKSW)** is hosted by the Chair of
+[Business Information Systems](http://bis.informatik.uni-leipzig.de) (BIS) of the [Institute of Computer Science](http://www.informatik.uni-leipzig.de) (~IfI) / [University of Leipzig](http://www.uni-leipzig.de) as well as the [Institute for Applied Informatics](http://infai.org) (~InfAI).
+It consists of the three subgroups
+[Emergent Semantics](http://aksw.org/Groups/ES),
+[Machine Learning and Ontology Engineering](http://aksw.org/Groups/MOLE), and
+[Semantic Abstraction](http://aksw.org/Groups/SIMBA).
+"""^^sysont:Markdown .
+
+rdf:_1 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "1." .
+
+rdf:_10 a rdfs:ContainerMembershipProperty ;
+        rdfs:label "10." .
+
+rdf:_2 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "2." .
+
+rdf:_3 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "3." .
+
+rdf:_4 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "4." .
+
+rdf:_5 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "5." .
+
+rdf:_6 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "6." .
+
+rdf:_7 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "7." .
+
+rdf:_8 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "8." .
+
+rdf:_9 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "9." .
+
+rdf:type a owl:ObjectProperty ;
+         rdfs:label "typ"@de, "type"@en .
+
+foaf:Document site:classTemplate "document" .
