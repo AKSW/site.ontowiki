@@ -28,7 +28,7 @@ $templateData           = $this->templateData;
 
     <link rel="<?php echo $this->curie('http://xmlns.com/foaf/0.1/primaryTopic') ?>" href="<?php echo $this->resourceUri?>" />
     <link rel="stylesheet" type="text/css" media="all" href="<?php echo $this->baseUri ?>/css/all.dev.css" title="Standard" />
-    <link type="text/css" href="<?= $this->baseUri ?>/css/bootstrap.css" rel="stylesheet" />
+    <link type="text/css" href="<?php echo $this->baseUri ?>/css/bootstrap.css" rel="stylesheet" />
 
     <style type="text/css">
       body {
@@ -80,10 +80,10 @@ $templateData           = $this->templateData;
 
     <div class="container">
 
-      <?= $this->renderx(); ?>
+      <?php echo $this->renderx(); ?>
 <!-- Example row of columns for a Feed -->
 <div class="row">
-<?= $this->partial('example/types/feed.phtml', $this->templateData) ?>
+<?php echo $this->partial('example/types/feed.phtml', $this->templateData) ?>
 </div>
       <hr>
       <footer>
@@ -91,8 +91,8 @@ $templateData           = $this->templateData;
       </footer>
 
     </div> <!-- /container -->
-    <script type="text/javascript" src="<?= $this->baseUri ?>/js/jquery.js"></script>
-    <script type="text/javascript" src="<?= $this->baseUri ?>/js/bootstrap.js"></script>
+    <script type="text/javascript" src="<?php echo $this->baseUri ?>/js/jquery.js"></script>
+    <script type="text/javascript" src="<?php echo $this->baseUri ?>/js/bootstrap.js"></script>
 
 </body>
 </html>

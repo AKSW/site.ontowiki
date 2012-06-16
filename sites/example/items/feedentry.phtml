@@ -75,15 +75,15 @@ foreach ($this->entries as $entry) {
 ?>
 <!-- feed entry start -->
 
-<?= '<div class="span4">'
+<?php echo '<div class="span4">'
     . "<$tag>"
     . $heading
     . "</$tag>"
 ?>
 <p class="meta hideme">
-    <?= $author ?>
+    <?php echo $author ?>
 </p>
-<?= $text ?>
+<?php echo $text ?>
     </div>
 <!-- feed entry end -->
 <?php
