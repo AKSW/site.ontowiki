@@ -109,6 +109,7 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
         if (isset($description[self::templatePropResource][0]['value'])) {
             $templateName   = $description[self::templatePropResource][0]['value'];
         } else {
+            $this->getMappings();
             // try template hints on classes
             // try to map each rdf:type property value
             if (isset($description[self::typeProp])) {
