@@ -27,6 +27,7 @@ It consists of the three subgroups
 
 <http://localhost/OntoWiki/Site/Map> a foaf:Document ;
                                                rdfs:label "Map Demo" .
+                                               site:template "map" .
 
 <http://localhost/OntoWiki/Site/Navigation/Main> a site:Navigation ;
                                                            rdf:_1 <http://localhost/OntoWiki/Site/Welcome> ;
@@ -36,14 +37,7 @@ It consists of the three subgroups
 
 <http://localhost/OntoWiki/Site/Welcome> a foaf:Document ;
                                                    rdfs:label "Welcome"@en, "Willkommen"@de ;
-                                                   site:content """
-The Research Group **Agile Knowledge Engineering and Semantic Web (AKSW)** is hosted by the Chair of
-[Business Information Systems](http://bis.informatik.uni-leipzig.de) (BIS) of the [Institute of Computer Science](http://www.informatik.uni-leipzig.de) (~IfI) / [University of Leipzig](http://www.uni-leipzig.de) as well as the [Institute for Applied Informatics](http://infai.org) (~InfAI).
-It consists of the three subgroups
-[Emergent Semantics](http://aksw.org/Groups/ES),
-[Machine Learning and Ontology Engineering](http://aksw.org/Groups/MOLE), and
-[Semantic Abstraction](http://aksw.org/Groups/SIMBA).
-"""^^sysont:Markdown .
+                                                   site:content "Congratulations and welcome to the example for the [site extension](https://github.com/AKSW/site.ontowiki \"OntoWiki Site Extension ong github\") for [OntoWiki](http://ontowiki.net/ \"OntoWiki Homepage\"). This example site demonstrates some functionality which is covered by the site extension. You can take this example as a starting point for your own OntoWiki powered Site."^^sysont:Markdown .
 
 rdf:_1 a rdfs:ContainerMembershipProperty ;
        rdfs:label "1." .
