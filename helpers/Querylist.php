@@ -63,7 +63,12 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
             $row['oddclass'] = $odd ? 'odd' : 'even';
             $row['rowcount'] = $count;
             $row['current']  = $current;
-            $row['title']    = $titleHelper->getTitle($row['resourceUri']);
+            if (!Erfurt_Uri::check($row['resourceUri'])) {
+                $row['title']    = $row['resourceUri'];
+            } else {
+                $row['title']    = $titleHelper->getTitle($row['resourceUri']);
+            }
+
             $row             = array_merge($row, $templateOptions);
 
             // render the template
