@@ -36,7 +36,6 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
         $this->templateData = $this->view->getHelper('Renderx')->templateData;
         $store              = OntoWiki::getInstance()->erfurt->getStore();
         $model              = OntoWiki::getInstance()->selectedModel;
-        $titleHelper        = new OntoWiki_Model_TitleHelper($model);
 
         // check for options and assign local vars or null
         $where    = (isset($options['where']))    ? $options['where']    : '?resourceUri a foaf:Project.';
