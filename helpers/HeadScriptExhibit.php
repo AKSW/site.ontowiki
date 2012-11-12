@@ -74,6 +74,7 @@ class Site_View_Helper_HeadScriptExhibit extends Zend_View_Helper_Abstract
                 if ($description->hasSP($resourceUri, $propertyUri)) {
                     // we've found something, so we can add the exhibit script
                     echo '    <script src="'.$this->exhibitScript.'" type="text/javascript"></script>' . PHP_EOL;
+                    echo '    <script>SimileAjax.History.enabled = false;</script>' . PHP_EOL;
                     $value = $description->getValue($resourceUri, $propertyUri);
                     if ($literalMod != null) {
                         $value = sprintf($literalMod, $value);
