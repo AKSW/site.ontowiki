@@ -57,10 +57,11 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
         $query .= 'SELECT DISTINCT ?resourceUri WHERE {' . PHP_EOL;
         $query .= $where . PHP_EOL;
         $query .= 'FILTER (!isBLANK(?resourceUri))' . PHP_EOL;
-        $query .= '}  LIMIT ' . $limit . PHP_EOL;
+        $query .= '}' . PHP_EOL;
         if ($orderby !== null) {
             $query .= 'ORDER BY ' . $orderby . PHP_EOL;
         }
+        $query .= 'LIMIT ' . $limit . PHP_EOL;
 
         // prepare the result string
         $result = $this->view->querylist($query, $template, $options);
