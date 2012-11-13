@@ -43,6 +43,7 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
         $limit    = (isset($options['limit']))    ? $options['limit']    : 100;
         $prefix   = (isset($options['prefix']))   ? $options['prefix']   : '';
         $suffix   = (isset($options['suffix']))   ? $options['suffix']   : '';
+        $orderby  = (isset($options['orderby']))  ? $options['orderby']  : null;
 
         // create template name {site}/items/{name}.phtml
         $siteId   = $this->templateData['siteId'];
@@ -57,6 +58,9 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
         $query .= $where . PHP_EOL;
         $query .= 'FILTER (!isBLANK(?resourceUri))' . PHP_EOL;
         $query .= '}  LIMIT ' . $limit . PHP_EOL;
+        if ($orderby !== null) {
+            $query .= 'ORDER BY ' . $orderby . PHP_EOL;
+        }
 
         // prepare the result string
         $result = $this->view->querylist($query, $template, $options);
