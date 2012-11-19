@@ -126,6 +126,11 @@ class Site_View_Helper_Img extends Zend_View_Helper_Abstract implements Site_Vie
             $return .= (!$src) ? ' property="'. $this->view->curie($imgProperty) .'"' : '';
             // this property is needed since ipc maybe rewrites the src
             $return .= (!$src) ? ' resource="'. $imgSrc .'"' : '';
+            if (isset($options['attributes']) && is_array($options['attributes'])) {
+                foreach ($options['attributes'] as $key => $value) {
+                    $return .= ' '.$key.'="'.$value.'"';
+                }
+            }
         }
         $return .= ' src="'. $imgSrc .'" />';
         $return .= $suffix;
