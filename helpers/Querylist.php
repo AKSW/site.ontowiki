@@ -124,6 +124,6 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
             $titleB    = $this->_titleHelper->getTitle($b['resourceUri']);
         }
 
-        return strcmp($titleA, $titleB);
+        return strcasecmp($titleA, $titleB);
     }
 }
