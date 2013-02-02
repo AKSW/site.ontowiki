@@ -83,12 +83,18 @@ class SiteHelper extends OntoWiki_Component_Helper
             );
             $router->addRoute('empty', $emptyRoute);
         }
+    }
+
+    public function onCreateMenu($event) {
+        $request    = Zend_Controller_Front::getInstance()->getRequest();
+        $controller = $request->getControllerName();
+        $action     = $request->getActionName();
 
         if ($controller === 'resource' && $action === 'properties') {
-            $resourceUrl = $this->_owApp->selectedResource;
+            $resourceUri = $this->_owApp->selectedResource;
 
-            if (!empty($resourceUrl) && $resourceUrl != (string)$this->_owApp->selectedModel) {
-                $resourceUrl .= '.html';
+            if (!empty($resourceUri) && $resourceUri != (string)$this->_owApp->selectedModel) {
+                $resourceUri .= '.html';
             }
 
             $toolbar = OntoWiki_Toolbar::getInstance();
@@ -97,7 +103,7 @@ class SiteHelper extends OntoWiki_Component_Helper
                         OntoWiki_Toolbar::SUBMIT,
                         array(
                             'name' => 'Back to Site',
-                            'url' => $resourceUrl
+                            'url' => $resourceUri
                         )
                     );
         }
