@@ -69,7 +69,7 @@ class SiteHelper extends OntoWiki_Component_Helper
                     if ($requestUri !== $indexResource) {
                         // response not ready yet, do it the PHP way
                         header('Location: ' . $indexResource, true, 303);
-                        return;
+                        exit;
                     }
                 }
             }
@@ -117,7 +117,7 @@ class SiteHelper extends OntoWiki_Component_Helper
             $parts = explode('.', $requestUri);
             if ($parts[count($parts)-1] != $event->type) {
                 header('Location: ' . $event->uri . '.' . $event->type, true, 302);
-                return;
+                exit;
             }
         } else {
             return false;
