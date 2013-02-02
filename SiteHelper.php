@@ -2,7 +2,7 @@
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
- * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
+ * @copyright Copyright (c) 2013, {@link http://aksw.org AKSW}
  * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
 
@@ -38,7 +38,7 @@ class SiteHelper extends OntoWiki_Component_Helper
      * @var string
      */
     protected $_currentSuffix = '';
-    
+
     public function onPostBootstrap($event)
     {
         $router     = $event->bootstrap->getResource('Router');
@@ -69,17 +69,18 @@ class SiteHelper extends OntoWiki_Component_Helper
                     if ($requestUri !== $indexResource) {
                         // response not ready yet, do it the PHP way
                         header('Location: ' . $indexResource, true, 303);
-                        exit;
+                        return;
                     }
                 }
             }
 
             $emptyRoute = new Zend_Controller_Router_Route(
-                    '',
-                    array(
-                        'controller' => 'site',
-                        'action'     => $this->_privateConfig->defaultSite)
-                    );
+                '',
+                array(
+                    'controller' => 'site',
+                    'action'     => $this->_privateConfig->defaultSite
+                )
+            );
             $router->addRoute('empty', $emptyRoute);
         }
 
@@ -93,7 +94,7 @@ class SiteHelper extends OntoWiki_Component_Helper
             $toolbar = OntoWiki_Toolbar::getInstance();
             $toolbar->prependButton(OntoWiki_Toolbar::SEPARATOR)
                     ->prependButton(
-                        OntoWiki_Toolbar::SUBMIT, 
+                        OntoWiki_Toolbar::SUBMIT,
                         array(
                             'name' => 'Back to Site',
                             'url' => $resourceUrl
@@ -110,7 +111,7 @@ class SiteHelper extends OntoWiki_Component_Helper
             $parts = explode('.', $requestUri);
             if ($parts[count($parts)-1] != $event->type) {
                 header('Location: ' . $event->uri . '.' . $event->type, true, 302);
-                exit;
+                return;
             }
         } else {
             return false;
