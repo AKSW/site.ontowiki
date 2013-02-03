@@ -21,8 +21,8 @@ class Site_View_Helper_Lastchange extends Zend_View_Helper_Abstract
         // TODO: fill this value with the erfurt versioning api
         $versioning = Erfurt_App::getInstance()->getVersioning();
         $limit = $versioning->getLimit();
-        $versioning->setLimit(1);
-        $history = $versioning->getHistoryForResource($uri, (string)  OntoWiki::getInstance()->selectedModel);
+        $versioning->setLimit(PHP_INT_MAX);
+        $history = $versioning->getHistoryForResource($uri, (string) OntoWiki::getInstance()->selectedModel);
 
         if (empty($history)) {
             return array(
@@ -47,7 +47,7 @@ class Site_View_Helper_Lastchange extends Zend_View_Helper_Abstract
         $return['resourceUri'] = $uri;
         $return['resourceTitle'] = $th->getTitle($uri);
         $return['timeStamp'] = $history[0]['tstamp']; //unix timestamp
-        $return['timeIso8601'] = date('c',$history[0]['tstamp']); // ISO 8601 format
+        $return['timeIso8601'] = date('c', $history[0]['tstamp']); // ISO 8601 format
 
         try {
             $return['timeDuration'] = OntoWiki_Utils::dateDifference($history[0]['tstamp'], null, 3); // x days ago
