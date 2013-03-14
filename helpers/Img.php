@@ -2,7 +2,7 @@
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
- * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
+ * @copyright Copyright (c) 2006-2013, {@link http://aksw.org AKSW}
  * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
 
@@ -26,7 +26,7 @@ class Site_View_Helper_Img extends Zend_View_Helper_Abstract implements Site_Vie
     /*
      * the list of known image properties
      */
-    private $properties = array(
+    private $_properties = array(
         'http://xmlns.com/foaf/0.1/depiction',
         'http://xmlns.com/foaf/0.1/logo',
         'http://xmlns.com/foaf/0.1/img',
@@ -54,7 +54,7 @@ class Site_View_Helper_Img extends Zend_View_Helper_Abstract implements Site_Vie
         $extManager  = $owapp->extensionManager;
 
         // check for options and assign local vars or null
-        $src      = (isset($options['src']))    ? (string) $options['src']         : null;
+        $src      = (isset($options['src']))    ? (string)$options['src']         : null;
         $class    = (isset($options['class']))  ? ' class="'.$options['class'].'"' : '';
         $alt      = (isset($options['alt']))    ? ' alt="'.$options['alt'].'"'     : '';
         $filter   = (isset($options['filter'])) ? $options['filter']               : null;
@@ -64,8 +64,8 @@ class Site_View_Helper_Img extends Zend_View_Helper_Abstract implements Site_Vie
 
         // choose, which uri to use: option over helper default over view value
         $uri = (isset($this->resourceUri))           ? $this->resourceUri : null;
-        $uri = (isset($options['selectedResource'])) ? (string) $options['selectedResource'] : $uri;
-        $uri = (isset($options['uri']))              ? (string) $options['uri'] : $uri;
+        $uri = (isset($options['selectedResource'])) ? (string)$options['selectedResource'] : $uri;
+        $uri = (isset($options['uri']))              ? (string)$options['uri'] : $uri;
         // in case qname is given, transform to full URI
         $uri = Erfurt_Uri::getFromQnameOrUri($uri, $model);
 
@@ -73,7 +73,7 @@ class Site_View_Helper_Img extends Zend_View_Helper_Abstract implements Site_Vie
         if ($src == null) {
             // choose, which properties to use for lookup (todo: allow multple properties)
             $properties = (isset($options['property'])) ? array( $options['property']) : null;
-            $properties = (!$properties) ? $this->properties : $properties;
+            $properties = (!$properties) ? $this->_properties : $properties;
 
             // validate each given property
             foreach ($properties as $key => $value) {
@@ -101,7 +101,17 @@ class Site_View_Helper_Img extends Zend_View_Helper_Abstract implements Site_Vie
             }
 
             if ($imgProperty != null) {
-                $imgSrc = $description[$imgProperty][0]['value'];
+                //search for language tag
+                foreach ($description[$imgProperty] as $literalNumber => $literal) {
+                    $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
+                    if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
+                        $imgSrc = $description[$imgProperty][$literalNumber]['value'];
+                        break;
+                    }
+                }
+                if (!isset($imgSrc)) {
+                    $imgSrc = $description[$imgProperty][0]['value'];
+                }
             } else {
                 // we do not have an image src
                 return '';
@@ -143,6 +153,6 @@ class Site_View_Helper_Img extends Zend_View_Helper_Abstract implements Site_Vie
     public function setView(Zend_View_Interface $view)
     {
         $this->view = $view;
-        $this->resourceUri  = (string) $view->resourceUri;
+        $this->resourceUri  = (string)$view->resourceUri;
     }
 }

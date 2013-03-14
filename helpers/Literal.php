@@ -2,7 +2,7 @@
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
- * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
+ * @copyright Copyright (c) 2006-2013, {@link http://aksw.org AKSW}
  * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
 
@@ -62,8 +62,8 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
 
         // choose, which uri to use: option over helper default over view value
         $uri = (isset($this->resourceUri))           ? $this->resourceUri : null;
-        $uri = (isset($options['selectedResource'])) ? (string) $options['selectedResource'] : $uri;
-        $uri = (isset($options['uri']))              ? (string) $options['uri'] : $uri;
+        $uri = (isset($options['selectedResource'])) ? (string)$options['selectedResource'] : $uri;
+        $uri = (isset($options['uri']))              ? (string)$options['uri'] : $uri;
         $uri = Erfurt_Uri::getFromQnameOrUri($uri, $model);
 
         // choose, which properties to use (todo: allow multple properties)
@@ -96,7 +96,17 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         // filter and render the (first) literal value of the main property
         // TODO: striptags and tidying as extension
         if ($mainProperty) {
-            $firstLiteral = $description[$mainProperty][0];
+            //search for language tag
+            foreach ($description[$mainProperty] as $literalNumber => $literal) {
+                $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
+                if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
+                    $firstLiteral = $description[$mainProperty][$literalNumber];
+                    break;
+                }
+            }
+            if (!isset($firstLiteral)) {
+                $firstLiteral = $description[$mainProperty][0];
+            }
             $content = $firstLiteral['value'];
 
             if ($array) {
@@ -138,7 +148,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
     public function setView(Zend_View_Interface $view)
     {
         $this->view = $view;
-        $this->resourceUri  = (string) $view->resourceUri;
+        $this->resourceUri  = (string)$view->resourceUri;
     }
 
 }
