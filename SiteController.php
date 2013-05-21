@@ -43,6 +43,11 @@ class SiteController extends OntoWiki_Controller_Component
     private $_resourceUri = null;
 
     /**
+     * relative Path to the extension template folder
+     */
+    private $_relativeTemplatePath = 'templates';
+    
+    /**
      * The site id which is part of the request URI as well as the template structure
      *
      * @var string|null
@@ -54,6 +59,7 @@ class SiteController extends OntoWiki_Controller_Component
         parent::init();
         $this->_helper->viewRenderer->setNoRender();
         $this->_helper->layout()->disableLayout();
+        $this->_relativeTemplatePath = $this->_owApp->extensionManager->getExtensionConfig('site')->templates;
     }
 
     /*
@@ -106,7 +112,7 @@ class SiteController extends OntoWiki_Controller_Component
             }
 
             $moduleTemplatePath = $this->_componentRoot
-                                . 'sites'
+                                . $this->_relativeTemplatePath
                                 . DIRECTORY_SEPARATOR
                                 . $this->_privateConfig->defaultSite
                                 . DIRECTORY_SEPARATOR
@@ -163,8 +169,8 @@ class SiteController extends OntoWiki_Controller_Component
             'wikiBaseUrl'       => $this->_owApp->getUrlBase(),
             'themeUrlBase'      => $this->view->themeUrlBase,
             'libraryUrlBase'    => $this->view->libraryUrlBase,
-            'basePath'          => sprintf('%ssites/%s', $this->_componentRoot, $this->_site),
-            'baseUri'           => sprintf('%ssites/%s', $this->_componentUrlBase, $this->_site),
+            'basePath'          => sprintf('%s%s/%s', $this->_componentRoot, $this->_relativeTemplatePath, $this->_site),
+            'baseUri'           => sprintf('%s%s/%s', $this->_componentUrlBase, $this->_relativeTemplatePath, $this->_site),
             'context'           => $this->moduleContext,
             'namespaces'        => $namespaces,
             'model'             => $this->_model,
@@ -196,7 +202,7 @@ class SiteController extends OntoWiki_Controller_Component
             if (!Erfurt_Uri::check($siteConfig['model'])) {
                 $site = $this->_privateConfig->defaultSite;
                 $root = $this->getComponentHelper()->getComponentRoot();
-                $configFilePath = sprintf('%ssites/%s/%s', $root, $site, SiteHelper::SITE_CONFIG_FILENAME);
+                $configFilePath = sprintf('%s%s/%s/%s', $root, $this->_relativeTemplatePath, $site, SiteHelper::SITE_CONFIG_FILENAME);
                 throw new OntoWiki_Exception(
                     'No model selected! Please, configure a site model by setting the option '
                     . '"model=..." in "' . $configFilePath . '" or specify parameter m in the URL.'

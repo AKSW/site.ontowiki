@@ -7,7 +7,7 @@
  */
 
 /**
- * OntoWiki Literal view helper
+ * OntoWiki Table view helper
  *
  * returns the content of a specific property of a given resource as an RDFa
  * annotated tag with (optional) given css classes and other parameters
@@ -17,7 +17,7 @@
  * @category OntoWiki
  * @package  OntoWiki_extensions_components_site
  */
-class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site_View_Helper_MarkupInterface
+class Site_View_Helper_Table extends Zend_View_Helper_Abstract implements Site_View_Helper_MarkupInterface
 {
     /*
      * current view, injected with setView from Zend
@@ -25,11 +25,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
     public $view;
 
     public $contentProperties = array(
-        'http://ns.ontowiki.net/SysOnt/Site/content',
-        'http://purl.org/rss/1.0/modules/content/encoded',
-        'http://rdfs.org/sioc/ns#content',
-        'http://purl.org/dc/terms/description',
-        'http://www.w3.org/2000/01/rdf-schema#comment',
+        'http://ns.ontowiki.net/SysOnt/Site/tableContent',
     );
 
     /*
@@ -42,23 +38,20 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
      * - suffix   - string at the end
      * - iprefix  - string between tag and content at the beginning
      * - isuffix  - string betwee content and tag at the end
-     * - plain    - outputs the literal only (no html)
-     * - array    - returns an array of the values (not suitable for template markup)
      */
-    public function literal($options = array())
+    public function table($options = array())
     {
         $model       = OntoWiki::getInstance()->selectedModel;
         $titleHelper = new OntoWiki_Model_TitleHelper($model);
 
         // check for options and assign local vars or default values
         $class   = (isset($options['class']))   ? $options['class']   : '';
+        $id      = (isset($options['id']))      ? $options['id']      : '';
         $tag     = (isset($options['tag']))     ? $options['tag']     : 'span';
         $prefix  = (isset($options['prefix']))  ? $options['prefix']  : '';
         $suffix  = (isset($options['suffix']))  ? $options['suffix']  : '';
         $iprefix = (isset($options['iprefix'])) ? $options['iprefix'] : '';
         $isuffix = (isset($options['isuffix'])) ? $options['isuffix'] : '';
-        $plain   = (isset($options['plain']))   ? true                : false;
-        $array   = (isset($options['array']))   ? true                : false;
 
         // choose, which uri to use: option over helper default over view value
         $uri = (isset($this->resourceUri))           ? $this->resourceUri : null;
@@ -84,61 +77,65 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $description  = $resource->getDescription();
         $description  = $description[$uri];
 
-        // select the main property from existing ones
-        $mainProperty = null; // the URI of the main content property
+        // get the table size
+        $tableRows = 0; // the URI of the main content property
+        $tableColumns = 0; // the URI of the main content property
         foreach ($contentProperties as $contentProperty) {
-            if (isset($description[$contentProperty])) {
+            if (isset($description[$contentProperty . 'Rows'])) {
+                $tableRows = (int)$description[$contentProperty . 'Rows'][0]['value'];
+            }
+            if (isset($description[$contentProperty . 'Columns'])) {
+                $tableColumns = (int)$description[$contentProperty . 'Columns'][0]['value'];
+            }
+            if (null != $tableRows && null != $tableColumns) {
                 $mainProperty = $contentProperty;
                 break;
             }
         }
-
-        // filter and render the (first) literal value of the main property
-        // TODO: striptags and tidying as extension
-        if ($mainProperty) {
-            //search for language tag
-            foreach ($description[$mainProperty] as $literalNumber => $literal) {
-                $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
-                if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
-                    $firstLiteral = $description[$mainProperty][$literalNumber];
-                    break;
+        $content = '';
+        // filter and render the table
+        if (0 < $tableRows && 0 < $tableColumns) {
+            $content .= '<table id=' . $id . '><thead>';
+            for ($row = 1; $row <= $tableRows; $row++) {
+                $content .= '<tr id="R' . $row . '">';
+                for ($column = 1; $column <= $tableColumns; $column++) {
+                    $content .= (1 == $row ? '<th' : '<td') . ' id="R' . $row . 'C' . $column . '">';
+                    $currentMainProperty = $mainProperty . 'R' . $row . 'C' . $column;
+                    unset($firstLiteral);
+                    // search for language tag
+                    foreach ($description[$currentMainProperty] as $literalNumber => $literal) {
+                        $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
+                        if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
+                            $firstLiteral = $description[$currentMainProperty][$literalNumber];
+                            break;
+                        }
+                    }
+                    if (!isset($firstLiteral)) {
+                        $firstLiteral = $description[$currentMainProperty][0];
+                    }
+                    $cellContent = $firstLiteral['value'];
+        
+                    // execute the helper markup on the content (after the extensions)
+                    $cellContent = $this->view->executeHelperMarkup($cellContent);
+        
+                    // filter by using available extensions
+                    if (isset($firstLiteral['datatype'])) {
+                        $datatype = $firstLiteral['datatype'];
+                        $cellContent = $this->view->displayLiteralPropertyValue($cellContent, $currentMainProperty, $datatype);
+                    } else {
+                        $cellContent = $this->view->displayLiteralPropertyValue($cellContent, $currentMainProperty);
+                    }
+        
+                    $curie = $this->view->curie($currentMainProperty);
+                    $content .= "$prefix<$tag class='$class' property='$curie'>$iprefix$cellContent$isuffix</$tag>$suffix";
+                    $content .= 1 == $row ? '</th>' : '</td>';
                 }
+                $content .= '</tr>';
+                $content .= (1 == $row ? '</thead><tbody>' : '');
             }
-            if (!isset($firstLiteral)) {
-                $firstLiteral = $description[$mainProperty][0];
-            }
-            $content = $firstLiteral['value'];
-
-            if ($array) {
-                $return = array();
-                foreach ($description[$mainProperty] as $key => $value) {
-                    $return[] = $value['value'];
-                };
-                return $return;
-            } else if ($plain) {
-                return $content;
-            } else {
-                // execute the helper markup on the content (after the extensions)
-                $content = $this->view->executeHelperMarkup($content);
-
-                // filter by using available extensions
-                if (isset($firstLiteral['datatype'])) {
-                    $datatype = $firstLiteral['datatype'];
-                    $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
-                } else {
-                    $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
-                }
-
-                $curie = $this->view->curie($mainProperty);
-                return "$prefix<$tag class='$class' property='$curie'>$iprefix$content$isuffix</$tag>$suffix";
-            }
-        } else {
-            if ($array) {
-                return array();
-            } else {
-                return '';
-            }
+            $content .= '</tbody></table>';
         }
+        return $content;
 
     }
 
