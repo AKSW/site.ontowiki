@@ -2,7 +2,7 @@
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
- * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
+ * @copyright Copyright (c) 2013, {@link http://aksw.org AKSW}
  * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
 
@@ -38,7 +38,7 @@ class SiteHelper extends OntoWiki_Component_Helper
      * @var string
      */
     protected $_currentSuffix = '';
-    
+
     public function onPostBootstrap($event)
     {
         $router     = $event->bootstrap->getResource('Router');
@@ -75,28 +75,35 @@ class SiteHelper extends OntoWiki_Component_Helper
             }
 
             $emptyRoute = new Zend_Controller_Router_Route(
-                    '',
-                    array(
-                        'controller' => 'site',
-                        'action'     => $this->_privateConfig->defaultSite)
-                    );
+                '',
+                array(
+                    'controller' => 'site',
+                    'action'     => $this->_privateConfig->defaultSite
+                )
+            );
             $router->addRoute('empty', $emptyRoute);
         }
+    }
+
+    public function onCreateMenu($event) {
+        $request    = Zend_Controller_Front::getInstance()->getRequest();
+        $controller = $request->getControllerName();
+        $action     = $request->getActionName();
 
         if ($controller === 'resource' && $action === 'properties') {
-            $resourceUrl = $this->_owApp->selectedResource;
+            $resourceUri = $this->_owApp->selectedResource;
 
-            if (!empty($resourceUrl) && $resourceUrl != (string)$this->_owApp->selectedModel) {
-                $resourceUrl .= '.html';
+            if (!empty($resourceUri) && $resourceUri != (string)$this->_owApp->selectedModel) {
+                $resourceUri .= '.html';
             }
 
             $toolbar = OntoWiki_Toolbar::getInstance();
             $toolbar->prependButton(OntoWiki_Toolbar::SEPARATOR)
                     ->prependButton(
-                        OntoWiki_Toolbar::SUBMIT, 
+                        OntoWiki_Toolbar::SUBMIT,
                         array(
                             'name' => 'Back to Site',
-                            'url' => $resourceUrl
+                            'url' => $resourceUri
                         )
                     );
         }

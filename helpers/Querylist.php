@@ -17,17 +17,25 @@
  */
 class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
 {
-    /*
+    /**
      * current view, injected with setView from Zend
      */
     public $view;
+
+    /**
+     * The TitleHelper object
+     */
+    private $_titleHelper = null;
 
     public function querylist($query, $template, $templateOptions = array())
     {
         $owapp       = OntoWiki::getInstance();
         $store       = $owapp->erfurt->getStore();
         $model       = $owapp->selectedModel;
-        $titleHelper = new OntoWiki_Model_TitleHelper($model);
+
+        if ($this->_titleHelper == null) {
+            $this->_titleHelper = new OntoWiki_Model_TitleHelper($model);
+        }
 
         try {
             $result = $model->sparqlQuery($query);
@@ -40,9 +48,14 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
         foreach ($result as $row) {
             foreach ($row as $value) {
                 if (Erfurt_Uri::check($value)) {
-                    $titleHelper->addResource($value);
+                    $this->_titleHelper->addResource($value);
                 }
             }
+        }
+
+        if (!stristr($query, 'ORDER BY')) {
+            // sort results by resource title
+            usort($result, array('Site_View_Helper_Querylist', '_cmpTitles'));
         }
 
         $return  = '';
@@ -63,7 +76,12 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
             $row['oddclass'] = $odd ? 'odd' : 'even';
             $row['rowcount'] = $count;
             $row['current']  = $current;
-            $row['title']    = $titleHelper->getTitle($row['resourceUri']);
+            if (!Erfurt_Uri::check($row['resourceUri'])) {
+                $row['title']    = $row['resourceUri'];
+            } else {
+                $row['title']    = $this->_titleHelper->getTitle($row['resourceUri']);
+            }
+
             $row             = array_merge($row, $templateOptions);
 
             // render the template
@@ -79,5 +97,33 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
     public function setView(Zend_View_Interface $view)
     {
         $this->view = $view;
+    }
+
+    /**
+     * This is the sorting function used to sort the result set.
+     * It compares the titles of the resources in $a and $b as returned by the TitleHelper
+     *
+     * @param $a the first row to compare
+     * @param $b the second row to compare
+     * @return int as needed by usort
+     */
+    private function _cmpTitles ($a, $b)
+    {
+        $titleA = '';
+        $titleB = '';
+
+        if (!Erfurt_Uri::check($a['resourceUri'])) {
+            $titleA    = $a['resourceUri'];
+        } else {
+            $titleA    = $this->_titleHelper->getTitle($a['resourceUri']);
+        }
+
+        if (!Erfurt_Uri::check($b['resourceUri'])) {
+            $titleB    = $b['resourceUri'];
+        } else {
+            $titleB    = $this->_titleHelper->getTitle($b['resourceUri']);
+        }
+
+        return strcasecmp($titleA, $titleB);
     }
 }

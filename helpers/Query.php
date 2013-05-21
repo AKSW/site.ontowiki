@@ -36,7 +36,6 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
         $this->templateData = $this->view->getHelper('Renderx')->templateData;
         $store              = OntoWiki::getInstance()->erfurt->getStore();
         $model              = OntoWiki::getInstance()->selectedModel;
-        $titleHelper        = new OntoWiki_Model_TitleHelper($model);
 
         // check for options and assign local vars or null
         $where    = (isset($options['where']))    ? $options['where']    : '?resourceUri a foaf:Project.';
@@ -44,6 +43,7 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
         $limit    = (isset($options['limit']))    ? $options['limit']    : 100;
         $prefix   = (isset($options['prefix']))   ? $options['prefix']   : '';
         $suffix   = (isset($options['suffix']))   ? $options['suffix']   : '';
+        $orderby  = (isset($options['orderby']))  ? $options['orderby']  : null;
 
         // create template name {site}/items/{name}.phtml
         $siteId   = $this->templateData['siteId'];
@@ -57,7 +57,11 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
         $query .= 'SELECT DISTINCT ?resourceUri WHERE {' . PHP_EOL;
         $query .= $where . PHP_EOL;
         $query .= 'FILTER (!isBLANK(?resourceUri))' . PHP_EOL;
-        $query .= '}  LIMIT ' . $limit . PHP_EOL;
+        $query .= '}' . PHP_EOL;
+        if ($orderby !== null) {
+            $query .= 'ORDER BY ' . $orderby . PHP_EOL;
+        }
+        $query .= 'LIMIT ' . $limit . PHP_EOL;
 
         // prepare the result string
         $result = $this->view->querylist($query, $template, $options);
