@@ -23,6 +23,10 @@ $map = trim($this->module('map', array('noChrome' => true)));
 <div class="span4">
 <?php if (!empty($map)): ?>
 <?php echo $map; ?>
+<?php else: ?>
+<div class="alert alert-info">
+Please enable the map extension in OntoWiki to view this example
+</div>
 <?php endif; ?>
 </div>
 </div>
