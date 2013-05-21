@@ -27,8 +27,10 @@ $templateData           = $this->templateData;
     <link rel="pingback" href="<?php echo $this->pingbackUrl ?>" />
 
     <link rel="<?php echo $this->curie('http://xmlns.com/foaf/0.1/primaryTopic') ?>" href="<?php echo $this->resourceUri?>" />
-    <link rel="stylesheet" type="text/css" media="all" href="<?php echo $this->baseUri ?>/css/all.dev.css" title="Standard" />
     <link type="text/css" href="<?php echo $this->baseUri ?>/css/bootstrap.css" rel="stylesheet" />
+
+    <!-- jQuery -->
+    <script type="text/javascript" src="<?php echo $this->themeUrlBase ?>scripts/libraries/jquery.js"></script>
 
     <style type="text/css">
       body {
@@ -60,11 +62,11 @@ $templateData           = $this->templateData;
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="#">OntoWiki Site Extension</a>
+          <a class="brand">OntoWiki Site Extension</a>
               <!-- TODO build menu -->
               <?php
               $navOptions = array(
-                      'navResource' => 'http://localhost/OntoWiki/Site/Navigation/Main',
+                      'navResource' => 'http://localhost/Site/Navigation/Main',
                       'navId' => 'nav-main',
                       'suffix'    => '<!-- /#nav-main -->',
                       'activeUrl' => $this->resourceUri,
@@ -87,7 +89,7 @@ $templateData           = $this->templateData;
 </div>
       <hr>
       <footer>
-        <p>&copy; AKSW 2012</p>
+        <p>&copy; AKSW 2013</p>
       </footer>
 
     </div> <!-- /container -->

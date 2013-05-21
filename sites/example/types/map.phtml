@@ -13,10 +13,16 @@
  */
 
 // prepare module options
-$moduleConfig = new Zend_Config(array());
-$content = trim($this->module('map', $moduleConfig));
+$map = trim($this->module('map', array('noChrome' => true)));
 ?>
 <h1>Map</h1>
-<?php if (!empty($content)): ?>
-<?php echo $content; ?>
+<div class="row-fluid">
+<div class="span8">
+    <?php echo $this->literal(array('class' => 'content')); ?>
+</div>
+<div class="span4">
+<?php if (!empty($map)): ?>
+<?php echo $map; ?>
 <?php endif; ?>
+</div>
+</div>

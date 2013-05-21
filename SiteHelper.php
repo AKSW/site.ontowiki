@@ -222,14 +222,6 @@ class SiteHelper extends OntoWiki_Component_Helper
                     // URL created
                     return true;
                 }
-            } else {
-                // classic
-                $event->route      = null;
-                $event->controller = 'site';
-                $event->action     = $site['id'];
-
-                // URL not created, but params changed
-                return false;
             }
         }
     }
