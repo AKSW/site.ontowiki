@@ -240,8 +240,9 @@ class SiteHelper extends OntoWiki_Component_Helper
             $this->_siteConfig = array();
             $site = $this->_privateConfig->defaultSite;
 
+            $relativeTemplatePath = OntoWiki::getInstance()->extensionManager->getExtensionConfig('site')->templates;
             // load the site config
-            $configFilePath = sprintf('%s/sites/%s/%s', $this->getComponentRoot(), $site, self::SITE_CONFIG_FILENAME);
+            $configFilePath = sprintf('%s/%s/%s/%s', $this->getComponentRoot(), $relativeTemplatePath, $site, self::SITE_CONFIG_FILENAME);
             if (is_readable($configFilePath)) {
                 if ($config = parse_ini_file($configFilePath, true)) {
                     $this->_siteConfig = $config;
