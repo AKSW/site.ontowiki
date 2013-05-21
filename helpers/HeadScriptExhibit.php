@@ -25,7 +25,7 @@ class Site_View_Helper_HeadScriptExhibit extends Zend_View_Helper_Abstract
         array ('uri' => 'http://lod2.eu/schema/exhibitData')
     );
 
-    private $exhibitScript = 'http://static.simile.mit.edu/exhibit/api-2.0/exhibit-api.js';
+    private $exhibitScript = 'http://api.simile-widgets.org/exhibit/3.0.0/exhibit-api.js';
 
     /*
      * Parameter propertyInfo:
@@ -74,7 +74,6 @@ class Site_View_Helper_HeadScriptExhibit extends Zend_View_Helper_Abstract
                 if ($description->hasSP($resourceUri, $propertyUri)) {
                     // we've found something, so we can add the exhibit script
                     echo '    <script src="'.$this->exhibitScript.'" type="text/javascript"></script>' . PHP_EOL;
-                    echo '    <script>SimileAjax.History.enabled = false;</script>' . PHP_EOL;
                     $value = $description->getValue($resourceUri, $propertyUri);
                     if ($literalMod != null) {
                         $value = sprintf($literalMod, $value);
