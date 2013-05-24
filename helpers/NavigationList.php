@@ -33,6 +33,12 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
     private $navResource;
 
     /*
+     * The resource URI which is used as a relation from the active resource to 
+     * the navResource
+     */
+    private $navProperty;
+
+    /*
      * the used list tag (ol/ul)
      */
     private $listTag = 'ul';
@@ -75,6 +81,8 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
     /*
      * main call method, takes an URI and an options array.
      * possible options array key:
+     * - navResource     - the navigation resource URI
+     * - navProperty    - the link to the navigation resource
      * - listTag         - the used html tag (ol, ul)
      * - listClass       - the used css class for the list
      * - activeItemClass - the used css class for the active item
@@ -93,7 +101,15 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         $titleHelper = new OntoWiki_Model_TitleHelper($owapp->selectedModel);
 
         if (!$options['navResource']) {
-            return '';
+            if (isset($options['navProperty'])) {
+                $this->navProperty = $options['navProperty'];
+                $resource          = new OntoWiki_Resource($this->resourceUri, $this->model);
+                $description       = $resource->getDescription();
+                $description       = $description[(string) $resource];
+                $this->navResource = $description[$this->navProperty][0]['value'];
+            } else {
+                return '';
+            }
         } else {
             $this->navResource = $options['navResource'];
         }
@@ -175,6 +191,9 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
     public function setView(Zend_View_Interface $view)
     {
         $this->view = $view;
+        $this->model       = $view->model;
+        $this->templateData = $view->templateData;
+        $this->resourceUri = (string) $view->resourceUri;
     }
 
     /*
