@@ -44,9 +44,20 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
     private $listTag = 'ul';
 
     /*
+     * the used list tag for sub lists (ol/ul)
+     * this value is set to the value of $listTag if not specified
+     */
+    private $sublistTag = '';
+
+    /*
      * css class value for the list item
      */
     private $listClass = '';
+
+    /*
+     * css class value for the list item of a sublist
+     */
+    private $sublistClass = '';
 
     /*
      * css class value for active li item
@@ -77,6 +88,21 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
      * id value for the nav item
      */
     private $navId = '';
+
+    /*
+     * surround sub navigation heading tag
+     */
+    private $subheadTag = 'strong';
+
+    /*
+     * surround sub navigation heading class
+     */
+    private $subheadClass = 'headline';
+
+    /*
+     * skip link to navigation resource
+     */
+    private $subheadSkipLink = true;
 
     /*
      * main call method, takes an URI and an options array.
@@ -123,6 +149,11 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         $this->suffix          = (isset($options['suffix'])) ? $options['suffix'] : $this->suffix;
         $this->navClass        = (isset($options['navClass'])) ? $options['navClass'] : $this->navClass;
         $this->navId           = (isset($options['navId'])) ? $options['navId'] : $this->navId;
+        $this->subheadTag      = (isset($options['subheadTag'])) ? $options['subheadTag'] : $this->subheadTag;
+        $this->subheadClass    = (isset($options['subheadClass'])) ? $options['subheadClass'] : $this->subheadClass;
+        $this->subheadSkipLink = (isset($options['subheadSkipLink'])) ? $options['subheadSkipLink'] : $this->subheadSkipLink;
+        $this->sublistTag      = (isset($options['sublistTag'])) ? $options['sublistTag'] : $this->listTag; // takes the list tag for default
+        $this->sublistClass    = (isset($options['sublistClass'])) ? $options['sublistClass'] : $this->sublistClass;
 
         if (isset($options['titleProperty'])) {
             $titleHelper->prependTitleProperty($options['titleProperty']);
@@ -130,57 +161,8 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
             $titleHelper->prependTitleProperty($this->menuLabel);
         }
 
-        $query = '
-            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-            SELECT ?item ?prop
-            WHERE {
-               <'. $this->navResource .'> ?prop ?item.
-               ?prop a rdfs:ContainerMembershipProperty.
-            }
-        ';
-
-        try {
-            $result = $store->sparqlQuery($query);
-        } catch (Exception $e) {
-            // executions failed (return error message)
-            return $e->getMessage();
-        }
-
-        // array of urls and labels which represent the navigation menu
-        $navigation = array();
-
-        // round one: fill navigation array with urls as well as fill the titleHelper
-        foreach ($result as $row) {
-            // works only for URIs ...
-            if (Erfurt_Uri::check($row['item'])) {
-                // prepare variables
-                $url      = $row['item'];
-                $property = $row['prop'];
-
-                // fill the titleHelper
-                $titleHelper->addResource($url);
-
-                // split property and use numeric last part for navigation order.
-                // example property: http://www.w3.org/2000/01/rdf-schema#_1
-                $pieces = explode ('_' , $property);
-                if (isset($pieces[1]) && is_numeric($pieces[1])) {
-                    // file the navigation array
-                    $navigation[$pieces[1]] = array(
-                        'url' => $url,
-                        'label' => $pieces[1]
-                    );
-                }
-            }
-        }
-
-        // round two: fill navigation array with labels from the titleHelper
-        foreach ($navigation as $key => $value) {
-            $label = $titleHelper->getTitle($value['url']);
-            $navigation[$key]['label'] = $label;
-        }
-
-        // round three: sort navigation according to the index
-        ksort($navigation);
+        $navigation = $this->_getMenu($this->navResource, $store, $titleHelper);
+        $navigation = $this->_setTitles($navigation, $titleHelper);
 
         return $this->render($navigation);
     }
@@ -214,8 +196,18 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
                 $return .= '<li>';
             }
 
-            // item tag body
-            $return .= '<a href="'.$url.'">'.$label.'</a>';
+            if ($item['hasSubMenu']) {
+                $return .= '<' . $this->subheadTag . ' class="' . $this->subheadClass . '">';
+                if ($this->subheadSkipLink) {
+                    $return .= $label;
+                } else {
+                    $return .= '<a href="'.$url.'">'.$label.'</a>';
+                }
+                $return .= '</' . $this->subheadTag . '>';
+                $return .= $this->_renderSubMenu($item['subMenu']);
+            } else {
+                $return .= '<a href="'.$url.'">'.$label.'</a>';
+            }
 
             // item tag end
             $return .= '</li>' . PHP_EOL;
@@ -244,4 +236,120 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         return $return;
     }
 
+    private function _renderSubMenu ($navigation)
+    {
+        $return = '';
+        foreach ($navigation as $item) {
+            // prepare item values
+            $url   = $item['url'];
+            $label = $item['label'];
+
+            // item tag start (depends on activeness)
+            if ($url == $this->activeUrl) {
+                $return .= '<li class="'.$this->activeItemClass.'">';
+            } else {
+                $return .= '<li>';
+            }
+
+            if ($item['hasSubMenu']) {
+                $return .= '<' . $this->subheadTag . ' class="' . $this->subheadClass . '">';
+                if ($this->subheadSkipLink) {
+                    $return .= $label;
+                } else {
+                    $return .= '<a href="'.$url.'">'.$label.'</a>';
+                }
+                $return .= '</' . $this->subheadTag . '>';
+                $return .= $this->_renderSubMenu($item['subMenu']);
+            } else {
+                $return .= '<a href="'.$url.'">'.$label.'</a>';
+            }
+
+            // item tag end
+            $return .= '</li>' . PHP_EOL;
+        }
+
+        $return  = '<' . $this->sublistTag . ' class="' . $this->sublistClass . '">' . PHP_EOL . $return;
+        $return .= '</' . $this->sublistTag . '>' . PHP_EOL;
+
+        return $return;
+    }
+
+    private function _getMenu ($navResource, $store, $titleHelper = null)
+    {
+        $query = '
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            SELECT ?item ?prop
+            WHERE {
+               <'. $navResource .'> ?prop ?item.
+               ?prop a rdfs:ContainerMembershipProperty.
+            }
+        ';
+
+        try {
+            $result = $store->sparqlQuery($query);
+        } catch (Exception $e) {
+            throw new OntoWiki_Exception('Problem while getting menu entries.', $e);
+        }
+
+        // array of urls and labels which represent the navigation menu
+        $navigation = array();
+
+        // round one: fill navigation array with urls as well as fill the titleHelper
+        foreach ($result as $row) {
+            // works only for URIs ...
+            if (Erfurt_Uri::check($row['item'])) {
+                // prepare variables
+                $url      = $row['item'];
+                $property = $row['prop'];
+
+                // fill the titleHelper
+                if ($titleHelper !== null) {
+                    $titleHelper->addResource($url);
+                }
+
+                // split property and use numeric last part for navigation order.
+                // example property: http://www.w3.org/2000/01/rdf-schema#_1
+                $pieces = explode ('_' , $property);
+                if (isset($pieces[1]) && is_numeric($pieces[1])) {
+                    // file the navigation array
+                    $navigation[$pieces[1]] = array(
+                        'url' => $url,
+                        'label' => $pieces[1]
+                    );
+
+                    $subMenu = $this->_getMenu($url, $store, $titleHelper);
+
+                    if (count($subMenu) > 0) {
+                        $navigation[$pieces[1]]['hasSubMenu'] = true;
+                        $navigation[$pieces[1]]['subMenu'] = $subMenu;
+                    } else {
+                        $navigation[$pieces[1]]['hasSubMenu'] = false;
+                    }
+                }
+            }
+        }
+
+        // round three: sort navigation according to the index
+        if (count($navigation) > 1) {
+            ksort($navigation);
+        }
+
+        return $navigation;
+    }
+
+    private function _setTitles ($navigation, $titleHelper)
+    {
+        // round two: fill navigation array with labels from the titleHelper
+        foreach ($navigation as $key => $value) {
+            $label = $titleHelper->getTitle($value['url']);
+            $navigation[$key]['label'] = $label;
+            if ($navigation[$key]['hasSubMenu']) {
+                $navigation[$key]['subMenu'] = $this->_setTitles(
+                    $navigation[$key]['subMenu'], $titleHelper
+                );
+            }
+        }
+
+        return $navigation;
+    }
 }
