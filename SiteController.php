@@ -103,9 +103,14 @@ class SiteController extends OntoWiki_Controller_Component
             // try to load the cached value
             $erfurtObjectCache = OntoWiki::getInstance()->erfurt->getCache();
             $erfurtQueryCache  = OntoWiki::getInstance()->erfurt->getQueryCache();
-            $cachePageContent  = $erfurtObjectCache->load($siteModuleObjectCacheId);
-            if ($cachePageContent == false) {
+            $cache = $erfurtObjectCache->load($siteModuleObjectCacheId);
+            if (!is_array($cache)) {
                 $erfurtQueryCache->startTransaction($siteModuleObjectCacheId);
+
+                $cache = array(
+                    'code'    => 200,
+                    'headers' => array('Content-Type' => 'text/html; encoding=utf-8'),
+                );
 
                 $moduleTemplatePath = $this->_componentRoot
                                     . $this->_relativeTemplatePath
@@ -127,17 +132,20 @@ class SiteController extends OntoWiki_Controller_Component
                 $this->view->templateData = $this->_getTemplateData();
 
                 // generate the page body
-                $cachePageContent = $this->view->render($mainTemplate);
+                $cache['body'] = $this->view->render($mainTemplate);
 
                 // save the page body as an object value for the object cache
-                $erfurtObjectCache->save($cachePageContent, $siteModuleObjectCacheId);
+                $erfurtObjectCache->save($cache, $siteModuleObjectCacheId);
                 // close the object cache transaction
                 $erfurtQueryCache->endTransaction($siteModuleObjectCacheId);
             }
 
             // set the page content
-            $this->_response->setBody($cachePageContent);
-            $this->_response->setHeader('Content-Type', 'text/html; encoding=utf-8');
+            $this->_response->setHttpResponseCode($cache['code']);
+            foreach ($cache['headers'] as $header => $content) {
+                $this->_response->setHeader($header, $content);
+            }
+            $this->_response->setBody($cache['body']);
         } else {
             $this->_response->setRawHeader('HTTP/1.0 404 Not Found');
             $this->_response->setBody($this->view->render('404.phtml'));
