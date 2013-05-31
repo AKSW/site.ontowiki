@@ -39,9 +39,9 @@ site:DeletedResource a owl:Class;
 ###
 
 site:seeAlso a owl:ObjectProperty, owl:FunctionalProperty;
-  rdfs:comment "If a requested resources links with this property to another resource, the server should forward with http status code 303 instead.";
+  rdfs:comment "If a requested resources links with this property to another resource, the server should forward to this resource";
   rdfs:subPropertyOf rdfs:seeAlso;
-  rdfs:label "seeAlso (303)";
+  rdfs:label "seeAlso (site)";
   rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
 
 site:menuLabel a owl:DatatypeProperty, owl:FunctionalProperty ;
