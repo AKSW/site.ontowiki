@@ -115,8 +115,13 @@ class SiteController extends OntoWiki_Controller_Component
                 $description = $this->_resource->getDescription();
                 $type = $description[$this->_resourceUri]['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'][0]['value'];
                 if ($type === 'http://ns.ontowiki.net/SysOnt/Site/MovedResource') {
-                    $cache['code'] = 303;
-                    $cache['headers']['Location'] = $description[$this->_resourceUri]['http://ns.ontowiki.net/SysOnt/Site/seeAlso'][0]['value'];
+                    if (!empty($description[$this->_resourceUri]['http://ns.ontowiki.net/SysOnt/Site/seeAlso'])) {
+                        $cache['code'] = 303;
+                        $cache['headers']['Location'] = $description[$this->_resourceUri]['http://ns.ontowiki.net/SysOnt/Site/seeAlso'][0]['value'];
+                    } else {
+                        // FIXME
+                        $cache['code'] = 500;
+                    }
                     // TODO use different template?
                 }
 
