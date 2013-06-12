@@ -62,6 +62,44 @@ class SiteController extends OntoWiki_Controller_Component
         $this->_relativeTemplatePath = $this->_owApp->extensionManager->getExtensionConfig('site')->templates;
     }
 
+	public function sitemapAction(){
+		$pathGenerator	= __DIR__.'/libraries/SitemapGenerator/classes/';
+		require_once ($pathGenerator.'Sitemap.php');
+//		require_once ($pathGenerator.'Sitemap/Index.php');
+		require_once ($pathGenerator.'Sitemap/URL.php');
+		require_once ($pathGenerator.'XML/Builder.php');
+		require_once ($pathGenerator.'XML/Node.php');
+
+//		$results	= ...
+//		$timestamp	= ...
+
+		//  fake results for testing
+		$results	= array ((object) array('url' => 'http://localhost/OntoWiki/test'));
+		//  fake timestamp
+		$timestamp	= "20130601";
+
+		
+		$sitemap	= new Sitemap();
+		foreach ($results as $result) {
+			$sitemap->addUrl (new Sitemap_URL ($result->url));
+		}
+
+		$cache		= Erfurt_App::getInstance()->getCache();
+		$cacheKey	= 'sitemap_'.$timestamp;
+		$cacheTags	= array('site', 'sitemap');
+		if (0 && $cache->test ($cacheKey)){
+			$xml	= $cache->load ($cacheKey);
+		}
+		else{
+			$xml	= $sitemap->render();
+//			$cache->clean ('matchingTag', $cacheTags);
+//			$cache->save( $xml, $cacheKey, $cacheTags);
+		}
+		header ("Content-type: application/xml");
+		print ($xml);
+		exit;
+	}
+	
     /*
      * to allow multiple template sets, every action is mapped to a template directory
      */

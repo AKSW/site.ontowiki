@@ -21,7 +21,7 @@
 /*
  * only mysql supported
  */
-function GetCachedContent_ZendDB($cacheId, $config)
+function GetCachedContent_Database_ZendDB($cacheId, $config)
 {
     $dbuser = $config['store.zenddb.username'];
     $dbpass = $config['store.zenddb.password'];
@@ -53,7 +53,7 @@ function GetCachedContent_ZendDB($cacheId, $config)
 /*
  * fetch virtuoso based cache
  */
-function GetCachedContent_Virtuoso($cacheId, $config)
+function GetCachedContent_Database_Virtuoso($cacheId, $config)
 {
     $virtUser = $config['store.virtuoso.username'];
     $virtPass = $config['store.virtuoso.password'];
@@ -83,21 +83,56 @@ function GetCachedContent_Virtuoso($cacheId, $config)
     }
 }
 
+function GetCachedContent_Memcached($cacheId, $config)
+{
+    $host = 'localhost';
+    if( isset( $config['cache.backend.memcached.servers.0.host'] ) )
+        $host = $config['cache.backend.memcached.servers.0.host'];
+    $port = 11211;
+    if( isset( $config['cache.backend.memcached.servers.0.port'] ) )
+        $port = $config['cache.backend.memcached.servers.0.port'];
+
+    if( !class_exists( 'Memcache' ) )
+        exit( 'Missing memcache client extension' );
+
+    $memcache = new Memcache;
+    $memcache->addServer( $host, $port );
+    $result   = $memcache->get($cacheId);
+    if ($result){
+        $content = unserialize($result[0]);
+        if (is_string($content)){
+            return $content;
+        }
+    }
+}
+
 function GetCacheContent ($id)
 {
-    $config  = parse_ini_file('config.ini');
-    $backend = $config['store.backend'];
+    $default = parse_ini_file('application/config/default.ini');
+    $config  = array_merge( $default, parse_ini_file('config.ini') );
 
     $content = null;
-    switch ($backend) {
-    case 'zenddb':
-        $content = GetCachedContent_ZendDB($id, $config);
-        break;
-    case 'virtuoso':
-        $content = GetCachedContent_Virtuoso($id, $config);
-        break;
-    default:
-        // nothing to do
+    switch ($config['cache.backend.type']) {
+        case 'memcached':
+            $content = GetCachedContent_Memcached($id, $config);
+            break;
+        case 'database':
+            switch ($config['store.backend']) {
+                case 'zenddb':
+                    $content = GetCachedContent_Database_ZendDB($id, $config);
+                    break;
+                case 'virtuoso':
+                    $content = GetCachedContent_Database_Virtuoso($id, $config);
+                    break;
+                default:
+                    // nothing to do
+            }
+            break;
+        case 'apc':
+        case 'sqlite':
+        case 'file':
+        default:
+            // nothing to do
     }
     return $content;
 }
@@ -116,4 +151,3 @@ if ($content != null) {
     echo $content;
     exit;
 }
-
