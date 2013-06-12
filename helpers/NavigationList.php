@@ -178,7 +178,9 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
     {
         $this->view = $view;
         $this->model       = $view->model;
-        $this->templateData = $view->templateData;
+        if (isset($view->templateData)) {
+            $this->templateData = $view->templateData;
+        }
         $this->resourceUri = (string) $view->resourceUri;
     }
 
