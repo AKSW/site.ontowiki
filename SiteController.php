@@ -87,13 +87,13 @@ class SiteController extends OntoWiki_Controller_Component
 		$cache		= Erfurt_App::getInstance()->getCache();
 		$cacheKey	= 'sitemap_'.$timestamp;
 		$cacheTags	= array('site', 'sitemap');
-		if ($cache->test ($cacheKey)){
+		if (0 && $cache->test ($cacheKey)){
 			$xml	= $cache->load ($cacheKey);
 		}
 		else{
 			$xml	= $sitemap->render();
-			$cache->clean ('matchingTag', $cacheTags);
-			$cache->save( $xml, $cacheKey, $cacheTags);
+//			$cache->clean ('matchingTag', $cacheTags);
+//			$cache->save( $xml, $cacheKey, $cacheTags);
 		}
 		header ("Content-type: application/xml");
 		print ($xml);
