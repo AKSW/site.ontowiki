@@ -141,44 +141,64 @@ class SiteController extends OntoWiki_Controller_Component
             // try to load the cached value
             $erfurtObjectCache = OntoWiki::getInstance()->erfurt->getCache();
             $erfurtQueryCache  = OntoWiki::getInstance()->erfurt->getQueryCache();
-            $cachePageContent  = $erfurtObjectCache->load($siteModuleObjectCacheId);
-            if ($cachePageContent != false) {
-                $this->_response->setBody($cachePageContent); // send cached body instead of generating a new one
-                return;
-            } else {
+            $cache = $erfurtObjectCache->load($siteModuleObjectCacheId);
+            if (!is_array($cache)) {
                 $erfurtQueryCache->startTransaction($siteModuleObjectCacheId);
+
+                $cache = array(
+                    'code'    => 200,
+                    'headers' => array('Content-Type' => 'text/html; encoding=utf-8'),
+                );
+
+                $description = $this->_resource->getDescription();
+                if (!empty($description[$this->_resourceUri][EF_RDF_TYPE])) {
+                    $type = $description[$this->_resourceUri][EF_RDF_TYPE][0]['value'];
+                    if ($type === 'http://ns.ontowiki.net/SysOnt/Site/MovedResource') {
+                        if (!empty($description[$this->_resourceUri]['http://ns.ontowiki.net/SysOnt/Site/seeAlso'])) {
+                            $cache['code'] = 303;
+                            $cache['headers']['Location'] = $description[$this->_resourceUri]['http://ns.ontowiki.net/SysOnt/Site/seeAlso'][0]['value'];
+                        } else {
+                            // FIXME
+                            $cache['code'] = 500;
+                        }
+                        // TODO use different template?
+                    }
+                }
+
+                $moduleTemplatePath = $this->_componentRoot
+                                    . $this->_relativeTemplatePath
+                                    . DIRECTORY_SEPARATOR
+                                    . $this->_privateConfig->defaultSite
+                                    . DIRECTORY_SEPARATOR
+                                    . 'modules';
+
+                // add module template override path
+                if (is_readable($moduleTemplatePath)) {
+                    $scriptPaths = $this->view->getScriptPaths();
+                    array_push($scriptPaths, $moduleTemplatePath);
+                    $this->view->setScriptPath($scriptPaths);
+                }
+
+                // with assignment, direct access is possible ($this->basePath).
+                $this->view->assign($this->_getTemplateData());
+                // this allows for easy re-assignment of everything
+                $this->view->templateData = $this->_getTemplateData();
+
+                // generate the page body
+                $cache['body'] = $this->view->render($mainTemplate);
+
+                // save the page body as an object value for the object cache
+                $erfurtObjectCache->save($cache, $siteModuleObjectCacheId);
+                // close the object cache transaction
+                $erfurtQueryCache->endTransaction($siteModuleObjectCacheId);
             }
-
-            $moduleTemplatePath = $this->_componentRoot
-                                . $this->_relativeTemplatePath
-                                . DIRECTORY_SEPARATOR
-                                . $this->_privateConfig->defaultSite
-                                . DIRECTORY_SEPARATOR
-                                . 'modules';
-
-            // add module template override path
-            if (is_readable($moduleTemplatePath)) {
-                $scriptPaths = $this->view->getScriptPaths();
-                array_push($scriptPaths, $moduleTemplatePath);
-                $this->view->setScriptPath($scriptPaths);
-            }
-
-            // with assignment, direct access is possible ($this->basePath).
-            $this->view->assign($this->_getTemplateData());
-            // this allows for easy re-assignment of everything
-            $this->view->templateData = $this->_getTemplateData();
-
-            // generate the page body
-            $bodyContent = $this->view->render($mainTemplate);
-
-            // save the page body as an object value for the object cache
-            $erfurtObjectCache->save($bodyContent, $siteModuleObjectCacheId);
-            // close the object cache transaction
-            $erfurtQueryCache->endTransaction($siteModuleObjectCacheId);
 
             // set the page content
-            $this->_response->setBody($bodyContent);
-            $this->_response->setHeader('Content-Type', 'text/html; encoding=utf-8');
+            $this->_response->setHttpResponseCode($cache['code']);
+            foreach ($cache['headers'] as $header => $content) {
+                $this->_response->setHeader($header, $content);
+            }
+            $this->_response->setBody($cache['body']);
         } else {
             $this->_response->setRawHeader('HTTP/1.0 404 Not Found');
             $this->_response->setBody($this->view->render('404.phtml'));
