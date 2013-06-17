@@ -62,51 +62,44 @@ class SiteController extends OntoWiki_Controller_Component
         $this->_relativeTemplatePath = $this->_owApp->extensionManager->getExtensionConfig('site')->templates;
     }
 
-    public function sitemapAction(){
-        $pathGenerator	= __DIR__.'/libraries/SitemapGenerator/classes/';
-        require_once ($pathGenerator.'Sitemap.php');
-        require_once ($pathGenerator.'Sitemap/URL.php');
-        require_once ($pathGenerator.'XML/Builder.php');
-        require_once ($pathGenerator.'XML/Node.php');
+	public function sitemapAction(){
+		$pathGenerator	= __DIR__.'/libraries/SitemapGenerator/classes/';
+		require_once ($pathGenerator.'Sitemap.php');
+//		require_once ($pathGenerator.'Sitemap/Index.php');
+		require_once ($pathGenerator.'Sitemap/URL.php');
+		require_once ($pathGenerator.'XML/Builder.php');
+		require_once ($pathGenerator.'XML/Node.php');
 
-        // Here we start the object cache id
-        $sitemapObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        $sitemapObjectCacheId = 'sitemap_' . md5($sitemapObjectCacheIdSource);
+//		$results	= ...
+//		$timestamp	= ...
 
-        // try to load the cached value
-        $erfurtObjectCache  = OntoWiki::getInstance()->erfurt->getCache();
-        $erfurtQueryCache   = OntoWiki::getInstance()->erfurt->getQueryCache();
-        $sitemapXml         = $erfurtObjectCache->load($sitemapObjectCacheId);
-        if ($sitemapXml === false) {
-            $erfurtQueryCache->startTransaction($sitemapObjectCacheId);
-            $siteConfig = $this->_getSiteConfig();
-            $this->_loadModel();
-            $query	= '
-SELECT DISTINCT ?resourceUri ?modified
-WHERE { 
-?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type. 
-OPTIONAL {?resourceUri <http://purl.org/dc/terms/modified> ?modified }
-FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'") 
-} ';
-            $results    = $this->_model->sparqlQuery( $query );
-            $sitemap    = new Sitemap();
-            foreach ($results as $result) {
-                $url    = new Sitemap_URL ($result['resourceUri']);
-                if (isset($result['timestamp']))
-                    $url->setDatetime ($result['timestamp']);
-                $sitemap->addUrl ($url);
-            }
-            $sitemapXml	= $sitemap->render();
-            // save the page body as an object value for the object cache
-            $erfurtObjectCache->save($sitemapXml, $sitemapObjectCacheId);
-            // close the object cache transaction
-            $erfurtQueryCache->endTransaction($sitemapObjectCacheId);
-        }
-        header ("Content-type: application/xml");
-        print ($sitemapXml);
-        exit;
-    }
+		//  fake results for testing
+		$results	= array ((object) array('url' => 'http://localhost/OntoWiki/test'));
+		//  fake timestamp
+		$timestamp	= "20130601";
 
+		
+		$sitemap	= new Sitemap();
+		foreach ($results as $result) {
+			$sitemap->addUrl (new Sitemap_URL ($result->url));
+		}
+
+		$cache		= Erfurt_App::getInstance()->getCache();
+		$cacheKey	= 'sitemap_'.$timestamp;
+		$cacheTags	= array('site', 'sitemap');
+		if (0 && $cache->test ($cacheKey)){
+			$xml	= $cache->load ($cacheKey);
+		}
+		else{
+			$xml	= $sitemap->render();
+//			$cache->clean ('matchingTag', $cacheTags);
+//			$cache->save( $xml, $cacheKey, $cacheTags);
+		}
+		header ("Content-type: application/xml");
+		print ($xml);
+		exit;
+	}
+	
     /*
      * to allow multiple template sets, every action is mapped to a template directory
      */
