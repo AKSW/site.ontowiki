@@ -96,41 +96,43 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         // filter and render the (first) literal value of the main property
         // TODO: striptags and tidying as extension
         if ($mainProperty) {
-            //search for language tag
-            foreach ($description[$mainProperty] as $literalNumber => $literal) {
-                $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
-                if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
-                    $firstLiteral = $description[$mainProperty][$literalNumber];
-                    break;
-                }
-            }
-            if (!isset($firstLiteral)) {
-                $firstLiteral = $description[$mainProperty][0];
-            }
-            $content = $firstLiteral['value'];
-
             if ($array) {
                 $return = array();
                 foreach ($description[$mainProperty] as $key => $value) {
                     $return[] = $value['value'];
                 };
                 return $return;
-            } else if ($plain) {
-                return $content;
             } else {
-                // execute the helper markup on the content (after the extensions)
-                $content = $this->view->executeHelperMarkup($content);
-
-                // filter by using available extensions
-                if (isset($firstLiteral['datatype'])) {
-                    $datatype = $firstLiteral['datatype'];
-                    $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
-                } else {
-                    $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
+                //search for language tag
+                foreach ($description[$mainProperty] as $literalNumber => $literal) {
+                    $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
+                    if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
+                        $firstLiteral = $description[$mainProperty][$literalNumber];
+                        break;
+                    }
                 }
+                if (!isset($firstLiteral)) {
+                    $firstLiteral = $description[$mainProperty][0];
+                }
+                $content = $firstLiteral['value'];
 
-                $curie = $this->view->curie($mainProperty);
-                return "$prefix<$tag class='$class' property='$curie'>$iprefix$content$isuffix</$tag>$suffix";
+                if ($plain) {
+                    return $content;
+                } else {
+                    // execute the helper markup on the content (after the extensions)
+                    $content = $this->view->executeHelperMarkup($content);
+
+                    // filter by using available extensions
+                    if (isset($firstLiteral['datatype'])) {
+                        $datatype = $firstLiteral['datatype'];
+                        $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
+                    } else {
+                        $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
+                    }
+
+                    $curie = $this->view->curie($mainProperty);
+                    return "$prefix<$tag class='$class' property='$curie'>$iprefix$content$isuffix</$tag>$suffix";
+                }
             }
         } else {
             if ($array) {
