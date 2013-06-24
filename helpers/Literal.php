@@ -60,38 +60,8 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $plain   = (isset($options['plain']))   ? true                : false;
         $array   = (isset($options['array']))   ? true                : false;
 
-        // choose, which uri to use: option over helper default over view value
-        $uri = (isset($this->resourceUri))           ? $this->resourceUri : null;
-        $uri = (isset($options['selectedResource'])) ? (string)$options['selectedResource'] : $uri;
-        $uri = (isset($options['uri']))              ? (string)$options['uri'] : $uri;
-        $uri = Erfurt_Uri::getFromQnameOrUri($uri, $model);
-
-        // choose, which properties to use (todo: allow multple properties)
-        $contentProperties = (isset($options['property'])) ? array( $options['property']) : null;
-        $contentProperties = (!$contentProperties) ? $this->contentProperties : $contentProperties;
-
-        foreach ($contentProperties as $key => $value) {
-            try {
-                $validatedValue = Erfurt_Uri::getFromQnameOrUri($value, $model);
-                $contentProperties[$key] = $validatedValue;
-            } catch (Exception $e) {
-                unset($contentProperties[$key]);
-            }
-        }
-
-        // create description from resource URI
-        $resource     = new OntoWiki_Resource($uri, $model);
-        $description  = $resource->getDescription();
-        $description  = $description[$uri];
-
-        // select the main property from existing ones
-        $mainProperty = null; // the URI of the main content property
-        foreach ($contentProperties as $contentProperty) {
-            if (isset($description[$contentProperty])) {
-                $mainProperty = $contentProperty;
-                break;
-            }
-        }
+        $description  = $this->_getDescription($model, $options);
+        $mainProperty = $this->_selectMainProperty($model, $description, $options);
 
         // filter and render the (first) literal value of the main property
         // TODO: striptags and tidying as extension
@@ -151,6 +121,49 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
     {
         $this->view = $view;
         $this->resourceUri  = (string)$view->resourceUri;
+    }
+
+    protected function _getDescription($model, $options)
+    {
+        // choose, which uri to use: option over helper default over view value
+        $uri = (isset($this->resourceUri))           ? $this->resourceUri : null;
+        $uri = (isset($options['selectedResource'])) ? (string)$options['selectedResource'] : $uri;
+        $uri = (isset($options['uri']))              ? (string)$options['uri'] : $uri;
+        $uri = Erfurt_Uri::getFromQnameOrUri($uri, $model);
+
+        // create description from resource URI
+        $resource     = new OntoWiki_Resource($uri, $model);
+        $description  = $resource->getDescription();
+        $description  = $description[$uri];
+
+        return $description;
+    }
+
+    protected function _selectMainProperty($model, $description, $options)
+    {
+        // choose, which properties to use (todo: allow multple properties)
+        $contentProperties = (isset($options['property'])) ? array( $options['property']) : null;
+        $contentProperties = (!$contentProperties) ? $this->contentProperties : $contentProperties;
+
+        foreach ($contentProperties as $key => $value) {
+            try {
+                $validatedValue = Erfurt_Uri::getFromQnameOrUri($value, $model);
+                $contentProperties[$key] = $validatedValue;
+            } catch (Exception $e) {
+                unset($contentProperties[$key]);
+            }
+        }
+
+        // select the main property from existing ones
+        $mainProperty = null; // the URI of the main content property
+        foreach ($contentProperties as $contentProperty) {
+            if (isset($description[$contentProperty])) {
+                $mainProperty = $contentProperty;
+                break;
+            }
+        }
+
+        return $mainProperty;
     }
 
 }
