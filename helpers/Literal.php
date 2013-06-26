@@ -90,8 +90,12 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 $content = $firstLiteral['value'];
 
                 if (isset($labels[$content])) {
-                    $contentAttr = " content='$content'";
+                    $contentAttr = " content='${firstLiteral['value']}'";
                     $content = $labels[$content];
+                }
+
+                if (isset($firstLiteral['type']) && $firstLiteral['type'] === 'uri') {
+                    $contentAttr = " resource='${firstLiteral['value']}'";
                 }
 
                 if ($plain) {
