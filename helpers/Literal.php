@@ -44,6 +44,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
      * - isuffix  - string betwee content and tag at the end
      * - plain    - outputs the literal only (no html)
      * - array    - returns an array of the values (not suitable for template markup)
+     * - labels   - content overrides for specified values
      */
     public function literal($options = array())
     {
@@ -59,6 +60,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $isuffix = (isset($options['isuffix'])) ? $options['isuffix'] : '';
         $plain   = (isset($options['plain']))   ? true                : false;
         $array   = (isset($options['array']))   ? true                : false;
+        $labels  = (isset($options['labels']))  ? $options['labels']  : array();
 
         $description  = $this->_getDescription($model, $options);
         $mainProperty = $this->_selectMainProperty($model, $description, $options);
@@ -84,7 +86,13 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 if (!isset($firstLiteral)) {
                     $firstLiteral = $description[$mainProperty][0];
                 }
+                $contentAttr = '';
                 $content = $firstLiteral['value'];
+
+                if (isset($labels[$content])) {
+                    $contentAttr = " content='$content'";
+                    $content = $labels[$content];
+                }
 
                 if ($plain) {
                     return $content;
@@ -101,7 +109,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                     }
 
                     $curie = $this->view->curie($mainProperty);
-                    return "$prefix<$tag class='$class' property='$curie'>$iprefix$content$isuffix</$tag>$suffix";
+                    return "$prefix<$tag class='$class' property='$curie'$contentAttr>$iprefix$content$isuffix</$tag>$suffix";
                 }
             }
         } else {
