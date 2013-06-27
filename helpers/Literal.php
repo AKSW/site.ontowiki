@@ -44,6 +44,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
      * - isuffix  - string betwee content and tag at the end
      * - plain    - outputs the literal only (no html)
      * - array    - returns an array of the values (not suitable for template markup)
+     * - labels   - content overrides for specified values
      */
     public function literal($options = array())
     {
@@ -59,78 +60,61 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $isuffix = (isset($options['isuffix'])) ? $options['isuffix'] : '';
         $plain   = (isset($options['plain']))   ? true                : false;
         $array   = (isset($options['array']))   ? true                : false;
+        $labels  = (isset($options['labels']))  ? $options['labels']  : array();
 
-        // choose, which uri to use: option over helper default over view value
-        $uri = (isset($this->resourceUri))           ? $this->resourceUri : null;
-        $uri = (isset($options['selectedResource'])) ? (string)$options['selectedResource'] : $uri;
-        $uri = (isset($options['uri']))              ? (string)$options['uri'] : $uri;
-        $uri = Erfurt_Uri::getFromQnameOrUri($uri, $model);
-
-        // choose, which properties to use (todo: allow multple properties)
-        $contentProperties = (isset($options['property'])) ? array( $options['property']) : null;
-        $contentProperties = (!$contentProperties) ? $this->contentProperties : $contentProperties;
-
-        foreach ($contentProperties as $key => $value) {
-            try {
-                $validatedValue = Erfurt_Uri::getFromQnameOrUri($value, $model);
-                $contentProperties[$key] = $validatedValue;
-            } catch (Exception $e) {
-                unset($contentProperties[$key]);
-            }
-        }
-
-        // create description from resource URI
-        $resource     = new OntoWiki_Resource($uri, $model);
-        $description  = $resource->getDescription();
-        $description  = $description[$uri];
-
-        // select the main property from existing ones
-        $mainProperty = null; // the URI of the main content property
-        foreach ($contentProperties as $contentProperty) {
-            if (isset($description[$contentProperty])) {
-                $mainProperty = $contentProperty;
-                break;
-            }
-        }
+        $description  = $this->_getDescription($model, $options);
+        $mainProperty = $this->_selectMainProperty($model, $description, $options);
 
         // filter and render the (first) literal value of the main property
         // TODO: striptags and tidying as extension
         if ($mainProperty) {
-            //search for language tag
-            foreach ($description[$mainProperty] as $literalNumber => $literal) {
-                $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
-                if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
-                    $firstLiteral = $description[$mainProperty][$literalNumber];
-                    break;
-                }
-            }
-            if (!isset($firstLiteral)) {
-                $firstLiteral = $description[$mainProperty][0];
-            }
-            $content = $firstLiteral['value'];
-
             if ($array) {
                 $return = array();
                 foreach ($description[$mainProperty] as $key => $value) {
                     $return[] = $value['value'];
                 };
                 return $return;
-            } else if ($plain) {
-                return $content;
             } else {
-                // execute the helper markup on the content (after the extensions)
-                $content = $this->view->executeHelperMarkup($content);
+                //search for language tag
+                foreach ($description[$mainProperty] as $literalNumber => $literal) {
+                    $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
+                    if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
+                        $firstLiteral = $description[$mainProperty][$literalNumber];
+                        break;
+                    }
+                }
+                if (!isset($firstLiteral)) {
+                    $firstLiteral = $description[$mainProperty][0];
+                }
+                $contentAttr = '';
+                $content = $firstLiteral['value'];
 
-                // filter by using available extensions
-                if (isset($firstLiteral['datatype'])) {
-                    $datatype = $firstLiteral['datatype'];
-                    $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
-                } else {
-                    $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
+                if (isset($labels[$content])) {
+                    $contentAttr = " content='${firstLiteral['value']}'";
+                    $content = $labels[$content];
                 }
 
-                $curie = $this->view->curie($mainProperty);
-                return "$prefix<$tag class='$class' property='$curie'>$iprefix$content$isuffix</$tag>$suffix";
+                if (isset($firstLiteral['type']) && $firstLiteral['type'] === 'uri') {
+                    $contentAttr = " resource='${firstLiteral['value']}'";
+                }
+
+                if ($plain) {
+                    return $content;
+                } else {
+                    // execute the helper markup on the content (after the extensions)
+                    $content = $this->view->executeHelperMarkup($content);
+
+                    // filter by using available extensions
+                    if (isset($firstLiteral['datatype'])) {
+                        $datatype = $firstLiteral['datatype'];
+                        $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
+                    } else {
+                        $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
+                    }
+
+                    $curie = $this->view->curie($mainProperty);
+                    return "$prefix<$tag class='$class' property='$curie'$contentAttr>$iprefix$content$isuffix</$tag>$suffix";
+                }
             }
         } else {
             if ($array) {
@@ -149,6 +133,49 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
     {
         $this->view = $view;
         $this->resourceUri  = (string)$view->resourceUri;
+    }
+
+    protected function _getDescription($model, $options)
+    {
+        // choose, which uri to use: option over helper default over view value
+        $uri = (isset($this->resourceUri))           ? $this->resourceUri : null;
+        $uri = (isset($options['selectedResource'])) ? (string)$options['selectedResource'] : $uri;
+        $uri = (isset($options['uri']))              ? (string)$options['uri'] : $uri;
+        $uri = Erfurt_Uri::getFromQnameOrUri($uri, $model);
+
+        // create description from resource URI
+        $resource     = new OntoWiki_Resource($uri, $model);
+        $description  = $resource->getDescription();
+        $description  = $description[$uri];
+
+        return $description;
+    }
+
+    protected function _selectMainProperty($model, $description, $options)
+    {
+        // choose, which properties to use (todo: allow multple properties)
+        $contentProperties = (isset($options['property'])) ? array( $options['property']) : null;
+        $contentProperties = (!$contentProperties) ? $this->contentProperties : $contentProperties;
+
+        foreach ($contentProperties as $key => $value) {
+            try {
+                $validatedValue = Erfurt_Uri::getFromQnameOrUri($value, $model);
+                $contentProperties[$key] = $validatedValue;
+            } catch (Exception $e) {
+                unset($contentProperties[$key]);
+            }
+        }
+
+        // select the main property from existing ones
+        $mainProperty = null; // the URI of the main content property
+        foreach ($contentProperties as $contentProperty) {
+            if (isset($description[$contentProperty])) {
+                $mainProperty = $contentProperty;
+                break;
+            }
+        }
+
+        return $mainProperty;
     }
 
 }
