@@ -58,8 +58,8 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $suffix  = (isset($options['suffix']))  ? $options['suffix']  : '';
         $iprefix = (isset($options['iprefix'])) ? $options['iprefix'] : '';
         $isuffix = (isset($options['isuffix'])) ? $options['isuffix'] : '';
-        $plain   = (isset($options['plain']))   ? true                : false;
-        $array   = (isset($options['array']))   ? true                : false;
+        $plain   = (isset($options['plain']))   ? $options['plain']   : false;
+        $array   = (isset($options['array']))   ? $options['array']   : false;
         $labels  = (isset($options['labels']))  ? $options['labels']  : array();
 
         $description  = $this->_getDescription($model, $options);
