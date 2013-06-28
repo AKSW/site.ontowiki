@@ -52,15 +52,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $titleHelper = new OntoWiki_Model_TitleHelper($model);
 
         // check for options and assign local vars or default values
-        $class   = (isset($options['class']))   ? $options['class']   : '';
-        $tag     = (isset($options['tag']))     ? $options['tag']     : 'span';
-        $prefix  = (isset($options['prefix']))  ? $options['prefix']  : '';
-        $suffix  = (isset($options['suffix']))  ? $options['suffix']  : '';
-        $iprefix = (isset($options['iprefix'])) ? $options['iprefix'] : '';
-        $isuffix = (isset($options['isuffix'])) ? $options['isuffix'] : '';
-        $plain   = (isset($options['plain']))   ? true                : false;
-        $array   = (isset($options['array']))   ? true                : false;
-        $labels  = (isset($options['labels']))  ? $options['labels']  : array();
+        $array   = (isset($options['array']))   ? $options['array']   : false;
 
         $description  = $this->_getDescription($model, $options);
         $mainProperty = $this->_selectMainProperty($model, $description, $options);
@@ -70,51 +62,25 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         if ($mainProperty) {
             if ($array) {
                 $return = array();
-                foreach ($description[$mainProperty] as $key => $value) {
-                    $return[] = $value['value'];
-                };
+                foreach ($description[$mainProperty] as $object) {
+                    $return[] = $this->_getContent($object, $mainProperty, $options);
+                }
                 return $return;
             } else {
                 //search for language tag
+                unset($object);
                 foreach ($description[$mainProperty] as $literalNumber => $literal) {
                     $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
                     if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
-                        $firstLiteral = $description[$mainProperty][$literalNumber];
+                        $object = $description[$mainProperty][$literalNumber];
                         break;
                     }
                 }
-                if (!isset($firstLiteral)) {
-                    $firstLiteral = $description[$mainProperty][0];
-                }
-                $contentAttr = '';
-                $content = $firstLiteral['value'];
-
-                if (isset($labels[$content])) {
-                    $contentAttr = " content='${firstLiteral['value']}'";
-                    $content = $labels[$content];
+                if (!isset($object)) {
+                    $object = $description[$mainProperty][0];
                 }
 
-                if (isset($firstLiteral['type']) && $firstLiteral['type'] === 'uri') {
-                    $contentAttr = " resource='${firstLiteral['value']}'";
-                }
-
-                if ($plain) {
-                    return $content;
-                } else {
-                    // execute the helper markup on the content (after the extensions)
-                    $content = $this->view->executeHelperMarkup($content);
-
-                    // filter by using available extensions
-                    if (isset($firstLiteral['datatype'])) {
-                        $datatype = $firstLiteral['datatype'];
-                        $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
-                    } else {
-                        $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
-                    }
-
-                    $curie = $this->view->curie($mainProperty);
-                    return "$prefix<$tag class='$class' property='$curie'$contentAttr>$iprefix$content$isuffix</$tag>$suffix";
-                }
+                return $this->_getContent($object, $mainProperty, $options);
             }
         } else {
             if ($array) {
@@ -176,6 +142,49 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         }
 
         return $mainProperty;
+    }
+
+    protected function _getContent($object, $mainProperty, $options)
+    {
+        $class   = (isset($options['class']))   ? $options['class']   : '';
+        $tag     = (isset($options['tag']))     ? $options['tag']     : 'span';
+        $prefix  = (isset($options['prefix']))  ? $options['prefix']  : '';
+        $suffix  = (isset($options['suffix']))  ? $options['suffix']  : '';
+        $iprefix = (isset($options['iprefix'])) ? $options['iprefix'] : '';
+        $isuffix = (isset($options['isuffix'])) ? $options['isuffix'] : '';
+        // array used to return plain values by default
+        $plain   = (isset($options['plain']))   ? $options['plain']   : isset($options['array']);
+        $labels  = (isset($options['labels']))  ? $options['labels']  : array();
+
+        $contentAttr = '';
+        $content = $object['value'];
+
+        if (isset($labels[$content])) {
+            $contentAttr = " content='${object['value']}'";
+            $content = $labels[$content];
+        }
+
+        if (isset($object['type']) && $object['type'] === 'uri') {
+            $contentAttr = " resource='${object['value']}'";
+        }
+
+        if ($plain) {
+            return $content;
+        } else {
+            // execute the helper markup on the content (after the extensions)
+            $content = $this->view->executeHelperMarkup($content);
+
+            // filter by using available extensions
+            if (isset($object['datatype'])) {
+                $datatype = $object['datatype'];
+                $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
+            } else {
+                $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
+            }
+
+            $curie = $this->view->curie($mainProperty);
+            return "$prefix<$tag class='$class' property='$curie'$contentAttr>$iprefix$content$isuffix</$tag>$suffix";
+        }
     }
 
 }
