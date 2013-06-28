@@ -101,6 +101,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 if ($plain) {
                     return $content;
                 } else {
+                    $lang    = '';
                     // execute the helper markup on the content (after the extensions)
                     $content = $this->view->executeHelperMarkup($content);
 
@@ -108,12 +109,15 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                     if (isset($firstLiteral['datatype'])) {
                         $datatype = $firstLiteral['datatype'];
                         $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
+                    } elseif (isset($firstLiteral['lang'])) {
+                        $lang    = " xml:lang='${firstLiteral['lang']}'";
+                        $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
                     } else {
                         $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
                     }
 
                     $curie = $this->view->curie($mainProperty);
-                    return "$prefix<$tag class='$class' property='$curie'$contentAttr>$iprefix$content$isuffix</$tag>$suffix";
+                    return "$prefix<$tag class='$class' property='$curie'$contentAttr$lang>$iprefix$content$isuffix</$tag>$suffix";
                 }
             }
         } else {
