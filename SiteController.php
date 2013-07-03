@@ -235,6 +235,7 @@ FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'")
             $this->_response->setBody($bodyContent);
             $this->_response->setHeader('Content-Type', 'text/html; encoding=utf-8');
         } else {
+            $this->_response->setHttpResponseCode(404);
             $this->_response->setRawHeader('HTTP/1.0 404 Not Found');
             $this->_response->setBody($this->view->render('404.phtml'));
         }
