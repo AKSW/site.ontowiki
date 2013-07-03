@@ -83,12 +83,23 @@ function GetCachedContent_Database_Virtuoso($cacheId, $config)
     }
 }
 
+function GetCachedContent_File($cacheId, $config)
+{
+    $prefix     = $config['cache.frontend.cache_id_prefix'];
+    $path       = $config['cache.backend.file.cache_dir'];
+    $fileName   = $path."zend_cache---".$prefix.$id;
+    if(file_exists($fileName)){
+        return unserialize(file_get_contents($fileName));
+    }
+}
+
 function GetCachedContent_Memcached($cacheId, $config)
 {
-    $host = 'localhost';
+    $host   = 'localhost';
+    $port   = 11211;
+    $prefix = $config['cache.frontend.cache_id_prefix'];
     if( isset( $config['cache.backend.memcached.servers.0.host'] ) )
         $host = $config['cache.backend.memcached.servers.0.host'];
-    $port = 11211;
     if( isset( $config['cache.backend.memcached.servers.0.port'] ) )
         $port = $config['cache.backend.memcached.servers.0.port'];
 
@@ -96,8 +107,8 @@ function GetCachedContent_Memcached($cacheId, $config)
         exit( 'Missing memcache client extension' );
 
     $memcache = new Memcache;
-    $memcache->addServer( $host, $port );
-    $result   = $memcache->get($cacheId);
+    $memcache->addServer($host, $port);
+    $result   = $memcache->get($prefix.$cacheId);
     if ($result){
         $content = unserialize($result[0]);
         if (is_string($content)){
@@ -113,6 +124,9 @@ function GetCacheContent ($id)
 
     $content = null;
     switch ($config['cache.backend.type']) {
+        case 'file':
+            $content = GetCachedContent_File($id, $config);
+            break;
         case 'memcached':
             $content = GetCachedContent_Memcached($id, $config);
             break;
@@ -130,24 +144,20 @@ function GetCacheContent ($id)
             break;
         case 'apc':
         case 'sqlite':
-        case 'file':
         default:
             // nothing to do
     }
     return $content;
 }
 
-$content = null;
-
 // prepare the cacheid and fetch the cache content
 if (preg_match('/\.html$/', $_SERVER['REQUEST_URI'])) {
     $siteModuleObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     $siteModuleObjectCacheId       = 'site_' . md5($siteModuleObjectCacheIdSource);
     $content = GetCacheContent($siteModuleObjectCacheId);
-}
-
-// Cache hit: send response and exit
-if ($content != null) {
-    echo $content;
-    exit;
+    // Cache hit: send response and exit
+    if ($content != null) {
+        echo $content;
+        exit;
+    }
 }
