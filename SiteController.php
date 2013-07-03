@@ -62,7 +62,34 @@ class SiteController extends OntoWiki_Controller_Component
         $this->_relativeTemplatePath = $this->_owApp->extensionManager->getExtensionConfig('site')->templates;
     }
 
+    /**
+     *  Prints a simple robots.txt containing nothing but a sitemap rule.
+     *  @access     public
+     *  @return     void
+     *  @todo       Create zend route from ./robots.txt to site/robots
+     *  @todo       Change URL to .../sitemap.xml after zend route has been created
+     */
+    public function robotsAction(){
+        header("Content-Type: text/plain");
+        print("Sitemap: ".$this->_config->urlBase."site/sitemap");
+        exit;
+    }
+
+    /**
+     *  Renders and prints sitemap XML.
+     *  For gzip compression add paramter "compression" with compression method "bzip" or "gzip" as value.
+     *  Appending a name paramter with a file name will name your download file if you request via browser.
+     *  @access     public
+     *  @return     void
+     *  @todo       Create zend route from ./sitemap.xml to site/sitemap
+     *  @todo       Create zend route from ./sitemap.xml.gz to site/sitemap/compression/gzip/name/sitemap.xml.gz
+     *  @todo       Create zend route from ./sitemap.xml.bz2 to site/sitemap/compression/bzip/name/sitemap.xml.bz2
+     *  @todo       add support for sitemap index
+     */
     public function sitemapAction(){
+        $compression = $this->getParam( 'compression' );
+#        $page   = (integer) $this->getParam( 'page' );
+
         $pathGenerator	= __DIR__.'/libraries/SitemapGenerator/classes/';
         require_once ($pathGenerator.'Sitemap.php');
         require_once ($pathGenerator.'Sitemap/URL.php');
@@ -88,12 +115,16 @@ WHERE {
 OPTIONAL {?resourceUri <http://purl.org/dc/terms/modified> ?modified }
 FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'") 
 } ';
-            $results    = $this->_model->sparqlQuery( $query );
+
+//OPTIONAL {?resourceUri <http://purl.org/dc/terms/modified> ?modified }
+//?resourceUri <http://purl.org/dc/terms/modified> ?modified
+            
+            $results    = $this->_model->sparqlQuery($query);
             $sitemap    = new Sitemap();
             foreach ($results as $result) {
                 $url    = new Sitemap_URL ($result['resourceUri']);
-                if (isset($result['timestamp']))
-                    $url->setDatetime ($result['timestamp']);
+                if (isset($result['modified']) && strlen($result['modified']))
+                    $url->setDatetime ($result['modified']);
                 $sitemap->addUrl ($url);
             }
             $sitemapXml	= $sitemap->render();
@@ -102,8 +133,25 @@ FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'")
             // close the object cache transaction
             $erfurtQueryCache->endTransaction($sitemapObjectCacheId);
         }
-        header ("Content-type: application/xml");
-        print ($sitemapXml);
+        $contentType    = "application/xml";
+        // compression has been requested
+        if(strlen(trim($compression))){
+            switch(strtolower($compression)){
+                case 'bzip':
+                    $sitemapXml     = bzcompress($sitemapXml);
+                    $contentType    = "application/x-bzip";
+                    header('Content-Encoding: bzip2');
+                    break;
+                case 'gzip':
+                    $sitemapXml     = gzencode($sitemapXml);
+                    $contentType    = "application/x-gzip";
+                    header('Content-Encoding: gzip');
+                    break;
+            }
+        }
+        header('Content-Length: '.strlen($sitemapXml));
+        header("Content-Type: ".$contentType);
+        print($sitemapXml);
         exit;
     }
 
