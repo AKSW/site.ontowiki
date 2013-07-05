@@ -157,6 +157,7 @@ if (preg_match('/\.html$/', $_SERVER['REQUEST_URI'])) {
     $content = GetCacheContent($siteModuleObjectCacheId);
     // Cache hit: send response and exit
     if ($content != null) {
+        header("Content-length: ".strlen($content));
         echo $content;
         exit;
     }
