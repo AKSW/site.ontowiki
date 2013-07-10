@@ -87,7 +87,7 @@ function GetCachedContent_File($cacheId, $config)
 {
     $prefix     = $config['cache.frontend.cache_id_prefix'];
     $path       = $config['cache.backend.file.cache_dir'];
-    $fileName   = $path."zend_cache---".$prefix.$id;
+    $fileName   = $path."zend_cache---".$prefix.$cacheId;
     if(file_exists($fileName)){
         return unserialize(file_get_contents($fileName));
     }
