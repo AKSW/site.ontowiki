@@ -54,9 +54,9 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
     /*
      * used schema URIs
      */
-    const templatePropClass    = 'http://ns.ontowiki.net/SysOnt/Site/classTemplate';
-    const templatePropResource = 'http://ns.ontowiki.net/SysOnt/Site/template';
-    const typeProp             = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+    const TEMPLATE_PROP_CLASS       = 'http://ns.ontowiki.net/SysOnt/Site/classTemplate';
+    const TEMPLATE_PROP_RESOURCE    = 'http://ns.ontowiki.net/SysOnt/Site/template';
+    const TYPE_PROP                 = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
     /*
      * the main method, mentioned parameters are:
@@ -106,14 +106,14 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
         $templateName = null;
 
         // if we have specific template on the resource, use it
-        if (isset($description[self::templatePropResource][0]['value'])) {
-            $templateName   = $description[self::templatePropResource][0]['value'];
+        if (isset($description[self::TEMPLATE_PROP_RESOURCE][0]['value'])) {
+            $templateName   = $description[self::TEMPLATE_PROP_RESOURCE][0]['value'];
         } else {
             $this->getMappings();
             // try template hints on classes
             // try to map each rdf:type property value
-            if (isset($description[self::typeProp])) {
-                foreach ($description[self::typeProp] as $class) {
+            if (isset($description[self::TYPE_PROP])) {
+                foreach ($description[self::TYPE_PROP] as $class) {
                     $classUri = $class['value'];
                     if (isset($this->_mappings[$classUri])) {
                         // overwrite, if class has an template entry
@@ -153,7 +153,7 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                 SELECT DISTINCT ?class ?template
                 WHERE {
-                    ?class <'. self::templatePropClass .'> ?template .
+                    ?class <'. self::TEMPLATE_PROP_CLASS .'> ?template .
                     }';
 
             // fetch results
