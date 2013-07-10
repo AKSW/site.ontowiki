@@ -114,10 +114,10 @@ class Site_View_Helper_Table extends Zend_View_Helper_Abstract implements Site_V
                         $firstLiteral = $description[$currentMainProperty][0];
                     }
                     $cellContent = $firstLiteral['value'];
-        
+
                     // execute the helper markup on the content (after the extensions)
                     $cellContent = $this->view->executeHelperMarkup($cellContent);
-        
+
                     // filter by using available extensions
                     if (isset($firstLiteral['datatype'])) {
                         $datatype = $firstLiteral['datatype'];
@@ -125,7 +125,7 @@ class Site_View_Helper_Table extends Zend_View_Helper_Abstract implements Site_V
                     } else {
                         $cellContent = $this->view->displayLiteralPropertyValue($cellContent, $currentMainProperty);
                     }
-        
+
                     $curie = $this->view->curie($currentMainProperty);
                     $content .= "$prefix<$tag class='$class' property='$curie'>$iprefix$cellContent$isuffix</$tag>$suffix";
                     $content .= 1 == $row ? '</th>' : '</td>';
