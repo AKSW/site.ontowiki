@@ -30,7 +30,7 @@
 
   owconfig:requiresExtension extension:linkeddataserver;
 
-  :defaultSite "generic" ;
+  :defaultSite "example" ;
   doap:release :v1-0 .
 
 :v1-0 a doap:Version ;
