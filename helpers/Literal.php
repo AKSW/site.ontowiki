@@ -44,6 +44,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
      * - isuffix  - string betwee content and tag at the end
      * - plain    - outputs the literal only (no html)
      * - array    - returns an array of the values (not suitable for template markup)
+     * - label    - content override
      * - labels   - content overrides for specified values
      */
     public function literal($options = array())
@@ -154,10 +155,16 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $isuffix = (isset($options['isuffix'])) ? $options['isuffix'] : '';
         // array used to return plain values by default
         $plain   = (isset($options['plain']))   ? $options['plain']   : isset($options['array']);
+        $label   = (isset($options['label']))   ? $options['label']   : '';
         $labels  = (isset($options['labels']))  ? $options['labels']  : array();
 
         $contentAttr = '';
         $content = $object['value'];
+
+        if ($label !== '') {
+            $contentAttr = " content='${object['value']}'";
+            $content = $label;
+        }
 
         if (isset($labels[$content])) {
             $contentAttr = " content='${object['value']}'";
