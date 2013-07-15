@@ -93,7 +93,7 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
     {
         $summary = 'Error while trying to render "'.$this->resource->getTitle().'"';
         $return  = '<details><summary>'.$summary.'</summary>' . PHP_EOL;
-        $return .= (string) $errorMessage . PHP_EOL;
+        $return .= (string)$errorMessage . PHP_EOL;
         $return .= '</details>' . PHP_EOL;
     }
 
@@ -191,7 +191,7 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
         $this->view         = $view;
         $this->_model       = $view->model;
         $this->templateData = $view->templateData;
-        $this->_resourceUri = (string) $view->resourceUri;
+        $this->_resourceUri = (string)$view->resourceUri;
     }
 
 }

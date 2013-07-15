@@ -121,14 +121,22 @@ class Site_View_Helper_Table extends Zend_View_Helper_Abstract implements Site_V
                     // filter by using available extensions
                     if (isset($firstLiteral['datatype'])) {
                         $datatype = $firstLiteral['datatype'];
-                        $cellContent = $this->view->displayLiteralPropertyValue($cellContent, $currentMainProperty, $datatype);
+                        $cellContent = $this->view->displayLiteralPropertyValue(
+                            $cellContent,
+                            $currentMainProperty,
+                            $datatype
+                        );
                     } else {
-                        $cellContent = $this->view->displayLiteralPropertyValue($cellContent, $currentMainProperty);
+                        $cellContent = $this->view->displayLiteralPropertyValue(
+                            $cellContent,
+                            $currentMainProperty
+                        );
                     }
 
-                    $curie = $this->view->curie($currentMainProperty);
-                    $content .= "$prefix<$tag class='$class' property='$curie'>$iprefix$cellContent$isuffix</$tag>$suffix";
-                    $content .= 1 == $row ? '</th>' : '</td>';
+                    $curie          = $this->view->curie($currentMainProperty);
+                    $cellContent    = $iprefix . $cellContent . $isuffix;
+                    $content        .= "$prefix<$tag class='$class' property='$curie'>$cellContent</$tag>$suffix";
+                    $content        .= 1 == $row ? '</th>' : '</td>';
                 }
                 $content .= '</tr>';
                 $content .= (1 == $row ? '</thead><tbody>' : '');

@@ -42,7 +42,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         $titleHelper = new OntoWiki_Model_TitleHelper($model);
 
         // check for options and assign local vars or null
-        $uri      = (isset($options['uri']))      ? (string) $options['uri'] : null;
+        $uri      = (isset($options['uri']))      ? (string)$options['uri']  : null;
         $literal  = (isset($options['literal']))  ? $options['literal']      : null;
         $text     = (isset($options['text']))     ? $options['text']         : null;
         $property = (isset($options['property'])) ? $options['property']     : null;
@@ -54,7 +54,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         $direct   = (isset($options['direct']))   ? true                     : false;
 
         // resolve short forms (overwrite full name values with short forms values)
-        $uri      = (isset($options['r'])) ? (string) $options['r'] : $uri;
+        $uri      = (isset($options['r'])) ? (string)$options['r']  : $uri;
         $literal  = (isset($options['l'])) ? $options['l']          : $literal;
         $text     = (isset($options['t'])) ? $options['t']          : $text;
         $property = (isset($options['p'])) ? $options['p']          : $property;
@@ -62,7 +62,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         // if an uri is given, we do not need to search for
         if (isset($uri)) {
             // resolve qnames and check uri input
-            $uri = Erfurt_Uri::getFromQnameOrUri((string) $uri, $model);
+            $uri = Erfurt_Uri::getFromQnameOrUri((string)$uri, $model);
         } else {
             // if no uri is given, we need to search by using the literal
             if (!isset($literal)) {
@@ -97,7 +97,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         } else {
             $url = new OntoWiki_Url(array('route' => 'properties'), array('r'));
             $url->setParam('r', $uri, true);
-            $url = (string) $url;
+            $url = (string)$url;
         }
 
         // link text comes from title helper or option

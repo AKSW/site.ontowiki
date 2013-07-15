@@ -20,7 +20,7 @@ class Site_View_Helper_Lastchange extends Zend_View_Helper_Abstract
     {
         // TODO: fill this value with the erfurt versioning api
         $versioning = Erfurt_App::getInstance()->getVersioning();
-        $history = $versioning->getLastModifiedForResource($uri, (string) OntoWiki::getInstance()->selectedModel);
+        $history = $versioning->getLastModifiedForResource($uri, (string)OntoWiki::getInstance()->selectedModel);
 
         if (empty($history)) {
             return array(
@@ -38,8 +38,8 @@ class Site_View_Helper_Lastchange extends Zend_View_Helper_Abstract
         $th = new OntoWiki_Model_TitleHelper(OntoWiki::getInstance()->selectedModel);
         $th->addResource($history['useruri']);
         $th->addResource($uri);
-        $return = array();
-        $userUrl= new OntoWiki_Url(array('route'=>'properties'));
+        $return     = array();
+        $userUrl    = new OntoWiki_Url(array('route' => 'properties'));
         $userUrl->setParam('r', $history['useruri']);
         $return['resourceUri'] = $uri;
         $return['resourceTitle'] = $th->getTitle($uri);
