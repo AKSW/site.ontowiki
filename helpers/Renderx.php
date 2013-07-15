@@ -64,6 +64,8 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
      */
     public function renderx($options = array())
     {
+        $this->prepareTemplateData($options);
+
         // if we have a template option this option wins
         if (isset($options['template'])) {
             $this->_template = $options['template'];
@@ -74,8 +76,6 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
                 $this->_template = $queriedTemplate;
             }
         }
-
-        $this->prepareTemplateData();
 
         // try to do a partial or output error details
         try {
@@ -134,11 +134,16 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
     /*
      * prepares / overwrites the template data
      */
-    private function prepareTemplateData()
+    private function prepareTemplateData($options = array())
     {
-        $this->templateData['title']       = $this->resource->getTitle();
+        if (isset($options['resourceUri'])) {
+            $this->_resourceUri = $options['resourceUri'];
+        }
+
         $this->templateData['resourceUri'] = $this->_resourceUri;
         $this->templateData['description'] = $this->getDescription();
+        $this->templateData['title']       = $this->resource->getTitle();
+        $this->templateData['options']     = $options;
     }
 
     /*
