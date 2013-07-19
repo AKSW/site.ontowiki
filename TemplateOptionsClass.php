@@ -100,4 +100,13 @@ class TemplateOptionsClass
 
         return $default;
     }
+
+    /**
+     * Same as getValue(), with comma separated values exploded to an array
+     */
+    public function getValueAsArray($key, $default = '')
+    {
+        $value = $this->getValue($key, $default);
+        return $value ? preg_split('/\s*,\s*/', $value) : array();
+    }
 }
