@@ -18,11 +18,19 @@ class TemplateOptionsClass
     const CLASS_SPECIFIC_OPTION    = 1;
     const RESOURCE_SPECIFIC_OPTION = 2;
 
+    const SITE_TEMPLATE_OPTION     = 'http://ns.ontowiki.net/SysOnt/Site/TemplateOption';
+
     /**
      * Template options
      * @var array
      */
     protected $_options = array();
+
+    /**
+     * Mapping of local names to template option keys
+     * @var array
+     */
+    protected $_optionLocalNames = array();
 
     public function __construct($resourceUri)
     {
@@ -59,7 +67,7 @@ class TemplateOptionsClass
 
         $query->addElement($union);
 
-        $query->addTriple($key, EF_RDF_TYPE, new Erfurt_Sparql_Query2_IriRef('http://ns.ontowiki.net/SysOnt/Site/TemplateOption'));
+        $query->addTriple($key, EF_RDF_TYPE, new Erfurt_Sparql_Query2_IriRef(static::SITE_TEMPLATE_OPTION));
 
         $results = $model->sparqlQuery($query);
         foreach ($results as $result) {
@@ -71,7 +79,12 @@ class TemplateOptionsClass
                 $priority = static::RESOURCE_SPECIFIC_OPTION;
             }
 
-            $this->_options[$result[$key->getName()]][$priority][] = $result[$value->getName()];
+            $arrayKey = $result[$key->getName()];
+            $this->_options[$arrayKey][$priority][] = $result[$value->getName()];
+
+            $templateOption = new Erfurt_Rdf_Resource($arrayKey, $model);
+            $arrayKeyLocalName = $templateOption->getLocalName();
+            $this->_optionLocalNames[$arrayKeyLocalName][] = $arrayKey;
         }
 
         foreach (array_keys($this->_options) as $key) {
@@ -79,23 +92,39 @@ class TemplateOptionsClass
         }
     }
 
+    /**
+     * Returns an array with the template options in sub arrays sorted by priority
+     * @param $key the key of the template option, either as URI or as localName
+     * @return 2d-array with the template options
+     */
     public function getArray($key)
     {
-        $key = "http://schema.eccenca.com/StarPages/$key";
+        if (!isset($this->_options[$key])) {
+            $keys = $this->_optionLocalNames[$key];
+        } else {
+            $keys = array($key);
+        }
 
-        if (isset($this->_options[$key])) {
-            if ($this->_options[$key]) {
-                return reset($this->_options[$key]);
+        $options = array();
+        foreach($keys as $optionKey) {
+            if ($this->_options[$optionKey]) {
+                $options = array_merge($options, $this->_options[$optionKey]);
             }
         }
 
-        return array();
+        return $options;
     }
 
+    /**
+     * Returns the template options value with the highest priority
+     * @param $key the key of the template option, either as URI or as localName
+     * @param $default (optional) the optional default value if the template option is not set
+     * @return the template options value
+     */
     public function getValue($key, $default = null)
     {
         if ($array = $this->getArray($key)) {
-            return reset($array);
+            return reset($array[0]);
         }
 
         return $default;
