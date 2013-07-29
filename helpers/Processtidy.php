@@ -19,34 +19,32 @@ class Site_View_Helper_Processtidy extends Zend_View_Helper_Abstract
 {
     public function processtidy($string)
     {
-        if (function_exists('tidy_repair_string'))
-        {
-            //*
-            $string = tidy_repair_string($string,
-                                      array('alt-text'=>'',
-                                            'bare'=>true,
-                                            'clean'=>true,
-                                            'drop-empty-paras'=>true,
-                                            'drop-font-tags'=>true,
-                                            'drop-proprietary-attributes'=>true,
-                                            'enclose-block-text'=>true,
-                                            'enclose-text'=>true,
-                                            'logical-emphasis'=>true,
-                                            'word-2000'=>true,
-                                            'show-body-only'=>true,
-                                            'output-xhtml'=>true,
-                                            'quote-ampersand'=>true
-                                            ),
-                                      'utf8');
-            // */
+        if (function_exists('tidy_repair_string')) {
+/*            $string = tidy_repair_string($string,
+                array(
+                    'alt-text'=>'',
+                    'bare'=>true,
+                    'clean'=>true,
+                    'drop-empty-paras'=>true,
+                    'drop-font-tags'=>true,
+                    'drop-proprietary-attributes'=>true,
+                    'enclose-block-text'=>true,
+                    'enclose-text'=>true,
+                    'logical-emphasis'=>true,
+                    'word-2000'=>true,
+                    'show-body-only'=>true,
+                    'output-xhtml'=>true,
+                    'quote-ampersand'=>true
+                ),
+                'utf8'
+            );*/
 
             return $string;
-            return substr($string, strpos($string, '<body>')+6, strpos($string, '</body>')-strpos($string, '<body>')-6);
-        }
-        else
-        {
+/*            $posStart   = strpos($string, '<body>');
+            $posEnd     = strpos($string, '</body>');
+            return substr($string, $posStart+6, $posEnd-$posStart-6);*/
+        } else {
             return $string; // TODO: some basic fallbacks
         }
     }
-
 }

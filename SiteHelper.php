@@ -167,10 +167,11 @@ class SiteHelper extends OntoWiki_Component_Helper
                         $request->setControllerName('site');
                         $request->setActionName($this->_privateConfig->defaultSite);
 
+                        return true;
+                    }
+                    else {
                         $response = Zend_Controller_Front::getInstance()->getResponse();
                         $response->setRawHeader('HTTP/1.0 404 Not Found');
-
-                        return true;
                     }
                 }
 

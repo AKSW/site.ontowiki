@@ -26,8 +26,7 @@ class Site_View_Helper_ExecuteHelperMarkup extends Zend_View_Helper_Abstract
     public $view;
 
     /*
-     * the short helper markup pattern, allows linking of qnames in text 
-     * without any syntax
+     * the short helper markup pattern, allows linking of qnames in text without any syntax
      */
     //public $shortPattern = '/(?\'prefix\'[^a-zA-Z"])(?\'value\'[a-zA-Z]+\:[a-zA-Z]+)/';
     public $shortPattern = '/\[\[(?\'value\'[a-zA-Z]+\:[a-zA-Z]+)\]\]/';
@@ -68,7 +67,7 @@ class Site_View_Helper_ExecuteHelperMarkup extends Zend_View_Helper_Abstract
 
         // split the attributes part of the helper markup and fill it to the
         // options array
-        preg_match_all ($this->keyValuePattern, $attributes, $matches, PREG_SET_ORDER);
+        preg_match_all($this->keyValuePattern, $attributes, $matches, PREG_SET_ORDER);
         $options = array();
         foreach ($matches as $i => $match) {
             $key           = $match['key'];
@@ -84,17 +83,19 @@ class Site_View_Helper_ExecuteHelperMarkup extends Zend_View_Helper_Abstract
             $helperInstance = $this->view->getHelper($helper);
             if (!$helperInstance) {
                 throw new Exception(
-                    "Helper '$helper' not found.");
+                    "Helper '$helper' not found."
+                );
             }
             if (!$helperInstance instanceof Site_View_Helper_MarkupInterface) {
                 throw new Exception(
-                    "Helper '$helper' is not a markup helper and cannot be used in this way.");
+                    "Helper '$helper' is not a markup helper and cannot be used in this way."
+                );
             }
             return $this->view->$helper($options);
         } catch (Exception $e) {
-            $message = htmlspecialchars($e->getMessage(), ENT_NOQUOTES);
-            $message = str_replace ('"', '', $message);
-            $message = str_replace ('\'', '', $message);
+            $message    = htmlspecialchars($e->getMessage(), ENT_NOQUOTES);
+            $message    = str_replace('"', '', $message);
+            $message    = str_replace('\'', '', $message);
             return $this->returnError($message . " ($tag)");
         }
     }
@@ -106,15 +107,15 @@ class Site_View_Helper_ExecuteHelperMarkup extends Zend_View_Helper_Abstract
 
     public function executeHelperMarkup($text = null)
     {
-        $this->text = (string) $text;
+        $this->text = (string)$text;
 
         // replace shortened link tags with full helper tags
         $callback = array( &$this, 'replaceShortHelper');
-        $this->text = preg_replace_callback ($this->shortPattern, $callback , $this->text);
+        $this->text = preg_replace_callback($this->shortPattern, $callback, $this->text);
 
         // execute full helper tags
         $callback = array( &$this, 'executeFullHelper');
-        $this->text = preg_replace_callback ($this->helperPattern, $callback , $this->text);
+        $this->text = preg_replace_callback($this->helperPattern, $callback, $this->text);
 
         return $this->text;
     }

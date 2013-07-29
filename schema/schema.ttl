@@ -34,6 +34,17 @@ site:DeletedResource a owl:Class;
   rdfs:label "Deleted Resource";
   rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
 
+site:SiteMap a owl:Class;
+  rdfs:comment "a XML resource according to sitemap.org" ;
+  rdfs:label "Sitemap";
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:TemplateOption a owl:Class;
+  rdfs:subClassOf owl:DatatypeProperty;
+  rdfs:comment "the class of site specific template relevant options which can be used on resources, classes and datasets";
+  rdfs:label "Template Option";
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
 ###
 # Properties
 ###

@@ -20,7 +20,7 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
     /*
      * the uri of the special title property
      */
-    protected $menuLabel = 'http://ns.ontowiki.net/SysOnt/Site/menuLabel';
+    protected $_menuLabel = 'http://ns.ontowiki.net/SysOnt/Site/menuLabel';
 
     /*
      * current view, injected with setView from Zend
@@ -30,79 +30,78 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
     /*
      * The resource URI which is used for the SPARQL query
      */
-    private $navResource;
+    private $_navResource;
 
     /*
-     * The resource URI which is used as a relation from the active resource to 
-     * the navResource
+     * The resource URI which is used as a relation from the active resource to the navResource
      */
-    private $navProperty;
+    private $_navProperty;
 
     /*
      * the used list tag (ol/ul)
      */
-    private $listTag = 'ul';
+    private $_listTag = 'ul';
 
     /*
      * the used list tag for sub lists (ol/ul)
      * this value is set to the value of $listTag if not specified
      */
-    private $sublistTag = '';
+    private $_sublistTag = '';
 
     /*
      * css class value for the list item
      */
-    private $listClass = '';
+    private $_listClass = '';
 
     /*
      * css class value for the list item of a sublist
      */
-    private $sublistClass = '';
+    private $_sublistClass = '';
 
     /*
      * css class value for active li item
      */
-    private $activeItemClass = 'active';
+    private $_activeItemClass = 'active';
 
     /*
      * the currently active resource
      */
-    private $activeUrl = '';
+    private $_activeUrl = '';
 
     /*
      * a string which is prepended to the list
      */
-    private $prefix = '';
+    private $_prefix = '';
 
     /*
      * a string which is appended to the list
      */
-    private $suffix = '';
+    private $_suffix = '';
 
     /*
      * the nav tag css class
      */
-    private $navClass = '';
+    private $_navClass = '';
 
     /*
      * id value for the nav item
      */
-    private $navId = '';
+    private $_navId = '';
 
     /*
      * surround sub navigation heading tag
      */
-    private $subheadTag = 'strong';
+    private $_subheadTag = 'strong';
 
     /*
      * surround sub navigation heading class
      */
-    private $subheadClass = 'headline';
+    private $_subheadClass = 'headline';
 
     /*
      * skip link to navigation resource
      */
-    private $subheadSkipLink = true;
+    private $_subheadSkipLink = true;
 
     /*
      * main call method, takes an URI and an options array.
@@ -128,12 +127,12 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
 
         if (!isset($options['navResource']) || !$options['navResource']) {
             if (isset($options['navProperty'])) {
-                $this->navProperty = $options['navProperty'];
+                $this->_navProperty = $options['navProperty'];
                 $resource          = new OntoWiki_Resource($this->resourceUri, $this->model);
                 $description       = $resource->getDescription();
-                $description       = $description[(string) $resource];
-                if (isset($description[$this->navProperty])) {
-                    $this->navResource = $description[$this->navProperty][0]['value'];
+                $description       = $description[(string)$resource];
+                if (isset($description[$this->_navProperty])) {
+                    $this->_navResource = $description[$this->_navProperty][0]['value'];
                 } else {
                     return '';
                 }
@@ -141,31 +140,31 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
                 return '';
             }
         } else {
-            $this->navResource = $options['navResource'];
+            $this->_navResource = $options['navResource'];
         }
 
         // overwrite standard options with given ones, if given as option
-        $this->listTag         = (isset($options['listTag'])) ? $options['listTag'] : $this->listTag;
-        $this->listClass       = (isset($options['listClass'])) ? $options['listClass'] : $this->listClass;
-        $this->activeItemClass = (isset($options['activeItemClass'])) ? $options['activeItemClass'] : $this->activeItemClass;
-        $this->activeUrl       = (isset($options['activeUrl'])) ? $options['activeUrl'] : $this->activeUrl;
-        $this->prefix          = (isset($options['prefix'])) ? $options['prefix'] : $this->prefix;
-        $this->suffix          = (isset($options['suffix'])) ? $options['suffix'] : $this->suffix;
-        $this->navClass        = (isset($options['navClass'])) ? $options['navClass'] : $this->navClass;
-        $this->navId           = (isset($options['navId'])) ? $options['navId'] : $this->navId;
-        $this->subheadTag      = (isset($options['subheadTag'])) ? $options['subheadTag'] : $this->subheadTag;
-        $this->subheadClass    = (isset($options['subheadClass'])) ? $options['subheadClass'] : $this->subheadClass;
-        $this->subheadSkipLink = (isset($options['subheadSkipLink'])) ? $options['subheadSkipLink'] : $this->subheadSkipLink;
-        $this->sublistTag      = (isset($options['sublistTag'])) ? $options['sublistTag'] : $this->listTag; // takes the list tag for default
-        $this->sublistClass    = (isset($options['sublistClass'])) ? $options['sublistClass'] : $this->sublistClass;
+        $this->_listTag         = (isset($options['listTag'])) ? $options['listTag'] : $this->_listTag;
+        $this->_listClass       = (isset($options['listClass'])) ? $options['listClass'] : $this->_listClass;
+        $this->_activeItemClass = (isset($options['activeItemClass'])) ? $options['activeItemClass'] : $this->_activeItemClass;
+        $this->_activeUrl       = (isset($options['activeUrl'])) ? $options['activeUrl'] : $this->_activeUrl;
+        $this->_prefix          = (isset($options['prefix'])) ? $options['prefix'] : $this->_prefix;
+        $this->_suffix          = (isset($options['suffix'])) ? $options['suffix'] : $this->_suffix;
+        $this->_navClass        = (isset($options['navClass'])) ? $options['navClass'] : $this->_navClass;
+        $this->_navId           = (isset($options['navId'])) ? $options['navId'] : $this->_navId;
+        $this->_subheadTag      = (isset($options['subheadTag'])) ? $options['subheadTag'] : $this->_subheadTag;
+        $this->_subheadClass    = (isset($options['subheadClass'])) ? $options['subheadClass'] : $this->_subheadClass;
+        $this->_subheadSkipLink = (isset($options['subheadSkipLink'])) ? $options['subheadSkipLink'] : $this->_subheadSkipLink;
+        $this->_sublistTag      = (isset($options['sublistTag'])) ? $options['sublistTag'] : $this->_listTag; // takes the list tag for default
+        $this->_sublistClass    = (isset($options['sublistClass'])) ? $options['sublistClass'] : $this->_sublistClass;
 
         if (isset($options['titleProperty'])) {
             $titleHelper->prependTitleProperty($options['titleProperty']);
         } else {
-            $titleHelper->prependTitleProperty($this->menuLabel);
+            $titleHelper->prependTitleProperty($this->_menuLabel);
         }
 
-        $navigation = $this->_getMenu($this->navResource, $store, $titleHelper);
+        $navigation = $this->_getMenu($this->_navResource, $store, $titleHelper);
         $navigation = $this->_setTitles($navigation, $titleHelper);
 
         return $this->render($navigation);
@@ -181,7 +180,7 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         if (isset($view->templateData)) {
             $this->templateData = $view->templateData;
         }
-        $this->resourceUri = (string) $view->resourceUri;
+        $this->resourceUri = (string)$view->resourceUri;
     }
 
     /*
@@ -196,20 +195,20 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
             $label = $item['label'];
 
             // item tag start (depends on activeness)
-            if ($url == $this->activeUrl) {
-                $return .= '<li class="'.$this->activeItemClass.'">';
+            if ($url == $this->_activeUrl) {
+                $return .= '<li class="'.$this->_activeItemClass.'">';
             } else {
                 $return .= '<li>';
             }
 
             if ($item['hasSubMenu']) {
-                $return .= '<' . $this->subheadTag . ' class="' . $this->subheadClass . '">';
-                if ($this->subheadSkipLink) {
+                $return .= '<' . $this->_subheadTag . ' class="' . $this->_subheadClass . '">';
+                if ($this->_subheadSkipLink) {
                     $return .= $label;
                 } else {
                     $return .= '<a href="'.$url.'">'.$label.'</a>';
                 }
-                $return .= '</' . $this->subheadTag . '>';
+                $return .= '</' . $this->_subheadTag . '>';
                 $return .= $this->_renderSubMenu($item['subMenu']);
             } else {
                 $return .= '<a href="'.$url.'">'.$label.'</a>';
@@ -220,22 +219,22 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         }
 
         // prepare the class attribute of the list
-        if ($this->listClass != '') {
-            $class = ' class="'. $this->listClass .'" ';
+        if ($this->_listClass != '') {
+            $class = ' class="'. $this->_listClass .'" ';
         } else {
             $class = '';
         }
 
         // surround the list items with ul or ol tag
-        $return  = '<' . $this->listTag . $class . '>' . PHP_EOL . $return;
-        $return .= '</' . $this->listTag . '>' . PHP_EOL;
+        $return  = '<' . $this->_listTag . $class . '>' . PHP_EOL . $return;
+        $return .= '</' . $this->_listTag . '>' . PHP_EOL;
 
         // surround the list with prefix/suffix
-        $return = $this->prefix . $return . $this->suffix;
+        $return = $this->_prefix . $return . $this->_suffix;
 
         // prepare class and id attribute/value strings for the nav-tag
-        $class = ($this->navClass != '') ? ' class="'.$this->navClass.'"' : '';
-        $id    = ($this->navId != '')    ? ' id="'.$this->navId.'"'       : '';
+        $class = ($this->_navClass != '') ? ' class="'.$this->_navClass.'"' : '';
+        $id    = ($this->_navId != '')    ? ' id="'.$this->_navId.'"'       : '';
 
         // surround the list with the nav-tag
         $return = '<nav'. $class . $id .'>' . $return . '</nav>' . PHP_EOL;
@@ -251,20 +250,20 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
             $label = $item['label'];
 
             // item tag start (depends on activeness)
-            if ($url == $this->activeUrl) {
-                $return .= '<li class="'.$this->activeItemClass.'">';
+            if ($url == $this->_activeUrl) {
+                $return .= '<li class="'.$this->_activeItemClass.'">';
             } else {
                 $return .= '<li>';
             }
 
             if ($item['hasSubMenu']) {
-                $return .= '<' . $this->subheadTag . ' class="' . $this->subheadClass . '">';
-                if ($this->subheadSkipLink) {
+                $return .= '<' . $this->_subheadTag . ' class="' . $this->_subheadClass . '">';
+                if ($this->_subheadSkipLink) {
                     $return .= $label;
                 } else {
                     $return .= '<a href="'.$url.'">'.$label.'</a>';
                 }
-                $return .= '</' . $this->subheadTag . '>';
+                $return .= '</' . $this->_subheadTag . '>';
                 $return .= $this->_renderSubMenu($item['subMenu']);
             } else {
                 $return .= '<a href="'.$url.'">'.$label.'</a>';
@@ -274,8 +273,8 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
             $return .= '</li>' . PHP_EOL;
         }
 
-        $return  = '<' . $this->sublistTag . ' class="' . $this->sublistClass . '">' . PHP_EOL . $return;
-        $return .= '</' . $this->sublistTag . '>' . PHP_EOL;
+        $return  = '<' . $this->_sublistTag . ' class="' . $this->_sublistClass . '">' . PHP_EOL . $return;
+        $return .= '</' . $this->_sublistTag . '>' . PHP_EOL;
 
         return $return;
     }
@@ -315,7 +314,7 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
 
                 // split property and use numeric last part for navigation order.
                 // example property: http://www.w3.org/2000/01/rdf-schema#_1
-                $pieces = explode ('_' , $property);
+                $pieces = explode('_', $property);
                 if (isset($pieces[1]) && is_numeric($pieces[1])) {
                     // file the navigation array
                     $navigation[$pieces[1]] = array(

@@ -21,11 +21,11 @@ class Site_View_Helper_HeadScriptExhibit extends Zend_View_Helper_Abstract
      */
     public $view;
 
-    private $defaultPropertyInfo = array(
+    private $_defaultPropertyInfo = array(
         array ('uri' => 'http://lod2.eu/schema/exhibitData')
     );
 
-    private $exhibitScript = 'http://api.simile-widgets.org/exhibit/3.0.0/exhibit-api.js';
+    private $_exhibitScript = 'http://api.simile-widgets.org/exhibit/3.0.0/exhibit-api.js';
 
     /*
      * Parameter propertyInfo:
@@ -41,8 +41,8 @@ class Site_View_Helper_HeadScriptExhibit extends Zend_View_Helper_Abstract
     public function headScriptExhibit($propertyInfo = null)
     {
         if ($propertyInfo == null) {
-            // set default info 
-            $propertyInfo = $this->defaultPropertyInfo;
+            // set default info
+            $propertyInfo = $this->_defaultPropertyInfo;
         } else if (is_string($propertyInfo)) {
             // transform string to array
             $propertyInfo = array(
@@ -73,14 +73,17 @@ class Site_View_Helper_HeadScriptExhibit extends Zend_View_Helper_Abstract
                 // check for exhibit data URI and integrate this as well as exhibit
                 if ($description->hasSP($resourceUri, $propertyUri)) {
                     // we've found something, so we can add the exhibit script
-                    echo '    <script src="'.$this->exhibitScript.'" type="text/javascript"></script>' . PHP_EOL;
+                    echo '    <script src="'.$this->_exhibitScript.'" type="text/javascript"></script>' . PHP_EOL;
                     $value = $description->getValue($resourceUri, $propertyUri);
                     if ($literalMod != null) {
                         $value = sprintf($literalMod, $value);
                     }
 
                     // output the data script and return
-                    echo '    <link href="'.$value.'" type="application/jsonp" rel="exhibit/data" ex:jsonp-callback="cb" />' .PHP_EOL;
+                    $type   = "application/jsonp";
+                    $rel    = "exhibit/data";
+                    echo '    <link href="'.$value.'" type="'.$type.'" rel="'.$rel.'" ex:jsonp-callback="cb" />';
+                    echo PHP_EOL;
                     return;
                 }
             }
