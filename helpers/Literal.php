@@ -32,6 +32,25 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         'http://www.w3.org/2000/01/rdf-schema#comment',
     );
 
+    // http://www.whatwg.org/html/microdata.html#values
+    public $microdataPropertyValue = array(
+        'meta'   => array('attr' => 'content', 'type' => 'string'),
+        'audio'  => array('attr' => 'src',     'type' => 'URI'),
+        'embed'  => array('attr' => 'src',     'type' => 'URI'),
+        'iframe' => array('attr' => 'src',     'type' => 'URI'),
+        'img'    => array('attr' => 'src',     'type' => 'URI'),
+        'source' => array('attr' => 'src',     'type' => 'URI'),
+        'track'  => array('attr' => 'src',     'type' => 'URI'),
+        'video'  => array('attr' => 'src',     'type' => 'URI'),
+        'a'      => array('attr' => 'href',    'type' => 'URI'),
+        'area'   => array('attr' => 'href',    'type' => 'URI'),
+        'link'   => array('attr' => 'href',    'type' => 'URI'),
+        'object' => array('attr' => 'data',    'type' => 'string'),
+        'data'   => array('attr' => 'value',   'type' => 'string'),
+        'meter'  => array('attr' => 'value',   'type' => 'string'),
+        'time'   => array('attr' => 'value',   'type' => 'FIXME'),
+    );
+
     /*
      * the main tah method, mentioned parameters are:
      * - uri      - which resource the literal is from (empty means selected * Resource)
@@ -145,7 +164,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         return $mainProperty;
     }
 
-    protected function _getContent($object, $mainProperty, $options)
+    protected function _getContent($object, $property, $options)
     {
         $class   = (isset($options['class']))   ? $options['class']   : '';
         $tag     = (isset($options['tag']))     ? $options['tag']     : 'span';
@@ -158,39 +177,83 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $label   = (isset($options['label']))   ? $options['label']   : '';
         $labels  = (isset($options['labels']))  ? $options['labels']  : array();
 
-        $contentAttr = '';
+        $tmplOpt = $this->view->templateOptions();
+        $markup  = $tmplOpt->getValue('http://ns.ontowiki.net/SysOnt/Site/dataMarkupFormat', 'RDFa');
+
+        $attr    = '';
+        $value   = null;
+
         $content = $object['value'];
 
         if ($label !== '') {
-            $contentAttr = " content='${object['value']}'";
+            $value = $object['value'];
             $content = $label;
         }
 
         if (isset($labels[$content])) {
-            $contentAttr = " content='${object['value']}'";
+            $value = $object['value'];
             $content = $labels[$content];
-        }
-
-        if (isset($object['type']) && $object['type'] === 'uri') {
-            $contentAttr = " resource='${object['value']}'";
         }
 
         if ($plain) {
             return $content;
         } else {
+            //$property = $this->view->curie($property);
+
+            $isUri = isset($object['type']) && $object['type'] === 'uri';
+
+            switch ($markup) {
+                case 'RDFa':
+                    $attr .= " property='$property'";
+
+                    if ($isUri) {
+                        $attr .= " resource='${object['value']}'";
+                        $value = null;
+                    }
+
+                    if ($value !== null) $attr .= " content='$value'";
+                break;
+                case 'microdata':
+                    $attr .= " itemprop='$property'";
+
+                    if ($value !== null) {
+                        // microdata does not have one general property for machine-readable value
+                        $valueInfo = null;
+                        if (isset($this->microdataPropertyValue[$tag])) {
+                            $valueInfo = $this->microdataPropertyValue[$tag];
+                        }
+
+                        if ($valueInfo !== null and ($isUri xor $valueInfo['type'] !== 'URI')) {
+                            $attr .= " {$valueInfo['attr']}='$value'";
+                        } else {
+                            if (!$isUri) {
+                                $prefix .= "<data$attr value='$value'>";
+                                $suffix  = "</data>$suffix";
+                            } else {
+                                $prefix .= "<link$attr href='$value'/>";
+                            }
+                            $attr = '';
+                        }
+                    }
+                break;
+            }
+
+            if ($class !== '') {
+                $attr .= " class='$class'";
+            }
+
             // execute the helper markup on the content (after the extensions)
             $content = $this->view->executeHelperMarkup($content);
 
             // filter by using available extensions
             if (isset($object['datatype'])) {
                 $datatype = $object['datatype'];
-                $content = $this->view->displayLiteralPropertyValue($content, $mainProperty, $datatype);
+                $content = $this->view->displayLiteralPropertyValue($content, $property, $datatype);
             } else {
-                $content = $this->view->displayLiteralPropertyValue($content, $mainProperty);
+                $content = $this->view->displayLiteralPropertyValue($content, $property);
             }
 
-            $curie = $this->view->curie($mainProperty);
-            return "$prefix<$tag class='$class' property='$curie'$contentAttr>$iprefix$content$isuffix</$tag>$suffix";
+            return "$prefix<$tag$attr>$iprefix$content$isuffix</$tag>$suffix";
         }
     }
 
