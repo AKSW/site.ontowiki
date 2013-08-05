@@ -40,7 +40,7 @@ site:SiteMap a owl:Class;
   rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
 
 site:TemplateOption a owl:Class;
-  rdfs:subClassOf owl:DatatypeProperty;
+  rdfs:subClassOf rdf:Property;
   rdfs:comment "the class of site specific template relevant options which can be used on resources, classes and datasets";
   rdfs:label "Template Option";
   rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
