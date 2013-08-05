@@ -100,7 +100,11 @@ class TemplateOptionsClass
     public function getArray($key)
     {
         if (!isset($this->_options[$key])) {
-            $keys = $this->_optionLocalNames[$key];
+            if (isset($this->_optionLocalNames[$key])) {
+                $keys = $this->_optionLocalNames[$key];
+            } else {
+                return array();
+            }
         } else {
             $keys = array($key);
         }
