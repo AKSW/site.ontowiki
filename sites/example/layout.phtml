@@ -65,8 +65,9 @@ $templateData           = $this->templateData;
             <a class="brand">OntoWiki Site Extension</a>
             <!-- TODO build menu -->
             <?php
+                $navResource = $this->templateOptions()->getValue('http://rdfs.org/ns/void#rootResource');
                 $navOptions = array(
-                    'navResource' => 'http://localhost/Site/Navigation/Main',
+                    'navResource' => $navResource,
                     'navId' => 'nav-main',
                     'suffix'    => '<!-- /#nav-main -->',
                     'activeUrl' => $this->resourceUri,

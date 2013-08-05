@@ -8,8 +8,10 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
 @prefix site: <http://ns.ontowiki.net/SysOnt/Site/> .
+@prefix void: <http://rdfs.org/ns/void#> .
 
-<> a owl:Ontology .
+<> a owl:Ontology ;
+   void:rootResource <Navigation/Main> .
 
 <Navigation/Main> a site:Navigation ;
                   rdf:_1 <Welcome> ;
@@ -41,6 +43,8 @@ The most advanced demo of a running example of an OntoWiki with this extension i
 You can find further information about the extension on its [github page](https://github.com/AKSW/site.ontowiki) and in the [wiki](https://github.com/AKSW/site.ontowiki/wiki)."""^^sysont:Markdown .
 
 foaf:Document site:classTemplate "document" .
+
+void:rootResource a site:TemplateOption .
 
 rdf:_1 a rdfs:ContainerMembershipProperty ;
        rdfs:label "1." .
