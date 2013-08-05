@@ -27,9 +27,9 @@
 <Map> a foaf:Document ;
       rdfs:label "Map Demo" ;
       site:content """With the map extension and the map module you can show the location of a resource in a map.
-The ma reads the longitude and latitude of the resource from the model and displays it on an OpenStreetMap.
+The map reads the longitude and latitude of the resource from the model and displays it on an OpenStreetMap.
 
-In thithe location of our working group in the roof of the university church at Augustusplatz in Leipzig."""^^sysont:Markdown ;
+This is the location of our working group in the roof of the university church at Augustusplatz in Leipzig."""^^sysont:Markdown ;
       site:template "map" ;
       geo:long "12.379438" ;
       geo:lat "51.338994" .
