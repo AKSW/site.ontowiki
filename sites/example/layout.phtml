@@ -51,50 +51,48 @@ $templateData           = $this->templateData;
     $this->headScript();
 ?>
 </head>
+
 <body<?php
     foreach ($this->namespaces as $prefix => $ns): ?><?php echo ' xmlns:' . $prefix . '="' . $ns . '"' ?><?php endforeach; ?>>
 <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-
+    <div class="navbar-inner">
         <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand">OntoWiki Site Extension</a>
-              <!-- TODO build menu -->
-              <?php
-              $navOptions = array(
-                      'navResource' => 'http://localhost/Site/Navigation/Main',
-                      'navId' => 'nav-main',
-                      'suffix'    => '<!-- /#nav-main -->',
-                      'activeUrl' => $this->resourceUri,
-                      'listClass' => 'nav',
-                      'navClass' => 'nav-collapse'
-                      );
-              echo $this->navigationList($navOptions);
-              ?>
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <a class="brand">OntoWiki Site Extension</a>
+            <!-- TODO build menu -->
+            <?php
+                $navOptions = array(
+                    'navResource' => 'http://localhost/Site/Navigation/Main',
+                    'navId' => 'nav-main',
+                    'suffix'    => '<!-- /#nav-main -->',
+                    'activeUrl' => $this->resourceUri,
+                    'listClass' => 'nav',
+                    'navClass' => 'nav-collapse'
+                );
+                echo $this->navigationList($navOptions);
+            ?>
         </div>
-
-      </div>
     </div>
-
-    <div class="container">
-
-      <?php echo $this->renderx(); ?>
-<!-- Example row of columns for a Feed -->
-<div class="row">
-<?php echo $this->partial('example/types/feed.phtml', $this->templateData) ?>
 </div>
-      <hr>
-      <footer>
-        <p>&copy; AKSW 2013</p>
-      </footer>
 
-    </div> <!-- /container -->
-    <script type="text/javascript" src="<?php echo $this->baseUri ?>/js/jquery.js"></script>
-    <script type="text/javascript" src="<?php echo $this->baseUri ?>/js/bootstrap.js"></script>
+<div class="container">
+    <?php echo $this->renderx(); ?>
+    <!-- Example row of columns for a Feed -->
+    <div class="row">
+        <?php echo $this->partial('example/types/feed.phtml', $this->templateData) ?>
+    </div>
+    <hr>
+    <footer>
+        <p>&copy; AKSW 2013</p>
+    </footer>
+</div> <!-- /container -->
+
+<script type="text/javascript" src="<?php echo $this->baseUri ?>/js/jquery.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUri ?>/js/bootstrap.js"></script>
 
 </body>
 </html>
