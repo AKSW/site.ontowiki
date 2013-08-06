@@ -1,0 +1,35 @@
+<h2><?= $this->title ?></h2>
+<code><?= $this->resourceUri ?></code>
+<?= $this->literal(array('property' => 'rdfs:comment', 'tag' => 'div', 'class' => 'content')) ?>
+
+<?php
+$subproperties  = $this->query(array('where' => '<' . $this->resourceUri . '> rdfs:subPropertyOf ?resourceUri', 'prefix' => '<dd>', 'suffix' => '</dd>', 'template' => 'classes'));
+$domain         = $this->query(array('where' => '<' . $this->resourceUri . '> rdfs:domain ?resourceUri', 'prefix' => '<dd>', 'suffix' => '</dd>', 'template' => 'classes'));
+$range          = $this->query(array('where' => '<' . $this->resourceUri . '> rdfs:range ?resourceUri', 'prefix' => '<dd>', 'suffix' => '</dd>', 'template' => 'classes'));
+$definedBy      = $this->query(array('where' => '<' . $this->resourceUri .  '> rdfs:isDefinedBy ?resourceUri', 'template' => 'classes'));
+$note           = $this->literals(array('property' => 'skos:note', 'tag' => 'dd'));
+?>
+
+<dl>
+<?php if ($definedBy) : ?>
+<dt>Is defined by</dt>
+<dd><?= $definedBy ?></dd>
+<?php endif; ?>
+<?php if ($note) : ?>
+<dt>Description</dt>
+<?= $note ?>
+<?php endif; ?>
+<?php if ($subproperties) : ?>
+<dt>Subproperty Of</dt>
+<?= $subproperties ?>
+<?php endif; ?>
+<?php if ($domain) : ?>
+<dt>Domain</dt>
+<?= $domain ?>
+<?php endif; ?>
+<?php if ($range) : ?>
+<dt>Range</dt>
+<?= $range ?>
+<?php endif; ?>
+</dl>
+

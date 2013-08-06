@@ -1,0 +1,117 @@
+<h2><?= $this->title ?></h2>
+<code><?= $this->resourceUri ?></code>
+<?= $this->literal(array('property' => 'rdfs:comment', 'tag' => 'p', 'class' => 'content')) ?>
+
+<?php
+$restrictionsQuery = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>' . PHP_EOL;
+$restrictionsQuery.= 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>' . PHP_EOL;
+$restrictionsQuery.= 'PREFIX owl: <http://www.w3.org/2002/07/owl#>' . PHP_EOL;
+$restrictionsQuery.= 'SELECT ?resourceUri ?cardinality ?minCardinality ?maxCardinality' . PHP_EOL;
+$restrictionsQuery.= 'WHERE {' . PHP_EOL;
+$restrictionsQuery.= '  <' . $this->resourceUri . '> rdfs:subClassOf ?restriction .' . PHP_EOL;
+$restrictionsQuery.= '  ?restriction a owl:Restriction ;' . PHP_EOL;
+$restrictionsQuery.= '               owl:onProperty ?resourceUri .' . PHP_EOL;
+$restrictionsQuery.= '  OPTIONAL {' . PHP_EOL;
+$restrictionsQuery.= '      ?restriction owl:cardinality ?cardinality .' . PHP_EOL;
+$restrictionsQuery.= '  }' . PHP_EOL;
+$restrictionsQuery.= '  OPTIONAL {' . PHP_EOL;
+$restrictionsQuery.= '      ?restriction owl:minCardinality ?minCardinality .' . PHP_EOL;
+$restrictionsQuery.= '  }' . PHP_EOL;
+$restrictionsQuery.= '  OPTIONAL {' . PHP_EOL;
+$restrictionsQuery.= '      ?restriction owl:maxCardinality ?maxCardinality .' . PHP_EOL;
+$restrictionsQuery.= '  }' . PHP_EOL;
+$restrictionsQuery.= '}' . PHP_EOL;
+
+$subclassesQuery = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>' . PHP_EOL;
+$subclassesQuery.= 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>' . PHP_EOL;
+$subclassesQuery.= 'PREFIX owl: <http://www.w3.org/2002/07/owl#>' . PHP_EOL;
+$subclassesQuery.= 'SELECT ?resourceUri' . PHP_EOL;
+$subclassesQuery.= 'WHERE {' . PHP_EOL;
+$subclassesQuery.= '  <' . $this->resourceUri . '> rdfs:subClassOf ?resourceUri .' . PHP_EOL;
+$subclassesQuery.= '  OPTIONAL {' . PHP_EOL;
+$subclassesQuery.= '      ?resourceUri a ?scClass .' . PHP_EOL;
+$subclassesQuery.= '  }' . PHP_EOL;
+$subclassesQuery.= '  FILTER(!bound(?scClass) || !sameTerm(?scClass,owl:Restriction)) .' . PHP_EOL;
+$subclassesQuery.= '}' . PHP_EOL;
+
+$propQuery = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>' . PHP_EOL;
+$propQuery.= 'SELECT ?resourceUri' . PHP_EOL;
+$propQuery.= 'WHERE {' . PHP_EOL;
+$propQuery.= '  ?resourceUri rdfs:domain <' . $this->resourceUri . '>' . PHP_EOL;
+$propQuery.= '}' . PHP_EOL;
+
+$invpropQuery = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>' . PHP_EOL;
+$invpropQuery.= 'SELECT ?resourceUri' . PHP_EOL;
+$invpropQuery.= 'WHERE {' . PHP_EOL;
+$invpropQuery.= '  ?resourceUri rdfs:range <' . $this->resourceUri . '>' . PHP_EOL;
+$invpropQuery.= '}' . PHP_EOL;
+
+$subclasses = $this->querylist(
+    $subclassesQuery,
+    'schema/items/classes.phtml',
+    array(),
+    array('prefix' => '<dd>', 'suffix' => '</dd>')
+);
+
+$disjoint   = $this->query(array('where' => '<' . $this->resourceUri .  '> owl:disjointWith ?resourceUri', 'template' => 'classes'));
+$definedBy  = $this->query(array('where' => '<' . $this->resourceUri .  '> rdfs:isDefinedBy ?resourceUri', 'template' => 'classes'));
+$note       = $this->literals(array('property' => 'skos:note', 'tag' => 'dd'));
+
+$restrictions = $this->querylist(
+    $restrictionsQuery,
+    'schema/items/restriction.phtml',
+    array(),
+    array('prefix' => '<dd>', 'suffix' => '</dd>')
+);
+
+$props      = $this->querylist(
+    $propQuery,
+    'schema/items/classes.phtml',
+    array(),
+    array('prefix' => '<dd>', 'suffix' => '</dd>')
+);
+
+$invprops   = $this->querylist(
+    $invpropQuery,
+    'schema/items/classes.phtml',
+    array(),
+    array('prefix' => '<dd>', 'suffix' => '</dd>')
+);
+?>
+
+<dl>
+<?php if ($definedBy) : ?>
+<dt>Is defined by</dt>
+<dd><?= $definedBy ?></dd>
+<?php endif; ?>
+
+<?php if ($note) : ?>
+<dt>Description</dt>
+<?= $note ?>
+<?php endif; ?>
+
+<?php if ($subclasses) : ?>
+<dt>Subclass Of</dt>
+<?= $subclasses ?>
+<?php endif; ?>
+
+<?php if ($disjoint) : ?>
+<dt>Disjoint With</dt>
+<dd><?= $disjoint ?></dd>
+<?php endif; ?>
+
+<?php if ($props || $restrictions) : ?>
+<dt title="This list contains all properties which contain this class in their owl:domain property and all properties which are used in owl:Restrictions on this class">Properties</dt>
+<?= $props ?>
+<?php endif; ?>
+<?php if ($restrictions) : ?>
+<?= $restrictions ?>
+<?php endif; ?>
+
+<?php if ($invprops) : ?>
+<dt title="This list contains all properties which contain this class in their owl:range property">Inverse Properties</dt>
+<?= $invprops ?>
+<?php endif; ?>
+
+</dl>
+

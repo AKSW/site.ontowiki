@@ -1,0 +1,21 @@
+<h1><?php echo $this->title ?></h1>
+<?php
+// uses default content properties
+echo $this->literal(array('tag' => 'div', 'class' => 'content'));
+
+$propertiesQuery = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>' . PHP_EOL;
+$propertiesQuery.= 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>' . PHP_EOL;
+$propertiesQuery.= 'PREFIX owl: <http://www.w3.org/2002/07/owl#>' . PHP_EOL;
+$propertiesQuery.= 'SELECT DISTINCT ?resourceUri' . PHP_EOL;
+$propertiesQuery.= 'WHERE {' . PHP_EOL;
+$propertiesQuery.= '    { ?resourceUri rdfs:isDefinedBy <' . $this->resourceUri . '> ;' . PHP_EOL;
+$propertiesQuery.= '                 a rdf:Property .' . PHP_EOL;
+$propertiesQuery.= '    } UNION { ?resourceUri rdfs:isDefinedBy <' . $this->resourceUri . '> ; a owl:DatatypeProperty . ' . PHP_EOL;
+$propertiesQuery.= '    } UNION { ?resourceUri rdfs:isDefinedBy <' . $this->resourceUri . '> ; a owl:ObjectProperty . }' . PHP_EOL;
+$propertiesQuery.= '}' . PHP_EOL;
+
+var_dump($propertiesQuery);
+
+echo $this->querylist($propertiesQuery, 'schema/items/properties.phtml');
+?>
+

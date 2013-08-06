@@ -1,0 +1,7 @@
+<Navigation/Main> rdf:_4 <http://localhost/Site/Navigation/Sub_menu> .
+
+<http://localhost/Site/Navigation/Sub_menu> a site:Navigation ;
+                                            rdf:_1 <http://aksw.org/> ;
+                                            rdf:_2 <http://aksw.org/Projects/Xodx> ;
+                                            rdf:_3 <http://aksw.org/Projects/DSSN> ;
+                                            rdfs:label "Sub menu" .
