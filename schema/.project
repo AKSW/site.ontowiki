@@ -9,6 +9,7 @@
 		<project>xturtle.foaf</project>
 		<project>xturtle.skos</project>
 		<project>xturtle.voidvann</project>
+		<project>xturtle.dc</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
