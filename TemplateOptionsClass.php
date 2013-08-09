@@ -14,11 +14,13 @@
  */
 class TemplateOptionsClass
 {
-    const DATASET_SPECIFIC_OPTION  = 0;
-    const CLASS_SPECIFIC_OPTION    = 1;
-    const RESOURCE_SPECIFIC_OPTION = 2;
+    const RESOURCE_SPECIFIC_OPTION = 1;
+    const CLASS_SPECIFIC_OPTION    = 2;
+    const DATASET_SPECIFIC_OPTION  = 3;
+    const PRIORITY_LAST            = 4;
 
     const SITE_TEMPLATE_OPTION     = 'http://ns.ontowiki.net/SysOnt/Site/TemplateOption';
+    const SITE_FETCH_OPTIONS_FROM  = 'http://ns.ontowiki.net/SysOnt/Site/fetchOptionsFrom';
 
     /**
      * Template options
@@ -34,17 +36,16 @@ class TemplateOptionsClass
 
     public function __construct($resourceUri)
     {
-        $owApp = OntoWiki::getInstance();
-        $store = $owApp->erfurt->getStore();
-        $model = $owApp->selectedModel;
-        $query = new Erfurt_Sparql_Query2();
+        $owApp     = OntoWiki::getInstance();
+        $store     = $owApp->erfurt->getStore();
+        $model     = $owApp->selectedModel;
+        $resource  = new Erfurt_Sparql_Query2_IriRef($resourceUri);
+        $ontology  = new Erfurt_Sparql_Query2_IriRef(EF_OWL_ONTOLOGY);
+        $fetchFrom = new Erfurt_Sparql_Query2_IriRef(static::SITE_FETCH_OPTIONS_FROM);
 
-        $resource = new Erfurt_Sparql_Query2_IriRef($resourceUri);
-
-        $query->addProjectionVar($key   = new Erfurt_Sparql_Query2_Var('key'));
-        $query->addProjectionVar($value = new Erfurt_Sparql_Query2_Var('value'));
-        $query->addProjectionVar($class = new Erfurt_Sparql_Query2_Var('class'));
-        $query->addProjectionVar($dataset = new Erfurt_Sparql_Query2_Var('dataset'));
+        // fetch options from this resource
+        $query  = new Erfurt_Sparql_Query2();
+        list($key, $value, $class, $dataset) = $this->_queryAddVars($query, array('key', 'value', 'class', 'dataset'));
 
         $union = new Erfurt_Sparql_Query2_GroupOrUnionGraphPattern();
 
@@ -71,24 +72,78 @@ class TemplateOptionsClass
 
         $results = $model->sparqlQuery($query);
         foreach ($results as $result) {
-            if (!is_null($result[$dataset->getName()])) {
-                $priority = static::DATASET_SPECIFIC_OPTION;
-            } elseif (!is_null($result[$class->getName()])) {
-                $priority = static::CLASS_SPECIFIC_OPTION;
-            } else {
-                $priority = static::RESOURCE_SPECIFIC_OPTION;
-            }
-
             $arrayKey = $result[$key->getName()];
-            $this->_options[$arrayKey][$priority][] = $result[$value->getName()];
+            $this->_options[$arrayKey][$this->_getPriority($result)][] = $result[$value->getName()];
 
             $templateOption = new Erfurt_Rdf_Resource($arrayKey, $model);
             $arrayKeyLocalName = $templateOption->getLocalName();
             $this->_optionLocalNames[$arrayKeyLocalName][] = $arrayKey;
         }
 
+        // fetch options from linked resources
+        $query  = new Erfurt_Sparql_Query2();
+        list($other, $class, $dataset) = $this->_queryAddVars($query, array('other', 'class', 'dataset'));
+
+        $union = new Erfurt_Sparql_Query2_GroupOrUnionGraphPattern();
+
+        // resource links
+        $group = new Erfurt_Sparql_Query2_GroupGraphPattern();
+        $group->addTriple($resource, $fetchFrom, $other);
+        $union->addElement($group);
+
+        // class links
+        $group = new Erfurt_Sparql_Query2_GroupGraphPattern();
+        $group->addTriple($resource, EF_RDF_TYPE, $class);
+        $group->addTriple($class, $fetchFrom, $other);
+        $union->addElement($group);
+
+        // dataset links
+        $group = new Erfurt_Sparql_Query2_GroupGraphPattern();
+        $group->addTriple($dataset, EF_RDF_TYPE, $ontology);
+        $group->addTriple($dataset, $fetchFrom, $other);
+        $union->addElement($group);
+
+        $query->addElement($union);
+
+        $results = $model->sparqlQuery($query);
+        foreach ($results as $result) {
+            $options = new TemplateOptionsClass($result[$other->getName()]);
+            foreach ($options->_options as $arrayKey => $priorities) {
+                foreach ($priorities as $priority => $values) {
+                    $this->_options[$arrayKey][$priority + $this->_getPriority($result) * static::PRIORITY_LAST] = $values;
+                }
+            }
+            foreach ($options->_optionLocalNames as $arrayKeyLocalName => $keys) {
+                foreach ($keys as $key) {
+                    if (!isset($this->_optionLocalNames[$arrayKeyLocalName])
+                        || !in_array($key, $this->_optionLocalNames[$arrayKeyLocalName])) {
+                        $this->_optionLocalNames[$arrayKeyLocalName][] = $key;
+                    }
+                }
+            }
+        }
+
         foreach (array_keys($this->_options) as $key) {
-            krsort($this->_options[$key]);
+            ksort($this->_options[$key]);
+        }
+    }
+
+    private function _queryAddVars($query, $vars)
+    {
+        return array_map(function($name) use($query) {
+            $query->addProjectionVar($var = new Erfurt_Sparql_Query2_Var($name));
+            return $var;
+        }, $vars);
+    }
+
+    private function _getPriority($result)
+    {
+        if (!is_null($result['dataset'])) {
+            return static::DATASET_SPECIFIC_OPTION;
+        } elseif (!is_null($result['class'])) {
+            return static::CLASS_SPECIFIC_OPTION;
+        } else {
+            return static::RESOURCE_SPECIFIC_OPTION;
         }
     }
 
