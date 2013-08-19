@@ -57,6 +57,7 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
     const TEMPLATE_PROP_CLASS       = 'http://ns.ontowiki.net/SysOnt/Site/classTemplate';
     const TEMPLATE_PROP_RESOURCE    = 'http://ns.ontowiki.net/SysOnt/Site/template';
     const TYPE_PROP                 = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+    const SUBCLASS_PROP             = 'http://www.w3.org/2000/01/rdf-schema#subClassOf';
 
     /*
      * the main method, mentioned parameters are:
@@ -123,6 +124,41 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
             }
         }
 
+        /*
+         * If still no template is found, try to get the transitive closure of subclasses and see if they have templates defined
+         */
+        if ($templateName === null) {
+            $store = OntoWiki::getInstance()->erfurt->getStore();
+            $closure = array();
+            $classes = array();
+            foreach($description[self::TYPE_PROP] as $class) {
+                $classUri = $class['value'];
+                $classes[] = $classUri;
+                $newClosure = $store->getTransitiveClosure($this->_model, self::SUBCLASS_PROP, array($classUri), false);
+                $closure = array_merge($closure, $newClosure);
+            }
+
+            $nextClasses = array();
+            while (count($classes) > 0) {
+                foreach($classes as $classUri) {
+                    $superClass = $closure[$classUri]['parent'];
+                    if ($superClass !== null) {
+                        if (isset($this->_mappings[$superClass])) {
+                            $templateName = $this->_mappings[$superClass];
+                            break;
+                        }
+                        $nextClasses[] = $superClass;
+                    }
+                }
+                if ($templateName !== null) {
+                    break;
+                } else {
+                    $classes = $nextClasses;
+                    $nextClasses = array();
+                }
+            }
+        }
+
         if ($templateName != null) {
             $this->_template = $this->view->siteId .'/types/'. $templateName .'.phtml';
             return $this->_template;
@@ -159,7 +195,7 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
                 SELECT DISTINCT ?class ?template
                 WHERE {
                     ?class <'. self::TEMPLATE_PROP_CLASS .'> ?template .
-                    }';
+                }';
 
             // fetch results
             $store = OntoWiki::getInstance()->erfurt->getStore();
