@@ -251,6 +251,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 $content = $this->view->displayLiteralPropertyValue($content, $property, $datatype);
             } elseif (isset($object['lang'])) {
                 $attr   .= ' xml:lang="'.$object['lang'].'"';
+                $attr   .= ' lang="'.$object['lang'].'"';
                 $content = $this->view->displayLiteralPropertyValue($content, $property);
             } else {
                 $content = $this->view->displayLiteralPropertyValue($content, $property);
