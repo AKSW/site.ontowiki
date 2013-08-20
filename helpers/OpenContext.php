@@ -125,7 +125,7 @@ class Site_View_Helper_OpenContext extends Zend_View_Helper_Abstract implements 
         }
 
         foreach ($html as $name => $value) {
-            $attr .= " $name='$value'";
+            $attr .= ' '.$name.'="'.$value.'"';
         }
 
         if (!isset($options['tag'])) {
