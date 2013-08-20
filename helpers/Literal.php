@@ -204,17 +204,17 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
 
             switch ($markup) {
                 case 'RDFa':
-                    $attr .= " property='$property'";
+                    $attr .= ' property="'.$property.'"';
 
                     if ($isUri) {
-                        $attr .= " resource='${object['value']}'";
+                        $attr .= ' resource="'.$object['value'].'"';
                         $value = null;
                     }
 
-                    if ($value !== null) $attr .= " content='$value'";
+                    if ($value !== null) $attr .= ' content="'.$value.'"';
                 break;
                 case 'microdata':
-                    $attr .= " itemprop='$property'";
+                    $attr .= ' itemprop="'.$property.'"';
 
                     if ($value !== null) {
                         // microdata does not have one general property for machine-readable value
@@ -224,13 +224,13 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                         }
 
                         if ($valueInfo !== null and ($isUri xor $valueInfo['type'] !== 'URI')) {
-                            $attr .= " {$valueInfo['attr']}='$value'";
+                            $attr .= ' '.$valueInfo['attr'].'="'.$value.'"';
                         } else {
                             if (!$isUri) {
-                                $prefix .= "<data$attr value='$value'>";
-                                $suffix  = "</data>$suffix";
+                                $prefix .= '<data'.$attr.' value="'.$value.'">';
+                                $suffix  = '</data>'.$suffix;
                             } else {
-                                $prefix .= "<link$attr href='$value'/>";
+                                $prefix .= '<link'.$attr.' href="'.$value.'"/>';
                             }
                             $attr = '';
                         }
@@ -239,7 +239,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
             }
 
             if ($class !== '') {
-                $attr .= " class='$class'";
+                $attr .= ' class="'.$class.'"';
             }
 
             // execute the helper markup on the content (after the extensions)
@@ -250,7 +250,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 $datatype = $object['datatype'];
                 $content = $this->view->displayLiteralPropertyValue($content, $property, $datatype);
             } elseif (isset($object['lang'])) {
-                $attr   .= " xml:lang='${object['lang']}'";
+                $attr   .= ' xml:lang="'.$object['lang'].'"';
                 $content = $this->view->displayLiteralPropertyValue($content, $property);
             } else {
                 $content = $this->view->displayLiteralPropertyValue($content, $property);

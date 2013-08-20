@@ -98,23 +98,23 @@ class Site_View_Helper_OpenContext extends Zend_View_Helper_Abstract implements 
 
         switch ($markup) {
             case 'RDFa':
-                $attr .= " resource='$resource'";
-                if ($type !== null) $attr .= " typeof='$type'";
-                if ($rel  !== null) $attr .= " rel='$rel'";
-                if ($rev  !== null) $attr .= " rev='$rev'";
+                $attr .= ' resource="'.$resource.'"';
+                if ($type !== null) $attr .= ' typeof="'.$type.'"';
+                if ($rel  !== null) $attr .= ' rel="'.$rel.'"';
+                if ($rev  !== null) $attr .= ' rev="'.$rev.'"';
             break;
             case 'microdata':
                 if (!isset($html['id']) or !in_array($html['id'], static::$_itemref)) {
-                    $attr .= " itemscope='itemscope'";
+                    $attr .= ' itemscope="itemscope"';
                     /* "The itemid attribute must not be specified on elements
                         that do not have both an itemscope attribute
                         and an itemtype attribute specified" */
-                    if ($type !== null) $attr   .= " itemid='$resource' itemtype='$type'";
-                    if ($rel  !== null) $attr   .= " itemprop='$rel'";
+                    if ($type !== null) $attr   .= ' itemid="'.$resource.'" itemtype="'.$type.'"';
+                    if ($rel  !== null) $attr   .= ' itemprop="'.$rel.'"';
                     //if ($rev  !== null) $iprefix = "<link itemprop='$rev' href='#TODO'/>$iprefix";
                     if ($itemref) {
                         $itemrefValue = implode(' ', $itemref);
-                        $attr .= " itemref='$itemrefValue'";
+                        $attr .= ' itemref="'.$itemrefValue.'"';
 
                         /* remember which elements are associated using itemref
                            so context markup can be disabled for them later */
