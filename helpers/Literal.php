@@ -287,9 +287,13 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                             $valueInfo = static::$microdataPropertyValue[$tag];
                         }
 
-                        if ($valueInfo !== null and ($isUri xor $valueInfo['type'] !== 'URI')) {
+                        if (
+                            $valueInfo !== null // element may have machine-readable values
+                            && ($isUri xor $valueInfo['type'] !== 'URI') // element's value type matches
+                        ) {
                             $attr .= ' '.$valueInfo['attr'].'="'.$value.'"';
                         } else {
+                            // supply additional element just to put machine-readable value into it
                             if (!$isUri) {
                                 $prefix .= '<data'.$attr.' value="'.$value.'">';
                                 $suffix  = '</data>'.$suffix;
