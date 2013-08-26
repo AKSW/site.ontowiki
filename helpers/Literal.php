@@ -32,6 +32,23 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         'http://www.w3.org/2000/01/rdf-schema#comment',
     );
 
+    // http://www.w3.org/TR/html4/index/elements.html
+    public static $htmlForbiddenEndTags = array(
+        'area',
+        'base',
+        'basefont',
+        'br',
+        'col',
+        'frame',
+        'hr',
+        'img',
+        'input',
+        'isindex',
+        'link',
+        'meta',
+        'param',
+    );
+
     // http://www.whatwg.org/html/microdata.html#values
     public static $microdataPropertyValue = array(
         'meta'   => array('attr' => 'content', 'type' => 'string'),
@@ -190,16 +207,27 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $attr    = '';
         $value   = null;
 
+        if (!in_array($tag, static::$htmlForbiddenEndTags)) {
+            $shortTag = '';
+            $endTag   = "</$tag>";
+        } else {
+            $shortTag = '/';
+            $endTag   = '';
+        }
+
         $content = $object['value'];
+        $alt     = '';
 
         if ($label !== '') {
-            $value = $object['value'];
+            $value   = $object['value'];
             $content = $label;
+            $alt     = $content;
         }
 
         if (isset($labels[$content])) {
-            $value = $object['value'];
+            $value   = $object['value'];
             $content = $labels[$content];
+            $alt     = $content;
         }
 
         if ($plain) {
@@ -207,14 +235,39 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         } else {
             //$property = $this->view->curie($property);
 
+            if ($endTag === '') {
+                $value   = $object['value'];
+                $content = '';
+
+                if ($iprefix !== '' || $isuffix !== '') {
+                    throw new OntoWiki_Exception('Attempting to use literal helper\'s iprefix and isuffix with '.$tag.' tag.');
+                }
+            }
+
             $isUri = isset($object['type']) && $object['type'] === 'uri';
 
             switch ($markup) {
                 case 'RDFa':
-                    $attr .= ' property="'.$property.'"';
+                    switch ($tag) {
+                        case 'link':
+                            $relation = 'rel';
+                        break; default:
+                            $relation = 'property';
+                    }
+
+                    $attr .= sprintf(' %s="%s"', $relation, $property);
 
                     if ($isUri) {
-                        $attr .= ' resource="'.$object['value'].'"';
+                        switch ($tag) {
+                            case 'img':
+                                $target = 'src';
+                            break; case 'link':
+                                $target = 'href';
+                            break; default:
+                                $target = 'resource';
+                        }
+
+                        $attr .= sprintf(' %s="%s"', $target, $object['value']);
                         $value = null;
                     }
 
@@ -264,7 +317,11 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 $content = $this->view->displayLiteralPropertyValue($content, $property);
             }
 
-            return "$prefix<$tag$attr>$iprefix$content$isuffix</$tag>$suffix";
+            if ($tag === 'img') {
+                $attr .= ' alt="'.$alt.'"';
+            }
+
+            return "$prefix<$tag$attr$shortTag>$iprefix$content$isuffix$endTag$suffix";
         }
     }
 
