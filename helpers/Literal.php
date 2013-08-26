@@ -33,7 +33,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
     );
 
     // http://www.whatwg.org/html/microdata.html#values
-    public $microdataPropertyValue = array(
+    public static $microdataPropertyValue = array(
         'meta'   => array('attr' => 'content', 'type' => 'string'),
         'audio'  => array('attr' => 'src',     'type' => 'URI'),
         'embed'  => array('attr' => 'src',     'type' => 'URI'),
@@ -226,8 +226,8 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                     if ($value !== null) {
                         // microdata does not have one general property for machine-readable value
                         $valueInfo = null;
-                        if (isset($this->microdataPropertyValue[$tag])) {
-                            $valueInfo = $this->microdataPropertyValue[$tag];
+                        if (isset(static::$microdataPropertyValue[$tag])) {
+                            $valueInfo = static::$microdataPropertyValue[$tag];
                         }
 
                         if ($valueInfo !== null and ($isUri xor $valueInfo['type'] !== 'URI')) {
