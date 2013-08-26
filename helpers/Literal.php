@@ -98,7 +98,11 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
             $objects     = $property ? $description[$property] : array();
         } else {
             $property    = $options['property'];
-            $objects     = array(array('value' => $options['value']));
+            $object      = $options['value'];
+            if (!is_array($object)) {
+                $object = array('value' => $object);
+            }
+            $objects     = array($object);
         }
 
         // filter and render the (first) literal value of the main property
