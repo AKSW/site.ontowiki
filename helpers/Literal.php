@@ -65,6 +65,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
      * - array    - returns an array of the values (not suitable for template markup)
      * - label    - content override
      * - labels   - content overrides for specified values
+     * - value    - static value to use instead of querying the database
      */
     public function literal($options = array())
     {
@@ -74,33 +75,39 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         // check for options and assign local vars or default values
         $array   = (isset($options['array']))   ? $options['array']   : false;
 
-        $description  = $this->_getDescription($model, $options);
-        $mainProperty = $this->_selectMainProperty($model, $description, $options);
+        if (!isset($options['value'])) {
+            $description = $this->_getDescription($model, $options);
+            $property    = $this->_selectMainProperty($model, $description, $options);
+            $objects     = $property ? $description[$property] : array();
+        } else {
+            $property    = $options['property'];
+            $objects     = array(array('value' => $options['value']));
+        }
 
         // filter and render the (first) literal value of the main property
         // TODO: striptags and tidying as extension
-        if ($mainProperty) {
+        if ($objects) {
             if ($array) {
                 $return = array();
-                foreach ($description[$mainProperty] as $object) {
-                    $return[] = $this->_getContent($object, $mainProperty, $options);
+                foreach ($objects as $object) {
+                    $return[] = $this->_getContent($object, $property, $options);
                 }
                 return $return;
             } else {
                 //search for language tag
                 unset($object);
-                foreach ($description[$mainProperty] as $literalNumber => $literal) {
+                foreach ($objects as $literalNumber => $literal) {
                     $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
                     if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
-                        $object = $description[$mainProperty][$literalNumber];
+                        $object = $objects[$literalNumber];
                         break;
                     }
                 }
                 if (!isset($object)) {
-                    $object = $description[$mainProperty][0];
+                    $object = $objects[0];
                 }
 
-                return $this->_getContent($object, $mainProperty, $options);
+                return $this->_getContent($object, $property, $options);
             }
         } else {
             if ($array) {
