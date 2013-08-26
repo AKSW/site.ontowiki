@@ -50,8 +50,8 @@ class Site_View_Helper_OpenContext extends Zend_View_Helper_Abstract implements 
         $attr     = '';
         $iprefix  = '';
         $type     = null;
-        $rel      = null;
-        $rev      = null;
+        $rel      = array();
+        $rev      = array();
         $itemref  = null;
 
         // can generate new namespaces which weren't included in html element
