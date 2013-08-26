@@ -25,8 +25,8 @@ class Site_View_Helper_OpenContext extends Zend_View_Helper_Abstract implements 
      * Options (all are optional):
      * - resource - resource URI (by default, the current resource in template)
      * - type     - resource type (by default, rdf:type value for the specified resource)
-     * - rel      - relation to the resource
-     * - rev      - reverse relation (from the resource)
+     * - rel      - relation to the resource, string or array of strings
+     * - rev      - reverse relation (from the resource), string or array of strings
      * - itemref  - microdata's itemref as an array of IDs
      * - tag      - HTML tag to create context with
      * - id       - HTML id attribute
@@ -75,11 +75,17 @@ class Site_View_Helper_OpenContext extends Zend_View_Helper_Abstract implements 
         } elseif (isset($this->view->rel)) {
             $rel = $this->view->rel;
         }
+        if (!is_array($rel)) {
+            $rel = array($rel);
+        }
 
         if (isset($options['rev'])) {
             $rev = $options['rev'];
         } elseif (isset($this->view->rev)) {
             $rev = $this->view->rev;
+        }
+        if (!is_array($rev)) {
+            $rev = array($rev);
         }
 
         if (isset($options['itemref'])) {
@@ -100,8 +106,8 @@ class Site_View_Helper_OpenContext extends Zend_View_Helper_Abstract implements 
             case 'RDFa':
                 $attr .= ' resource="'.$resource.'"';
                 if ($type !== null) $attr .= ' typeof="'.$type.'"';
-                if ($rel  !== null) $attr .= ' rel="'.$rel.'"';
-                if ($rev  !== null) $attr .= ' rev="'.$rev.'"';
+                if ($rel)           $attr .= ' rel="'.implode(' ', $rel).'"';
+                if ($rev)           $attr .= ' rev="'.implode(' ', $rev).'"';
             break;
             case 'microdata':
                 if (!isset($html['id']) or !in_array($html['id'], static::$_itemref)) {
@@ -110,8 +116,8 @@ class Site_View_Helper_OpenContext extends Zend_View_Helper_Abstract implements 
                         that do not have both an itemscope attribute
                         and an itemtype attribute specified" */
                     if ($type !== null) $attr   .= ' itemid="'.$resource.'" itemtype="'.$type.'"';
-                    if ($rel  !== null) $attr   .= ' itemprop="'.$rel.'"';
-                    //if ($rev  !== null) $iprefix = "<link itemprop='$rev' href='#TODO'/>$iprefix";
+                    if ($rel)           $attr   .= ' itemprop="'.implode(' ', $rel).'"';
+                    //if ($rev)           $iprefix = '<link itemprop="'.implode(' ', $rev).'" href="#TODO"/>$iprefix';
                     if ($itemref) {
                         $itemrefValue = implode(' ', $itemref);
                         $attr .= ' itemref="'.$itemrefValue.'"';
