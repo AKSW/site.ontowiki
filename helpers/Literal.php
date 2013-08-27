@@ -295,8 +295,13 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                         } else {
                             // supply additional element just to put machine-readable value into it
                             if (!$isUri) {
+                                /* non-empty <data/> is reasonable to use here,
+                                   but there are many issues in microdata parsers with it */
+                                /*
                                 $prefix .= '<data'.$attr.' value="'.$value.'">';
                                 $suffix  = '</data>'.$suffix;
+                                */
+                                $prefix .= '<meta'.$attr.' content="'.$value.'"/>';
                             } else {
                                 $prefix .= '<link'.$attr.' href="'.$value.'"/>';
                             }
