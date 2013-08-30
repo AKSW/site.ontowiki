@@ -250,6 +250,16 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
 
             $isUri = isset($object['type']) && $object['type'] === 'uri';
 
+            if (
+                isset($object['datatype'])
+                && $object['datatype'] === 'http://www.w3.org/2001/XMLSchema#time'
+                && $value === null
+            ) {
+                // format datetime
+                $value   = $object['value'];
+                $content = $this->view->date($object['value']);
+            }
+
             switch ($markup) {
                 case 'RDFa':
                     switch ($tag) {
