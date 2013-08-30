@@ -352,7 +352,13 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 $attr .= ' alt="'.$alt.'"';
             }
 
-            return "$prefix<$tag$attr$shortTag>$iprefix$content$isuffix$endTag$suffix";
+            $html = sprintf('%s%s%s', $iprefix, $content, $isuffix);
+            // don't generate empty elements, if tag is not specified explicitly
+            if ($attr !== '' || isset($options['tag'])) {
+                $html = sprintf('<%s%s%s>%s%s', $tag, $attr, $shortTag, $html, $endTag);
+            }
+
+            return sprintf('%s%s%s', $prefix, $html, $suffix);
         }
     }
 
