@@ -110,22 +110,36 @@ class Site_View_Helper_OpenContext extends Zend_View_Helper_Abstract implements 
                 if ($rev)           $attr .= ' rev="'.implode(' ', $rev).'"';
             break;
             case 'microdata':
-                if (!isset($html['id']) or !in_array($html['id'], static::$_itemref)) {
-                    $attr .= ' itemscope="itemscope"';
-                    /* "The itemid attribute must not be specified on elements
-                        that do not have both an itemscope attribute
-                        and an itemtype attribute specified" */
-                    if ($type !== null) $attr   .= ' itemid="'.$resource.'" itemtype="'.$type.'"';
-                    if ($rel)           $attr   .= ' itemprop="'.implode(' ', $rel).'"';
-                    //if ($rev)           $iprefix = '<link itemprop="'.implode(' ', $rev).'" href="#TODO"/>$iprefix';
-                    if ($itemref) {
-                        $itemrefValue = implode(' ', $itemref);
-                        $attr .= ' itemref="'.$itemrefValue.'"';
-
-                        /* remember which elements are associated using itemref
-                           so context markup can be disabled for them later */
-                        static::$_itemref += $itemref;
+                /* some parsers (Google) don't merge properties
+                   from multiple elements for the same resource */
+                if (isset(static::$_itemref[$resource])) {
+                    $flag = true;
+                    if (!isset($html['id'])) {
+                        //throw new OntoWiki_Exception('Attempting to create additional element for the same resource without itemref link (no itemref).');
+                        $flag = false;
+                    } elseif (!in_array($html['id'], static::$_itemref[$resource])) {
+                        //throw new OntoWiki_Exception('Attempting to create additional element for the same resource without itemref link (ID not listed in itemref).');
+                        $flag = false;
                     }
+                    if ($flag)
+                    break;
+                }
+
+                $attr .= ' itemscope="itemscope"';
+                /* "The itemid attribute must not be specified on elements
+                    that do not have both an itemscope attribute
+                    and an itemtype attribute specified" */
+                if ($type !== null) $attr   .= sprintf(' itemid="%s" itemtype="%s"', $resource, $type);
+                if ($rel)           $attr   .= sprintf(' itemprop="%s"', implode(' ', $rel));
+                //if ($rev)           $iprefix = sprintf('<link itemprop="%s" href="#TODO"/>%s', implode(' ', $rev), $iprefix);
+                if ($itemref) {
+                    $attr .= sprintf(' itemref="%s"', implode(' ', $itemref));
+
+                    /* remember which elements are linked using itemref
+                       so context markup can be disabled for them later */
+                    static::$_itemref[$resource] = $itemref;
+                } else {
+                    static::$_itemref[$resource] = array();
                 }
             break;
         }
