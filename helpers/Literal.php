@@ -260,14 +260,6 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 $content = $this->view->date($object['value']);
             }
 
-            if ($isUri && $value === null) {
-                // provide labels for URIs
-                $value   = $object['value'];
-                //$content = (string) new OntoWiki_Resource($value);
-                $th = new OntoWiki_Model_TitleHelper(OntoWiki::getInstance()->selectedModel);
-                $content = $th->getTitle($value, OntoWiki::getInstance()->getConfig()->languages->locale);
-            }
-
             switch ($markup) {
                 case 'RDFa':
                     switch ($tag) {
