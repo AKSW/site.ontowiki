@@ -123,7 +123,8 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
     {
         $owapp       = OntoWiki::getInstance();
         $store       = $owapp->erfurt->getStore();
-        $titleHelper = new OntoWiki_Model_TitleHelper($owapp->selectedModel);
+        $this->model = $owapp->selectedModel;
+        $titleHelper = new OntoWiki_Model_TitleHelper($this->model);
 
         if (!isset($options['navResource']) || !$options['navResource']) {
             if (isset($options['navProperty'])) {
@@ -164,7 +165,7 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
             $titleHelper->prependTitleProperty($this->_menuLabel);
         }
 
-        $navigation = $this->_getMenu($this->_navResource, $store, $titleHelper);
+        $navigation = $this->_getMenu($this->_navResource, $this->model, $titleHelper);
         $navigation = $this->_setTitles($navigation, $titleHelper);
 
         return $this->render($navigation);
@@ -279,7 +280,7 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         return $return;
     }
 
-    private function _getMenu ($navResource, $store, $titleHelper = null)
+    private function _getMenu ($navResource, $model, $titleHelper = null)
     {
         $query = '
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -291,7 +292,7 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         ';
 
         try {
-            $result = $store->sparqlQuery($query);
+            $result = $model->sparqlQuery($query);
         } catch (Exception $e) {
             throw new OntoWiki_Exception('Problem while getting menu entries.', $e);
         }
@@ -322,7 +323,7 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
                         'label' => $pieces[1]
                     );
 
-                    $subMenu = $this->_getMenu($url, $store, $titleHelper);
+                    $subMenu = $this->_getMenu($url, $model, $titleHelper);
 
                     if (count($subMenu) > 0) {
                         $navigation[$pieces[1]]['hasSubMenu'] = true;
