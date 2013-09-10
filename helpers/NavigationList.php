@@ -11,16 +11,17 @@
  *
  * returns an ol/ul list of a given rdf:seq resource
  *
- * @todo render substructure
  * @category OntoWiki
  * @package  OntoWiki_extensions_components_site
  */
 class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implements Site_View_Helper_MarkupInterface
 {
     /*
-     * the uri of the special title property
+     * the uris of the special properties
      */
-    protected $_menuLabel = 'http://ns.ontowiki.net/SysOnt/Site/menuLabel';
+    private $_menuLabel = 'http://ns.ontowiki.net/SysOnt/Site/menuLabel';
+    private $_appendedContent = 'http://ns.ontowiki.net/SysOnt/Site/appendedContent';
+    private $_prependedContent = 'http://ns.ontowiki.net/SysOnt/Site/prependedContent';
 
     /*
      * current view, injected with setView from Zend
@@ -189,8 +190,12 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
      */
     private function render($navigation = array())
     {
+        // split meta and items
+        $meta  = $navigation['meta'];
+        $items = $navigation['items'];
+
         $return = '';
-        foreach ($navigation as $item) {
+        foreach ($items as $item) {
             // prepare item values
             $url   = $item['url'];
             $label = $item['label'];
@@ -233,6 +238,13 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         // surround the list with prefix/suffix
         $return = $this->_prefix . $return . $this->_suffix;
 
+        if (isset($meta['prependedContent'])) {
+            $return = $meta['prependedContent'] . $return;
+        }
+        if (isset($meta['appendedContent'])) {
+            $return = $return . $meta['appendedContent'];
+        }
+
         // prepare class and id attribute/value strings for the nav-tag
         $class = ($this->_navClass != '') ? ' class="'.$this->_navClass.'"' : '';
         $id    = ($this->_navId != '')    ? ' id="'.$this->_navId.'"'       : '';
@@ -242,10 +254,14 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         return $return;
     }
 
-    private function _renderSubMenu ($navigation)
+    private function _renderSubMenu($navigation)
     {
+        // split meta and items
+        $meta  = $navigation['meta'];
+        $items = $navigation['items'];
+
         $return = '';
-        foreach ($navigation as $item) {
+        foreach ($items as $item) {
             // prepare item values
             $url   = $item['url'];
             $label = $item['label'];
@@ -280,13 +296,13 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         return $return;
     }
 
-    private function _getMenu ($navResource, $model, $titleHelper = null)
+    private function _getMenu ($uri, $model, $titleHelper = null)
     {
         $query = '
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             SELECT ?item ?prop
             WHERE {
-               <'. $navResource .'> ?prop ?item.
+               <'. $uri .'> ?prop ?item.
                ?prop a rdfs:ContainerMembershipProperty.
             }
         ';
@@ -298,9 +314,9 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
         }
 
         // array of urls and labels which represent the navigation menu
-        $navigation = array();
+        $items = array();
 
-        // round one: fill navigation array with urls as well as fill the titleHelper
+        // round one: fill items array with urls as well as fill the titleHelper
         foreach ($result as $row) {
             // works only for URIs ...
             if (Erfurt_Uri::check($row['item'])) {
@@ -313,49 +329,74 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
                     $titleHelper->addResource($url);
                 }
 
-                // split property and use numeric last part for navigation order.
+                // split property and use numeric last part for items order.
                 // example property: http://www.w3.org/2000/01/rdf-schema#_1
                 $pieces = explode('_', $property);
                 if (isset($pieces[1]) && is_numeric($pieces[1])) {
-                    // file the navigation array
-                    $navigation[$pieces[1]] = array(
+                    // file the items array
+                    $items[$pieces[1]] = array(
                         'url' => $url,
                         'label' => $pieces[1]
                     );
 
                     $subMenu = $this->_getMenu($url, $model, $titleHelper);
 
-                    if (count($subMenu) > 0) {
-                        $navigation[$pieces[1]]['hasSubMenu'] = true;
-                        $navigation[$pieces[1]]['subMenu'] = $subMenu;
+                    if (count($subMenu['items']) > 0) {
+                        $items[$pieces[1]]['hasSubMenu'] = true;
+                        $items[$pieces[1]]['subMenu'] = $subMenu;
                     } else {
-                        $navigation[$pieces[1]]['hasSubMenu'] = false;
+                        $items[$pieces[1]]['hasSubMenu'] = false;
                     }
                 }
             }
         }
 
-        // round three: sort navigation according to the index
-        if (count($navigation) > 1) {
-            ksort($navigation);
+        // round three: sort items according to the index
+        if (count($items) > 1) {
+            ksort($items);
         }
 
-        return $navigation;
+        // metadata of the navigation as a whole
+        $meta = array();
+        $resource = $model->getResource($uri);
+        $resourceModel = $resource->getMemoryModel();
+        if ($resourceModel->hasSP($uri, $this->_prependedContent)) {
+            $meta['prependedContent'] = $resourceModel->getValue($uri, $this->_prependedContent);
+        }
+        if ($resourceModel->hasSP($uri, $this->_appendedContent)) {
+            $meta['appendedContent'] = $resourceModel->getValue($uri, $this->_appendedContent);
+        }
+        //if ($uri == 'http://aksw.org/Events/2013/LeipzigerSemanticWebTag/Menu') {
+            //var_dump($resourceModel);
+        //}
+
+        return array(
+            'items' => $items,
+            'meta' => $meta
+        );
     }
 
-    private function _setTitles ($navigation, $titleHelper)
+    private function _setTitles($navigation, $titleHelper)
     {
-        // round two: fill navigation array with labels from the titleHelper
-        foreach ($navigation as $key => $value) {
+        // split meta and items
+        $meta  = $navigation['meta'];
+        $items = $navigation['items'];
+
+        // round two: fill items array with labels from the titleHelper
+        foreach ($items as $key => $value) {
             $label = $titleHelper->getTitle($value['url']);
-            $navigation[$key]['label'] = $label;
-            if ($navigation[$key]['hasSubMenu']) {
-                $navigation[$key]['subMenu'] = $this->_setTitles(
-                    $navigation[$key]['subMenu'], $titleHelper
+            $items[$key]['label'] = $label;
+            if ($items[$key]['hasSubMenu']) {
+                $items[$key]['subMenu'] = $this->_setTitles(
+                    $items[$key]['subMenu'], $titleHelper
                 );
             }
         }
 
-        return $navigation;
+        // rebuild and return
+        return array(
+            'items' => $items,
+            'meta' => $meta
+        );
     }
 }
