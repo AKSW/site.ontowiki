@@ -5,11 +5,12 @@
 	<projects>
 		<project>starpages.dev.eccenca.com</project>
 		<project>xturtle.core</project>
+		<project>xturtle.dc</project>
 		<project>xturtle.doap</project>
 		<project>xturtle.foaf</project>
+		<project>xturtle.schemaorg</project>
 		<project>xturtle.skos</project>
 		<project>xturtle.voidvann</project>
-		<project>xturtle.dc</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

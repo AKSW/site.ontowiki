@@ -96,6 +96,22 @@ site:content a owl:DatatypeProperty ;
   dct:modified "2013-05-28"^^xsd:date ;
   rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
 
+site:appendedContent a owl:DatatypeProperty ;
+  rdfs:subPropertyOf site:content ;
+  rdfs:comment "The content below the main content.", "This property is typically used for user addons on generated resources, e.g. menus" ;
+  rdfs:label "appended content" ;
+  dct:issued "2013-09-09"^^xsd:date ;
+  dct:modified "2013-09-09"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:prependedContent a owl:DatatypeProperty ;
+  rdfs:subPropertyOf site:content ;
+  rdfs:comment "The content above the main content.", "This property is typically used for user addons on generated resources, e.g. menus" ;
+  rdfs:label "prepended content" ;
+  dct:issued "2013-09-09"^^xsd:date ;
+  dct:modified "2013-09-09"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
 site:templateOption a owl:DatatypeProperty ;
   rdfs:comment "Used to forward specific options to the rendering templates." ;
   rdfs:comment "This is an lightweight version of the TemplateOption property class useful for very small deployments. Basicly, you have just values here, no keys." ;
