@@ -27,14 +27,20 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
      */
     private $_titleHelper = null;
 
+    /**
+     * Order field
+     */
+    private $_orderBy;
+
     public function querylist($query, $template, $templateOptions = array(), $options = array())
     {
         $owapp       = OntoWiki::getInstance();
         $store       = $owapp->erfurt->getStore();
         $model       = $owapp->selectedModel;
 
-        $prefix  = (isset($options['prefix']))  ? $options['prefix']  : '';
-        $suffix  = (isset($options['suffix']))  ? $options['suffix']  : '';
+        $prefix = (isset($options['prefix']))  ? $options['prefix']  : '';
+        $suffix = (isset($options['suffix']))  ? $options['suffix']  : '';
+        $this->_orderBy = (isset($options['orderBy'])) ? $options['orderBy'] : '';
 
         if ($this->_titleHelper == null) {
             $this->_titleHelper = new OntoWiki_Model_TitleHelper($model);
@@ -56,8 +62,11 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
             }
         }
 
-        if (!stristr($query, 'ORDER BY')) {
+        if ($this->_orderBy || !stristr($query, 'ORDER BY')) {
             // sort results by resource title
+            if (!$this->_orderBy) {
+                $this->_orderBy = 'resourceUri';
+            }
             usort($result, array('Site_View_Helper_Querylist', '_cmpTitles'));
         }
 
@@ -110,21 +119,22 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
      * @param $b the second row to compare
      * @return int as needed by usort
      */
-    private function _cmpTitles ($a, $b)
+    private function _cmpTitles ($a, $b, $orderBy = 'resourceUri')
     {
         $titleA = '';
         $titleB = '';
+        $orderBy = $this->_orderBy;
 
-        if (!Erfurt_Uri::check($a['resourceUri'])) {
-            $titleA    = $a['resourceUri'];
+        if (!Erfurt_Uri::check($a[$orderBy])) {
+            $titleA    = $a[$orderBy];
         } else {
-            $titleA    = $this->_titleHelper->getTitle($a['resourceUri']);
+            $titleA    = $this->_titleHelper->getTitle($a[$orderBy]);
         }
 
-        if (!Erfurt_Uri::check($b['resourceUri'])) {
-            $titleB    = $b['resourceUri'];
+        if (!Erfurt_Uri::check($b[$orderBy])) {
+            $titleB    = $b[$orderBy];
         } else {
-            $titleB    = $this->_titleHelper->getTitle($b['resourceUri']);
+            $titleB    = $this->_titleHelper->getTitle($b[$orderBy]);
         }
 
         return strcasecmp($titleA, $titleB);
