@@ -27,11 +27,6 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
      */
     private $_titleHelper = null;
 
-    /**
-     * Order field
-     */
-    private $_orderBy;
-
     public function querylist($query, $template, $templateOptions = array(), $options = array())
     {
         $owapp       = OntoWiki::getInstance();
@@ -40,7 +35,6 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
 
         $prefix = (isset($options['prefix']))  ? $options['prefix']  : '';
         $suffix = (isset($options['suffix']))  ? $options['suffix']  : '';
-        $this->_orderBy = (isset($options['orderBy'])) ? $options['orderBy'] : '';
 
         if ($this->_titleHelper == null) {
             $this->_titleHelper = new OntoWiki_Model_TitleHelper($model);
@@ -62,11 +56,12 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
             }
         }
 
-        if ($this->_orderBy || !stristr($query, 'ORDER BY')) {
+        /*
+         * If the ordering doesn't work using the 'ORDER BY' clause you should add ASC() around the
+         * variable which should by sorted. E.g. "… } ORDER BY ASC(?start) ASC(?end)"
+         */
+        if (!stristr($query, 'ORDER BY')) {
             // sort results by resource title
-            if (!$this->_orderBy) {
-                $this->_orderBy = 'resourceUri';
-            }
             usort($result, array('Site_View_Helper_Querylist', '_cmpTitles'));
         }
 
@@ -123,7 +118,6 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
     {
         $titleA = '';
         $titleB = '';
-        $orderBy = $this->_orderBy;
 
         if (!Erfurt_Uri::check($a[$orderBy])) {
             $titleA    = $a[$orderBy];
