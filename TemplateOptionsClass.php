@@ -199,4 +199,12 @@ class TemplateOptionsClass
         $value = $this->getValue($key, $default);
         return $value ? preg_split('/\s*,\s*/', $value) : array();
     }
+
+    public function dump()
+    {
+        return print_r(array(
+            'options'          => $this->_options,
+            'optionLocalNames' => $this->_optionLocalNames,
+        ), true);
+    }
 }
