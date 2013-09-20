@@ -29,12 +29,13 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
 
     public function querylist($query, $template, $templateOptions = array(), $options = array())
     {
-        $owapp       = OntoWiki::getInstance();
-        $store       = $owapp->erfurt->getStore();
-        $model       = $owapp->selectedModel;
+        $owapp      = OntoWiki::getInstance();
+        $store      = $owapp->erfurt->getStore();
+        $model      = $owapp->selectedModel;
 
-        $prefix = (isset($options['prefix']))  ? $options['prefix']  : '';
-        $suffix = (isset($options['suffix']))  ? $options['suffix']  : '';
+        $prefix     = (isset($options['prefix']))       ? $options['prefix']    : '';
+        $suffix     = (isset($options['suffix']))       ? $options['suffix']    : '';
+        $delimiter  = (isset($options['delimiter']))    ? $options['delimiter'] : '';
 
         if ($this->_titleHelper == null) {
             $this->_titleHelper = new OntoWiki_Model_TitleHelper($model);
@@ -93,6 +94,9 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
 
             // render the template
             $return         .= $prefix . $this->view->partial($template, $row) . $suffix;
+            if ($current < $count) {
+                $return     .= $delimiter;
+            }
         }
 
         return $return;
