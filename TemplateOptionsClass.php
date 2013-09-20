@@ -110,7 +110,8 @@ class TemplateOptionsClass
             $options = new TemplateOptionsClass($result[$other->getName()]);
             foreach ($options->_options as $arrayKey => $priorities) {
                 foreach ($priorities as $priority => $values) {
-                    $this->_options[$arrayKey][$priority + $this->_getPriority($result) * static::PRIORITY_LAST] = $values;
+                    $floor = floor($priority);
+                    $this->_options[$arrayKey][(string)($floor + 0.1*$this->_getPriority($result) + 0.1*($priority - $floor))] = $values;
                 }
             }
             foreach ($options->_optionLocalNames as $arrayKeyLocalName => $keys) {
@@ -183,7 +184,8 @@ class TemplateOptionsClass
     public function getValue($key, $default = null)
     {
         if ($array = $this->getArray($key)) {
-            return reset($array[0]);
+            $values = reset($array);
+            return reset($values);
         }
 
         return $default;
