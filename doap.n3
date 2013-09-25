@@ -30,6 +30,8 @@
 
   owconfig:requiresExtension extension:linkeddataserver;
 
+  owconfig:hasModule :CacheViewer;
+
   :defaultSite "example" ;
   doap:release :v1-0 .
 
@@ -44,3 +46,8 @@
   foaf:name "Sebastian Tramp";
   foaf:homepage <http://aksw.org/SebastianTramp>;
   foaf:mbox <mailto:tramp@informatik.uni-leipzig.de> .
+
+:CacheViewer a owconfig:Module;
+  owconfig:priority "30";
+  rdfs:label "Cache";
+  owconfig:context "main.window.modelinfo", "main.window.properties".

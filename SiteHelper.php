@@ -22,6 +22,38 @@ class SiteHelper extends OntoWiki_Component_Helper
     const SITE_CONFIG_FILENAME = 'config.ini';
 
     /**
+     * The main template filename
+     */
+    const MAIN_TEMPLATE_NAME = 'layout.phtml';
+
+    /**
+     * The model URI of the selected model or the uri which is given
+     * by the m parameter
+     *
+     * @var string|null
+     */
+    private $_modelUri = null;
+
+    /**
+     * The selected model or the model which is given
+     * by the m parameter
+     */
+    private $_model = null;
+
+    /**
+     * The resource URI of the requested resource or the uri which is given
+     * by the r parameter
+     *
+     * @var string|null
+     */
+    private $_resourceUri = null;
+
+    /**
+     * relative Path to the extension template folder
+     */
+    private $_relativeTemplatePath = 'templates';
+
+    /**
      * Current site (if in use)
      * @var string|null
      */
@@ -38,6 +70,11 @@ class SiteHelper extends OntoWiki_Component_Helper
      * @var string
      */
     protected $_currentSuffix = '';
+
+    public function init()
+    {
+        $this->_relativeTemplatePath = $this->_owApp->extensionManager->getExtensionConfig('site')->templates;
+    }
 
     public function onPostBootstrap($event)
     {
@@ -344,6 +381,252 @@ class SiteHelper extends OntoWiki_Component_Helper
     public function setSite($site)
     {
         $this->_site = (string)$site;
+    }
+
+    public function getPage($uri = null)
+    {
+        $this->_loadModel();
+        $this->_loadResource();
+
+        // prepare view
+        $moduleTemplatePath = $this->_componentRoot
+                            . $this->_relativeTemplatePath
+                            . DIRECTORY_SEPARATOR
+                            . $this->_privateConfig->defaultSite
+                            . DIRECTORY_SEPARATOR
+                            . 'modules';
+
+        $config = OntoWiki::getInstance()->config;
+
+        // TODO merge with Bootstrap::_initView
+        $defaultTemplatePath = ONTOWIKI_ROOT
+                             . 'application/views/templates';
+
+        $themeTemplatePath   = ONTOWIKI_ROOT
+                             . $config->themes->path
+                             . $config->themes->default
+                             . 'templates';
+
+        $viewOptions = array(
+            'use_module_cache' => (bool)$config->cache->modules,
+            'cache_path'        => $config->cache->path,
+            'lang'              => $config->languages->locale,
+        );
+
+        $translate = $GLOBALS['application']->getBootstrap()->getResource('Translate');
+
+        $view = new OntoWiki_View($viewOptions, $translate);
+        $view->addScriptPath($defaultTemplatePath)  // default templates
+            ->addScriptPath($themeTemplatePath)    // theme templates override default ones
+            ->addScriptPath($config->extensions->base)    // extension templates
+            ->setEncoding($config->encoding)
+            ->setHelperPath(ONTOWIKI_ROOT . 'application/classes/OntoWiki/View/Helper', 'OntoWiki_View_Helper');
+
+        $view->strictVars(defined('_OWDEBUG'));
+
+        // TODO merge with Controller::Base
+        $view->themeUrlBase   = $config->themeUrlBase;
+        $view->urlBase        = $config->urlBase;
+        $view->staticUrlBase  = $config->staticUrlBase;
+        $view->libraryUrlBase = $config->staticUrlBase . 'libraries/';
+
+        $cache = array(
+            'code'    => 200,
+            'headers' => array('Content-Type' => 'text/html; encoding=utf-8'),
+        );
+
+        $templatePath = $this->_owApp->extensionManager->getComponentTemplatePath('site');
+        $mainTemplate = sprintf('%s/%s', $this->_site, static::MAIN_TEMPLATE_NAME);
+
+        // TODO merge with Controller::Component
+        $cm   = $this->_owApp->extensionManager;
+        $name = 'site';
+
+        // set component specific template path
+        if ($tp = $cm->getComponentTemplatePath($name)) {
+            $view->addScriptPath($tp);
+        }
+
+        // set component specific helper path
+        if ($hp = $cm->getComponentHelperPath($name)) {
+            $view->addHelperPath($hp, ucfirst($name) . '_View_Helper_');
+        }
+
+        // set component root dir
+        $this->_componentRoot = $cm->getExtensionPath()
+            . $name
+            . '/';
+
+        // set component root url
+        $this->_componentUrlBase = $this->_config->staticUrlBase
+            . $this->_config->extensions->base
+            . $name
+            . '/';
+
+        if (!is_readable($templatePath . $mainTemplate)) {
+            $cache['code'] = 404;
+            $cache['body'] = $view->render('404.phtml');
+            return $cache;
+        }
+
+        $description = $this->_resource->getDescription();
+        if (!empty($description[$this->_resourceUri][EF_RDF_TYPE])) {
+            $type = $description[$this->_resourceUri][EF_RDF_TYPE][0]['value'];
+            if ($type === 'http://ns.ontowiki.net/SysOnt/Site/MovedResource') {
+                if (!empty($description[$this->_resourceUri]['http://ns.ontowiki.net/SysOnt/Site/seeAlso'])) {
+                    $cache['code'] = 303;
+                    $cache['headers']['Location'] = $description[$this->_resourceUri]['http://ns.ontowiki.net/SysOnt/Site/seeAlso'][0]['value'];
+                } else {
+                    // FIXME
+                    $cache['code'] = 500;
+                }
+                // TODO use different template?
+            }
+        }
+
+        // add module template override path
+        if (is_readable($moduleTemplatePath)) {
+            $scriptPaths = $view->getScriptPaths();
+            array_push($scriptPaths, $moduleTemplatePath);
+            $view->setScriptPath($scriptPaths);
+        }
+
+        // with assignment, direct access is possible ($this->basePath).
+        $view->assign($this->_getTemplateData($view));
+        // this allows for easy re-assignment of everything
+        $view->templateData = $this->_getTemplateData($view);
+
+        // generate the page body
+        $cache['body'] = $view->render($mainTemplate);
+
+        return $cache;
+    }
+
+    protected function _cacheId($uri)
+    {
+        if ($uri === null) {
+            $uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        }
+        return 'site_' . md5($uri);
+    }
+
+    public function testCache($uri = null)
+    {
+        $id = $this->_cacheId($uri);
+
+        $erfurtObjectCache = OntoWiki::getInstance()->erfurt->getCache();
+        return $erfurtObjectCache->test($id);
+    }
+
+    public function removeCache($uri = null)
+    {
+        $id = $this->_cacheId($uri);
+
+        $erfurtObjectCache = OntoWiki::getInstance()->erfurt->getCache();
+        return $erfurtObjectCache->remove($id);
+    }
+
+    public function makeCache($uri = null)
+    {
+        $id = $this->_cacheId($uri);
+
+        $erfurtObjectCache = OntoWiki::getInstance()->erfurt->getCache();
+        $erfurtQueryCache  = OntoWiki::getInstance()->erfurt->getQueryCache();
+
+        $erfurtQueryCache->startTransaction($id);
+        $erfurtObjectCache->save($cache = $this->getPage($uri), $id);
+        $erfurtQueryCache->endTransaction($id);
+
+        return $cache;
+    }
+
+    public function loadCache($uri = null)
+    {
+        $id = $this->_cacheId($uri);
+
+        $erfurtObjectCache = OntoWiki::getInstance()->erfurt->getCache();
+        return $erfurtObjectCache->load($id);
+    }
+
+    private function _getTemplateData($view)
+    {
+        // prepare namespace array with presets of rdf, rdfs and owl
+        $namespaces = array(
+            'rdf'    => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+            'rdfs'   => 'http://www.w3.org/2000/01/rdf-schema#',
+            'owl'    => 'http://www.w3.org/2002/07/owl#'
+        );
+        foreach ($this->_model->getNamespaces() as $ns => $prefix) {
+            $namespaces[$prefix] = $ns;
+        }
+
+        // this template data is given to ALL templates (with renderx)
+        $templateData           = array(
+            'siteId'            => $this->_site,
+            'siteConfig'        => $this->getSiteConfig(),
+            'generator'         => 'OntoWiki ' . $this->_config->version->number,
+            'pingbackUrl'       => $this->_owApp->getUrlBase() . 'pingback/ping',
+            'wikiBaseUrl'       => $this->_owApp->getUrlBase(),
+            'themeUrlBase'      => $view->themeUrlBase,
+            'libraryUrlBase'    => $view->libraryUrlBase,
+            'basePath'          => sprintf('%s%s/%s', $this->_componentRoot, $this->_relativeTemplatePath, $this->_site),
+            'baseUri'           => sprintf('%s%s/%s', $this->_componentUrlBase, $this->_relativeTemplatePath, $this->_site),
+            'context'           => 'site.' . $this->_site,
+            'namespaces'        => $namespaces,
+            'model'             => $this->_model,
+            'modelUri'          => $this->_modelUri,
+            'title'             => $this->_resource->getTitle(),
+            'resourceUri'       => (string) $this->_resourceUri,
+            'description'       => $this->_resource->getDescription(),
+            'descriptionHelper' => $this->_resource->getDescriptionHelper(),
+
+            'site'              => array(
+                                            'index' => 0,
+                                            'name' => 'Home'
+                                        ),
+            'navigation'        => array(),
+            'options'           => array(),
+        );
+
+        return $templateData;
+    }
+
+    protected function _loadModel()
+    {
+        $siteConfig = $this->getSiteConfig();
+
+        // m is automatically used and selected
+        if ((!isset($this->_request->m)) && (!$this->_owApp->selectedModel)) {
+            // TODO: what if no site model configured?
+            if (!Erfurt_Uri::check($siteConfig['model'])) {
+                $site = $this->_privateConfig->defaultSite;
+                $root = $this->getComponentHelper()->getComponentRoot();
+                $configFilePath = sprintf('%s%s/%s/%s', $root, $this->_relativeTemplatePath, $site, SiteHelper::SITE_CONFIG_FILENAME);
+                throw new OntoWiki_Exception(
+                    'No model selected! Please, configure a site model by setting the option '
+                    . '"model=..." in "' . $configFilePath . '" or specify parameter m in the URL.'
+                );
+            } else {
+                // setup the model
+                $this->_modelUri = $siteConfig['model'];
+                $store = OntoWiki::getInstance()->erfurt->getStore();
+                $this->_model = $store->getModel($this->_modelUri);
+                OntoWiki::getInstance()->selectedModel = $this->_model;
+            }
+        } else {
+            $this->_model = $this->_owApp->selectedModel;
+            $this->_modelUri = (string) $this->_owApp->selectedModel;
+        }
+    }
+
+    protected function _loadResource()
+    {
+        // r is automatically used and selected, if not then we use the model uri as starting point
+        if ((!isset($this->_request->r)) && (!$this->_owApp->selectedResource)) {
+            OntoWiki::getInstance()->selectedResource = new OntoWiki_Resource($this->_modelUri, $this->_model);
+        }
+        $this->_resource = $this->_owApp->selectedResource;
+        $this->_resourceUri = (string) $this->_owApp->selectedResource;
     }
 
 }
