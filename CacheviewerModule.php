@@ -20,6 +20,11 @@ class CacheviewerModule extends OntoWiki_Module
     {
     }
 
+    public function shouldShow()
+    {
+        return $this->_erfurt->getAc()->isActionAllowed('CacheManagement');
+    }
+
     public function getTitle()
     {
         return 'Site Page Cache';
@@ -27,21 +32,18 @@ class CacheviewerModule extends OntoWiki_Module
 
     public function getContents()
     {
-        $content = '';
+        $helper = $this->_owApp->extensionManager->getComponentHelper('site');
 
-        if (true) {
-            $helper = $this->_owApp->extensionManager->getComponentHelper('site');
-
-            $uri = $this->_owApp->selectedResource;
-            if (!empty($uri) && $uri != (string)$this->_owApp->selectedModel) {
-                $uri .= '.html';
-            }
-            $uri = preg_replace('~^http://~', '', $uri);
-
-            $this->view->test = $helper->testCache($uri);
-            $content .= $this->render('templates/cacheviewer');
+        $uri = $this->_owApp->selectedResource;
+        if (!empty($uri) && $uri != (string)$this->_owApp->selectedModel) {
+            $uri .= '.html';
         }
+        $uri = preg_replace('~^http://~', '', $uri);
 
-        return $content;
+        $this->view->r = $this->_owApp->selectedResource;
+        $this->view->uri = $uri;
+        $this->view->test = $helper->testCache($uri);
+
+        return $this->render('templates/cacheviewer');
     }
 }

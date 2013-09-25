@@ -128,6 +128,30 @@ FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'")
         exit;
     }
 
+    public function deletecacheAction()
+    {
+        if (!$this->_erfurt->getAc()->isActionAllowed('CacheManagement')) {
+            throw new Erfurt_Ac_Exception("Action 'CacheManagement' not allowed.");
+        }
+
+        $this->getComponentHelper()->removeCache($this->_request->getPost('uri'));
+        $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());
+        $redirect->r = $this->_request->getPost('r');
+        $this->_redirect($redirect);
+    }
+
+    public function regeneratecacheAction()
+    {
+        if (!$this->_erfurt->getAc()->isActionAllowed('CacheManagement')) {
+            throw new Erfurt_Ac_Exception("Action 'CacheManagement' not allowed.");
+        }
+
+        $this->getComponentHelper()->makeCache($this->_request->getPost('uri'));
+        $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());
+        $redirect->r = $this->_request->getPost('r');
+        $this->_redirect($redirect);
+    }
+
     /*
      * to allow multiple template sets, every action is mapped to a template directory
      */
