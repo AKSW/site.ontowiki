@@ -202,7 +202,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $isuffix = (isset($options['isuffix'])) ? $options['isuffix'] : '';
         // array used to return plain values by default
         $plain   = (isset($options['plain']))   ? $options['plain']   : isset($options['array']);
-        $label   = (isset($options['label']))   ? $options['label']   : '';
+        $label   = (isset($options['label']))   ? $options['label']   : null;
         $labels  = (isset($options['labels']))  ? $options['labels']  : array();
 
         $tmplOpt = $this->view->templateOptions();
@@ -222,7 +222,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $content = $object['value'];
         $alt     = '';
 
-        if ($label !== '') {
+        if ($label !== null) {
             $value   = $object['value'];
             $content = $label;
             $alt     = $content;
