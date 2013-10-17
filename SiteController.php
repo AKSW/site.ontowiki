@@ -278,7 +278,7 @@ FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'")
         $templateData           = array(
             'siteId'            => $this->_site,
             'siteConfig'        => $this->_getSiteConfig(),
-            'generator'         => 'OntoWiki ' . $this->_config->version->number,
+            'generator'         => $this->_config->version->label . ' ' . $this->_config->version->number,
             'pingbackUrl'       => $this->_owApp->getUrlBase() . 'pingback/ping',
             'wikiBaseUrl'       => $this->_owApp->getUrlBase(),
             'themeUrlBase'      => $this->view->themeUrlBase,
