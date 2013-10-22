@@ -23,6 +23,9 @@ class Site_View_Helper_Wrap extends Zend_View_Helper_Abstract implements Site_Vi
         $resourceUri = $this->view->resourceUri;
         $content = $this->view->partial($options['content'], array('resourceUri' => $resourceUri));
         if (!trim($content)) return '';
-        return $this->view->partial($options['template'], array('content' => $content, 'resourceUri' => $resourceUri));
+
+        $templateOptions = isset($options['templateOptions']) ? $options['templateOptions'] : array();
+        $templateOptions = array_merge($templateOptions, array('content' => $content, 'resourceUri' => $resourceUri));
+        return $this->view->partial($options['template'], $templateOptions);
     }
 }
