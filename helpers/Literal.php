@@ -65,7 +65,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         'object' => array('attr' => 'data',    'type' => 'string'),
         'data'   => array('attr' => 'value',   'type' => 'string'),
         'meter'  => array('attr' => 'value',   'type' => 'string'),
-        'time'   => array('attr' => 'value',   'type' => 'FIXME'),
+        'time'   => array('attr' => 'datetime','type' => 'string'),
     );
 
     /*
