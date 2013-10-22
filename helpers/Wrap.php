@@ -21,7 +21,22 @@ class Site_View_Helper_Wrap extends Zend_View_Helper_Abstract implements Site_Vi
     public function wrap($options)
     {
         $resourceUri = $this->view->resourceUri;
-        $content = $this->view->partial($options['content'], array('resourceUri' => $resourceUri));
+
+        $content = '';
+        if (!is_array($options['content'])) {
+            // render a template
+            $content = $this->view->partial($options['content'], array('resourceUri' => $resourceUri));
+
+        } else {
+            // single querylist call to avoid excess trivial templates
+            $content = $this->view->querylist(
+                null,
+                $options['content']['template'],
+                $options['content']['templateOptions'],
+                array('property' => $options['content']['property'])
+            );
+        }
+
         if (!trim($content)) return '';
 
         $templateOptions = isset($options['templateOptions']) ? $options['templateOptions'] : array();
