@@ -19,7 +19,7 @@ class Site_View_Helper_Literals extends Zend_View_Helper_Abstract implements Sit
     public function literals($options = array())
     {
         $options['array'] = true;
-        $options['plain'] = false;
+        if (!isset($options['plain'])) $options['plain'] = false;
 
         return implode('', $this->view->literal($options));
     }
