@@ -31,7 +31,9 @@ class Site_View_Helper_Img extends Zend_View_Helper_Abstract implements Site_Vie
         'http://xmlns.com/foaf/0.1/logo',
         'http://xmlns.com/foaf/0.1/img',
         'http://purl.org/ontology/mo/image',
-        'http://open.vocab.org/terms/screenshot'
+        'http://open.vocab.org/terms/screenshot',
+        'http://schema.org/logo',
+        'http://schema.org/image',
     );
 
     /*

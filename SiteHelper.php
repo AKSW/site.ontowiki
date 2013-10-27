@@ -564,7 +564,7 @@ class SiteHelper extends OntoWiki_Component_Helper
         $templateData           = array(
             'siteId'            => $this->_site,
             'siteConfig'        => $this->getSiteConfig(),
-            'generator'         => 'OntoWiki ' . $this->_config->version->number,
+            'generator'         => $this->_config->version->label . ' ' . $this->_config->version->number,
             'pingbackUrl'       => $this->_owApp->getUrlBase() . 'pingback/ping',
             'wikiBaseUrl'       => $this->_owApp->getUrlBase(),
             'themeUrlBase'      => $view->themeUrlBase,

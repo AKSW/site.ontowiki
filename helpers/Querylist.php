@@ -36,9 +36,24 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
         $prefix     = (isset($options['prefix']))       ? $options['prefix']    : '';
         $suffix     = (isset($options['suffix']))       ? $options['suffix']    : '';
         $delimiter  = (isset($options['delimiter']))    ? $options['delimiter'] : '';
+        $property   = (isset($options['property']))     ? $options['property']  : '';
 
         if ($this->_titleHelper == null) {
             $this->_titleHelper = new OntoWiki_Model_TitleHelper($model);
+        }
+
+        if ($property !== '') {
+            // construct query to retrieve specified property of the current resource
+            $query  = new Erfurt_Sparql_Query2();
+
+            $resourceUriVar = new Erfurt_Sparql_Query2_Var('resourceUri');
+            $query->addProjectionVar($resourceUriVar);
+
+            $query->addTriple(
+                new Erfurt_Sparql_Query2_IriRef($this->view->resourceUri),
+                new Erfurt_Sparql_Query2_IriRef($property),
+                $resourceUriVar
+            );
         }
 
         try {

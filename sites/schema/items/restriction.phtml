@@ -1,0 +1,11 @@
+<a href="<?= $this->resourceUri ?>"><?= $this->title ?></a> (cardinality
+
+<?php if ($this->cardinality !== '') : ?>
+= <?= $this->cardinality ?>
+<?php endif; ?>
+<?php if ($this->minCardinality !== '') : ?>
+&ge; <?= $this->minCardinality ?>
+<?php endif; ?>
+<?php if ($this->maxCardinality !== '') : ?>
+&le; <?= $this->maxCardinality ?>
+<?php endif; ?>) <em>owl:Restriction</em>

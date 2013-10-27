@@ -42,11 +42,6 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
     public $templateData = array();
 
     /*
-     * URI of the to rendered resource
-     */
-    private $_resourceUri;
-
-    /*
      * an array of mappings (key = class URI, value = template name)
      */
     private $_mappings = null;
@@ -173,10 +168,11 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
     private function prepareTemplateData($options = array())
     {
         if (isset($options['resourceUri'])) {
-            $this->_resourceUri = $options['resourceUri'];
+            $this->templateData['resourceUri'] = $options['resourceUri'];
+        } else {
+            $this->templateData['resourceUri'] = (string)$this->view->resourceUri;
         }
 
-        $this->templateData['resourceUri'] = $this->_resourceUri;
         $this->templateData['description'] = $this->getDescription();
         $this->templateData['title']       = $this->resource->getTitle();
         $this->templateData['options']     = $options;
@@ -218,9 +214,10 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
      */
     private function getDescription()
     {
-        $this->resource     = new OntoWiki_Resource($this->_resourceUri, $this->_model);
+        $resourceUri        = $this->templateData['resourceUri'];
+        $this->resource     = new OntoWiki_Resource($resourceUri, $this->_model);
         $this->description  = $this->resource->getDescription();
-        $this->description  = $this->description[$this->_resourceUri];
+        $this->description  = $this->description[$resourceUri];
         return $this->description;
     }
 
@@ -232,7 +229,6 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
         $this->view         = $view;
         $this->_model       = $view->model;
         $this->templateData = $view->templateData;
-        $this->_resourceUri = (string)$view->resourceUri;
     }
 
 }
