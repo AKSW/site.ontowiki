@@ -393,7 +393,7 @@ class SiteHelper extends OntoWiki_Component_Helper
 
     public function getAllURIs()
     {
-        $this->_loadModel();
+        $this->loadModel();
         $store = OntoWiki::getInstance()->erfurt->getStore();
 
         // get all classes with template set in some way
@@ -432,7 +432,7 @@ class SiteHelper extends OntoWiki_Component_Helper
 
     public function getPage($uri = null)
     {
-        $this->_loadModel();
+        $this->loadModel();
         $this->_loadResource();
 
         // prepare view
@@ -638,7 +638,7 @@ class SiteHelper extends OntoWiki_Component_Helper
         return $templateData;
     }
 
-    protected function _loadModel()
+    public function loadModel()
     {
         $siteConfig = $this->getSiteConfig();
 
@@ -664,6 +664,8 @@ class SiteHelper extends OntoWiki_Component_Helper
             $this->_model = $this->_owApp->selectedModel;
             $this->_modelUri = (string) $this->_owApp->selectedModel;
         }
+
+        return $this->_model;
     }
 
     protected function _loadResource()

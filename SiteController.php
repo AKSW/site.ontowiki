@@ -80,7 +80,7 @@ class SiteController extends OntoWiki_Controller_Component
         if ($sitemapXml === false) {
             $erfurtQueryCache->startTransaction($sitemapObjectCacheId);
             $siteConfig = $this->getComponentHelper()->_getSiteConfig();
-            $this->getComponentHelper()->_loadModel();
+            $this->_model = $this->getComponentHelper()->loadModel();
             $query	= '
 SELECT DISTINCT ?resourceUri ?modified
 WHERE { 
