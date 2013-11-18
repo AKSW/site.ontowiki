@@ -84,6 +84,15 @@ class SiteHelper extends OntoWiki_Component_Helper
         $this->_relativeTemplatePath = $this->_owApp->extensionManager->getExtensionConfig('site')->templates;
     }
 
+    public function onAnnounceWorker($event)
+    {
+        $event->registry->registerJob(
+            'makePageCache',
+            'extensions/site/jobs/MakePageCache.php',
+            'Site_Job_MakePageCache'
+        );
+    }
+
     public function onPostBootstrap($event)
     {
         $router     = $event->bootstrap->getResource('Router');

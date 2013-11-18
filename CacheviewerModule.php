@@ -42,6 +42,7 @@ class CacheviewerModule extends OntoWiki_Module
 
         $this->view->r = $this->_owApp->selectedResource;
         $this->view->uri = $uri;
+        $this->view->resourceUri = (string)$this->_owApp->selectedResource;
         $this->view->test = $helper->testCache($uri);
 
         return $this->render('templates/cacheviewer');

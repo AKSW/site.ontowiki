@@ -146,7 +146,17 @@ FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'")
             throw new Erfurt_Ac_Exception("Action 'CacheManagement' not allowed.");
         }
 
-        $this->getComponentHelper()->makeCache($this->_request->getPost('uri'));
+        $helper = $this->getComponentHelper();
+        $this->_model = $helper->loadModel();
+
+        OntoWiki::getInstance()->callJob('makePageCache', array(
+            'modelUri' => $this->_model->getModelUri(),
+            'resourceUri' => $this->_request->getPost('resourceUri'),
+            'uri' => $this->_request->getPost('uri'),
+            # TODO determine which site this resource belongs to?
+            'site' => $this->_privateConfig->defaultSite,
+        ));
+
         $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());
         $redirect->r = $this->_request->getPost('r');
         $this->_redirect($redirect);

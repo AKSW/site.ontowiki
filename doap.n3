@@ -22,6 +22,7 @@
   owconfig:templates "sites" ;
   owconfig:helpers "helpers" ;
 
+  owconfig:helperEvent event:onAnnounceWorker ;
   owconfig:helperEvent event:onPostBootstrap ;
   owconfig:helperEvent event:onShouldLinkedDataRedirect ;
   owconfig:helperEvent event:onBuildUrl ;
