@@ -71,6 +71,14 @@ class SiteHelper extends OntoWiki_Component_Helper
      */
     protected $_currentSuffix = '';
 
+    /*
+     * used schema URIs
+     */
+    const TEMPLATE_PROP_CLASS       = 'http://ns.ontowiki.net/SysOnt/Site/classTemplate';
+    const TEMPLATE_PROP_RESOURCE    = 'http://ns.ontowiki.net/SysOnt/Site/template';
+    const TYPE_PROP                 = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+    const SUBCLASS_PROP             = 'http://www.w3.org/2000/01/rdf-schema#subClassOf';
+
     public function init()
     {
         $this->_relativeTemplatePath = $this->_owApp->extensionManager->getExtensionConfig('site')->templates;
@@ -381,6 +389,45 @@ class SiteHelper extends OntoWiki_Component_Helper
     public function setSite($site)
     {
         $this->_site = (string)$site;
+    }
+
+    public function getAllURIs()
+    {
+        $this->_loadModel();
+        $store = OntoWiki::getInstance()->erfurt->getStore();
+
+        // get all classes with template set in some way
+        $classes = $this->_model->sparqlQuery('
+            SELECT DISTINCT ?resourceUri
+            FROM <http://starpages.dev.eccenca.com/>
+            WHERE {
+                ?resourceUri <' . self::TEMPLATE_PROP_CLASS . '> ?template.
+            }
+        ');
+        $classes = array_map(function($_) { return $_['resourceUri']; }, $classes);
+
+        $closure = $store->getTransitiveClosure($this->_model, self::SUBCLASS_PROP, $classes, true);
+        $classes = array_keys($closure);
+
+        // get all resources with templates set directly or with class
+        $URIs = $this->_model->sparqlQuery('
+            SELECT DISTINCT ?resourceUri
+            FROM <http://starpages.dev.eccenca.com/>
+            WHERE {
+                {
+                    ?resourceUri <' . self::TEMPLATE_PROP_RESOURCE . '> ?template.
+                }
+                UNION
+                {
+                    ?resourceUri rdf:type ?class.
+                    FILTER (
+                        ?class IN (' . implode(',', array_map(function($_) { return "<$_>"; }, $classes)) . ')
+                    )
+                }
+            }
+        ');
+        $URIs = array_map(function($_) { return $_['resourceUri']; }, $URIs);
+        return $URIs;
     }
 
     public function getPage($uri = null)
