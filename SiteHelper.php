@@ -604,6 +604,20 @@ class SiteHelper extends OntoWiki_Component_Helper
         return $erfurtObjectCache->load($id);
     }
 
+    public function setUrlBase($url)
+    {
+        $this->_urlBase = $url;
+    }
+
+    public function getUrlBase()
+    {
+        if (!isset($this->_urlBase)) {
+            return $this->_owApp->getUrlBase();
+        }
+
+        return $this->_urlBase;
+    }
+
     private function _getTemplateData($view)
     {
         // prepare namespace array with presets of rdf, rdfs and owl
@@ -621,8 +635,8 @@ class SiteHelper extends OntoWiki_Component_Helper
             'siteId'            => $this->_site,
             'siteConfig'        => $this->getSiteConfig(),
             'generator'         => $this->_config->version->label . ' ' . $this->_config->version->number,
-            'pingbackUrl'       => $this->_owApp->getUrlBase() . 'pingback/ping',
-            'wikiBaseUrl'       => $this->_owApp->getUrlBase(),
+            'pingbackUrl'       => $this->getUrlBase() . 'pingback/ping',
+            'wikiBaseUrl'       => $this->getUrlBase(),
             'themeUrlBase'      => $view->themeUrlBase,
             'libraryUrlBase'    => $view->libraryUrlBase,
             'basePath'          => sprintf('%s%s/%s', $this->_componentRoot, $this->_relativeTemplatePath, $this->_site),

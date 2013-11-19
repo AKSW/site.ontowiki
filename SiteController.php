@@ -153,6 +153,7 @@ FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'")
             'modelUri' => $this->_model->getModelUri(),
             'resourceUri' => $this->_request->getPost('resourceUri'),
             'uri' => $this->_request->getPost('uri'),
+            'urlBase' => $helper->getUrlBase(),
             # TODO determine which site this resource belongs to?
             'site' => $this->_privateConfig->defaultSite,
         ));
