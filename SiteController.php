@@ -150,12 +150,27 @@ FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'")
         $this->_model = $helper->loadModel();
 
         OntoWiki::getInstance()->callJob('makePageCache', array(
-            'modelUri' => $this->_model->getModelUri(),
             'resourceUri' => $this->_request->getPost('resourceUri'),
-            'uri' => $this->_request->getPost('uri'),
             'urlBase' => $helper->getUrlBase(),
-            # TODO determine which site this resource belongs to?
-            'site' => $this->_privateConfig->defaultSite,
+            'msg' => '(requested in OntoWiki)',
+        ));
+
+        $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());
+        $redirect->r = $this->_request->getPost('r');
+        $this->_redirect($redirect);
+    }
+
+    public function makesitecacheAction()
+    {
+        if (!$this->_erfurt->getAc()->isActionAllowed('CacheManagement')) {
+            throw new Erfurt_Ac_Exception("Action 'CacheManagement' not allowed.");
+        }
+
+        $helper = $this->getComponentHelper();
+        $siteConfig = $helper->getSiteConfig();
+
+        OntoWiki::getInstance()->callJob('makeSiteCache', array(
+            'urlBase' => $helper->getUrlBase(),
         ));
 
         $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());

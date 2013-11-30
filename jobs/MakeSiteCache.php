@@ -8,7 +8,7 @@
  * Cache generation job
  */
 
-class Site_Job_MakePageCache extends Erfurt_Worker_Job_Abstract
+class Site_Job_MakeSiteCache extends Erfurt_Worker_Job_Abstract
 {
     public function run($workload)
     {
@@ -19,17 +19,21 @@ class Site_Job_MakePageCache extends Erfurt_Worker_Job_Abstract
         $store = OntoWiki::getInstance()->erfurt->getStore();
         $model = $store->getModel($siteConfig['model']);
         OntoWiki::getInstance()->selectedModel = $model;
-        OntoWiki::getInstance()->selectedResource = new OntoWiki_Resource($workload->resourceUri, $model);
 
-        $helper->setSite($siteConfig['id']);
         $helper->setUrlBase($workload->urlBase);
 
-        // FIXME, actual uri logic is in onShouldLinkedDataRedirect & onBuildUrl, needs refactoring to be accessible
-        $uri = preg_replace('~^https?://(.*)$~', '$1.html', $workload->resourceUri);
+        $uris = $helper->getAllURIs();
+        $count = count($uris);
+        $i = 0;
+        foreach ($uris as $uri) {
+            $i++;
+            OntoWiki::getInstance()->callJob('makePageCache', array(
+                'resourceUri' => $uri,
+                'urlBase' => $helper->getUrlBase(),
+                'msg' => sprintf('(%d/%d)', $i, $count),
+            ));
+        }
 
-        // FIXME maybe we shouldn't always regenerate there, and just use cached version if available
-        $cache = $helper->makeCache($uri);
-
-        $this->logSuccess(sprintf('%s %d %s', $workload->msg, $cache['code'], $uri));
+        $this->logSuccess(sprintf('%s resources', $count));
     }
 }

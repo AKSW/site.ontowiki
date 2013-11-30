@@ -91,6 +91,11 @@ class SiteHelper extends OntoWiki_Component_Helper
             'extensions/site/jobs/MakePageCache.php',
             'Site_Job_MakePageCache'
         );
+        $event->registry->registerJob(
+            'makeSiteCache',
+            'extensions/site/jobs/MakeSiteCache.php',
+            'Site_Job_MakeSiteCache'
+        );
     }
 
     public function onPostBootstrap($event)
