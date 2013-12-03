@@ -35,6 +35,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
      * - iprefix  - string between tag and content at the beginning
      * - isuffix  - string betwee content and tag at the end
      * - direct   - set to something (e.g true) if you do not want OntoWiki URLs
+     * - plain    - get the URI straight, not the HTML a tag
      */
     public function link($options = array())
     {
@@ -52,6 +53,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         $iprefix  = (isset($options['iprefix']))  ? $options['iprefix']      : '';
         $isuffix  = (isset($options['isuffix']))  ? $options['isuffix']      : '';
         $direct   = (isset($options['direct']))   ? true                     : false;
+        $plain    = (isset($options['plain']))    ? true                     : false;
 
         // resolve short forms (overwrite full name values with short forms values)
         $uri      = (isset($options['r'])) ? (string)$options['r']  : $uri;
@@ -98,6 +100,10 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
             $url = new OntoWiki_Url(array('route' => 'properties'), array('r'));
             $url->setParam('r', $uri, true);
             $url = (string)$url;
+        }
+        
+        if ($plain === true) {
+            return $url;
         }
 
         // link text comes from title helper or option

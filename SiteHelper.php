@@ -261,34 +261,52 @@ class SiteHelper extends OntoWiki_Component_Helper
         }
     }
 
+    /**
+     * This method is calles when a OntoWiki_Url is renderd to a string.
+     *
+     * @param $event the event object containing necessary parameters
+     * @return boolean true if the URL was create, false if not
+     */
     public function onBuildUrl($event)
     {
         $site = $this->getSiteConfig();
-        $graph = isset($site['model']) ? $site['model'] : null;
-        $resource = isset($event->params['r']) ? OntoWiki_Utils::expandNamespace($event->params['r']) : null;
+
+        if (isset($site['model'])) {
+            $graph = $site['model'];
+        } else {
+            $graph = null;
+        }
+
+        if(isset($event->params['r'])) {
+            $resource = OntoWiki_Utils::expandNamespace($event->params['r']);
+        } else {
+            $resource = null;
+        }
 
         // URL for this site?
         if (($graph === (string)OntoWiki::getInstance()->selectedModel) && !empty($this->_site)) {
+            // check if the requested resource is in the namespace of the graph to see if it can be
+            // deliverd as LinkedData
             if (false !== strpos($resource, $graph)) {
                 // LD-capable
                 if ((string) $resource[strlen($resource)-1] == '/') {
                     // Slash should not get a suffix
                     $event->url = (string) $resource;
-                    // URL created
                     return true;
                 } else {
                     $event->url = $resource
                             . $this->getCurrentSuffix();
-                    // URL created
                     return true;
                 }
             } else {
-                // classic
-                $event->route      = null;
-                $event->controller = 'site';
-                $event->action     = $site['id'];
-
-                // URL not created, but params changed
+                // check if the controller and action are set explicitly or not
+                if (empty($event->controller) && empty($event->action)) {
+                    // set the controller and action according to the site to let the site handle
+                    // the URL
+                    $event->route      = null;
+                    $event->controller = 'site';
+                    $event->action     = $site['id'];
+                }
                 return false;
             }
         }

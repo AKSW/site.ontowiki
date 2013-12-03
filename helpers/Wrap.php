@@ -21,6 +21,9 @@ class Site_View_Helper_Wrap extends Zend_View_Helper_Abstract implements Site_Vi
     public function wrap($options)
     {
         $resourceUri = $this->view->resourceUri;
+        if (isset($options['resourceUri']) && !empty($options['resourceUri'])) {
+            $resourceUri = $options['resourceUri'];
+        }
 
         $content = '';
         if (!is_array($options['content'])) {

@@ -70,7 +70,7 @@ class TemplateOptionsClass
 
         $query->addTriple($key, EF_RDF_TYPE, new Erfurt_Sparql_Query2_IriRef(static::SITE_TEMPLATE_OPTION));
 
-        $results = $model->sparqlQuery($query);
+        $results = $store->sparqlQuery($query);
         foreach ($results as $result) {
             $arrayKey = $result[$key->getName()];
             $this->_options[$arrayKey][$this->_getPriority($result)][] = $result[$value->getName()];
@@ -105,7 +105,7 @@ class TemplateOptionsClass
 
         $query->addElement($union);
 
-        $results = $model->sparqlQuery($query);
+        $results = $store->sparqlQuery($query);
         foreach ($results as $result) {
             $options = new TemplateOptionsClass($result[$other->getName()]);
             foreach ($options->_options as $arrayKey => $priorities) {
