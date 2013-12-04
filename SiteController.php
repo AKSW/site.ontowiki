@@ -277,6 +277,7 @@ FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'")
         // this template data is given to ALL templates (with renderx)
         $templateData           = array(
             'siteId'            => $this->_site,
+            'systemConfig'      => $this->_config,
             'siteConfig'        => $this->_getSiteConfig(),
             'generator'         => $this->_config->version->label . ' ' . $this->_config->version->number,
             'pingbackUrl'       => $this->_owApp->getUrlBase() . 'pingback/ping',
