@@ -206,7 +206,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $labels  = (isset($options['labels']))  ? $options['labels']  : array();
 
         $tmplOpt = $this->view->templateOptions();
-        $markup  = $tmplOpt->getValue('http://ns.ontowiki.net/SysOnt/Site/dataMarkupFormat', 'RDFa');
+        $markup  = (isset($options['markup']))  ? $options['markup']  : $tmplOpt->getValue('http://ns.ontowiki.net/SysOnt/Site/dataMarkupFormat', 'RDFa');
 
         $attr    = '';
         $value   = null;
