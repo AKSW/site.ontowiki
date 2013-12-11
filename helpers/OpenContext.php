@@ -94,8 +94,8 @@ class Site_View_Helper_OpenContext extends Zend_View_Helper_Abstract implements 
             $itemref = $this->view->itemref;
         }
 
-        foreach (array('id', 'class') as $name) {
-            if (isset($options[$name])) {
+        foreach (array('id', 'class', 'lang', 'prefix') as $name) {
+            if (isset($options[$name]) && !empty($options[$name])) {
                 $html[$name] = $options[$name];
             } elseif (isset($this->view->$name)) {
                 $html[$name] = $this->view->$name;
