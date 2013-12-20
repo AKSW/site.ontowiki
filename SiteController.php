@@ -107,17 +107,25 @@ class SiteController extends OntoWiki_Controller_Component
         if ($sitemapXml === false) {
             $erfurtQueryCache->startTransaction($sitemapObjectCacheId);
             $siteConfig = $this->_getSiteConfig();
+            
+            $types  = array();
+            if( empty( $siteConfig['sitemap_types'] ) ){
+                $siteConfig['sitemap_types']    = '?type';
+            }
+            foreach( explode( ',', $siteConfig['sitemap_types'] ) as $type ){
+                $types[]    = '{?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> '.$type.'.}';
+            }
+            $types    = join( ' UNION ', $types );
+            
             $this->_loadModel();
             $query	= '
 SELECT DISTINCT ?resourceUri ?modified
 WHERE { 
-?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type. 
+    '.$types.'
 OPTIONAL {?resourceUri <http://purl.org/dc/terms/modified> ?modified }
 FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'") 
-} ';
-
-//OPTIONAL {?resourceUri <http://purl.org/dc/terms/modified> ?modified }
-//?resourceUri <http://purl.org/dc/terms/modified> ?modified
+}
+ORDER BY DESC(?modified)';
             
             $results    = $this->_model->sparqlQuery($query);
             $sitemap    = new Sitemap();
