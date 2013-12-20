@@ -198,7 +198,7 @@ ORDER BY DESC(?modified)';
             $this->_loadResource();
 
             // Here we start the object cache id
-            $siteModuleObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            $siteModuleObjectCacheIdSource = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . $this->_config->languages->locale . var_export($_POST, true);
             $siteModuleObjectCacheId = 'site_' . md5($siteModuleObjectCacheIdSource);
 
             // try to load the cached value
