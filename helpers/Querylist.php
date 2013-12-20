@@ -99,10 +99,12 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
             $row['oddclass'] = $odd ? 'odd' : 'even';
             $row['rowcount'] = $count;
             $row['current']  = $current;
-            if (!Erfurt_Uri::check($row['resourceUri'])) {
-                $row['title']    = $row['resourceUri'];
-            } else {
-                $row['title']    = $this->_titleHelper->getTitle($row['resourceUri']);
+            if (isset($row['resourceUri'])) {
+                if (!Erfurt_Uri::check($row['resourceUri'])) {
+                    $row['title']    = $row['resourceUri'];
+                } else {
+                    $row['title']    = $this->_titleHelper->getTitle($row['resourceUri']);
+                }
             }
 
             $row             = array_merge($row, $templateOptions);
@@ -138,16 +140,20 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
         $titleA = '';
         $titleB = '';
 
-        if (!Erfurt_Uri::check($a[$orderBy])) {
-            $titleA    = $a[$orderBy];
-        } else {
-            $titleA    = $this->_titleHelper->getTitle($a[$orderBy]);
+        if (isset($a[$orderBy])) {
+            if (!Erfurt_Uri::check($a[$orderBy])) {
+                $titleA    = $a[$orderBy];
+            } else {
+                $titleA    = $this->_titleHelper->getTitle($a[$orderBy]);
+            }
         }
 
-        if (!Erfurt_Uri::check($b[$orderBy])) {
-            $titleB    = $b[$orderBy];
-        } else {
-            $titleB    = $this->_titleHelper->getTitle($b[$orderBy]);
+        if (isset($b[$orderBy])) {
+            if (!Erfurt_Uri::check($b[$orderBy])) {
+                $titleB    = $b[$orderBy];
+            } else {
+                $titleB    = $this->_titleHelper->getTitle($b[$orderBy]);
+            }
         }
 
         return strcasecmp($titleA, $titleB);
