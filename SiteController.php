@@ -108,29 +108,35 @@ class SiteController extends OntoWiki_Controller_Component
             $erfurtQueryCache->startTransaction($sitemapObjectCacheId);
             $siteConfig = $this->_getSiteConfig();
             
-            $types  = array();
-            if( empty( $siteConfig['sitemap_types'] ) ){
-                $siteConfig['sitemap_types']    = '?type';
+            // determine resource types
+            $types  = array('?type');
+            if (!empty($siteConfig['sitemap_types'])) {
+                foreach (explode(',', $siteConfig['sitemap_types']) as $type) {
+                    $types[]    = '{?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> '.$type.'.}';
+                }
             }
-            foreach( explode( ',', $siteConfig['sitemap_types'] ) as $type ){
-                $types[]    = '{?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> '.$type.'.}';
+
+            // determine sitemap URL extension
+            $extension  = "";
+            if (!empty($siteConfig['sitemap_url_ext'])) {
+                $extension  = $siteConfig['sitemap_url_ext'];
             }
-            $types    = join( ' UNION ', $types );
-            
-            $this->_loadModel();
+
             $query	= '
 SELECT DISTINCT ?resourceUri ?modified
-WHERE { 
-    '.$types.'
-OPTIONAL {?resourceUri <http://purl.org/dc/terms/modified> ?modified }
-FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'") 
+FROM <http://schema.org/>
+WHERE {
+    '.join(' UNION ', $types).'
+    FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'") 
+    OPTIONAL {?resourceUri <http://purl.org/dc/terms/modified> ?modified }
 }
 ORDER BY DESC(?modified)';
-            
+
+            $this->_loadModel();
             $results    = $this->_model->sparqlQuery($query);
             $sitemap    = new Sitemap();
             foreach ($results as $result) {
-                $url    = new Sitemap_URL ($result['resourceUri']);
+                $url    = new Sitemap_URL ($result['resourceUri'].$extension);
                 if (isset($result['modified']) && strlen($result['modified']))
                     $url->setDatetime ($result['modified']);
                 $sitemap->addUrl ($url);
