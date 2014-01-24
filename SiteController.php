@@ -69,10 +69,52 @@ class SiteController extends OntoWiki_Controller_Component
      *  @todo       Create zend route from ./robots.txt to site/robots
      *  @todo       Change URL to .../sitemap.xml after zend route has been created
      */
-    public function robotsAction(){
+    public function robotsAction()
+    {
         header("Content-Type: text/plain");
         print("Sitemap: ".$this->_config->urlBase."site/sitemap");
         exit;
+    }
+
+    public function exportResource($targetPath, $model, $resourceUri)
+    {
+        print("ResourceURI: ".$item);
+        die;
+    }
+
+    public function exportAllResourcesByList($targetPath, $model, $list)
+    {
+        foreach ($list as $item) {
+            $this->exportResource($targetPath, $model, $item);
+        }
+    }
+
+    public function exportAllResourcesByQuery($targetPath, $model, $sparqlQuery)
+    {
+        $this->_loadModel();
+        $results    = $this->_model->sparqlQuery($sparqlQuery);
+        $list       = array();
+        foreach ($results as $result) {
+            $list[] = $result['resourceUri'];
+        }
+        return $this->exportAllResourcesByList($targetPath, $model, $list);
+    }
+
+    public function exportAllResources( $targetPath, $model, $types )
+    {
+        $siteConfig = $this->_getSiteConfig();
+        foreach ($types as $nr => $type) {
+            $types[$nr]    = '{?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> '.$type.'}';
+        }
+        $query	= '
+SELECT DISTINCT ?resourceUri
+FROM <http://schema.org/>
+WHERE {
+    '.join(' UNION ', $types).' .
+    FILTER strStarts(str(?resourceUri), "'.$model.'") .
+}
+ORDER BY DESC(?modified)';
+        return $this->exportAllResourcesByQuery($targetPath, $model, $query);
     }
 
     /**
@@ -86,7 +128,8 @@ class SiteController extends OntoWiki_Controller_Component
      *  @todo       Create zend route from ./sitemap.xml.bz2 to site/sitemap/compression/bzip/name/sitemap.xml.bz2
      *  @todo       add support for sitemap index
      */
-    public function sitemapAction(){
+    public function sitemapAction()
+    {
         $compression = $this->getParam( 'compression' );
 #        $page   = (integer) $this->getParam( 'page' );
 
@@ -107,13 +150,15 @@ class SiteController extends OntoWiki_Controller_Component
         if ($sitemapXml === false) {
             $erfurtQueryCache->startTransaction($sitemapObjectCacheId);
             $siteConfig = $this->_getSiteConfig();
-            
+
             // determine resource types
             $types  = array('?type');
             if (!empty($siteConfig['sitemap_types'])) {
-                foreach (explode(',', $siteConfig['sitemap_types']) as $type) {
-                    $types[]    = '{?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> '.$type.'.}';
-                }
+                $types  = explode(',', $siteConfig['sitemap_types']);
+            }
+
+            foreach ($types as $nr => $type) {
+                $types[$nr]    = '{?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> '.$type.'}';
             }
 
             // determine sitemap URL extension
@@ -126,12 +171,13 @@ class SiteController extends OntoWiki_Controller_Component
 SELECT DISTINCT ?resourceUri ?modified
 FROM <http://schema.org/>
 WHERE {
-    '.join(' UNION ', $types).'
-    FILTER strstarts(str(?resourceUri), "'.$siteConfig['model'].'") 
-    OPTIONAL {?resourceUri <http://purl.org/dc/terms/modified> ?modified }
+    '.join(' UNION ', $types).' .
+    FILTER strStarts(str(?resourceUri), "'.$siteConfig['model'].'") .
+    OPTIONAL {
+        ?resourceUri <http://purl.org/dc/terms/modified> ?modified .
+    }
 }
 ORDER BY DESC(?modified)';
-
             $this->_loadModel();
             $results    = $this->_model->sparqlQuery($query);
             $sitemap    = new Sitemap();
