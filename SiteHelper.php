@@ -656,6 +656,7 @@ class SiteHelper extends OntoWiki_Component_Helper
         // this template data is given to ALL templates (with renderx)
         $templateData           = array(
             'siteId'            => $this->_site,
+            'systemConfig'      => $this->_config,
             'siteConfig'        => $this->getSiteConfig(),
             'generator'         => $this->_config->version->label . ' ' . $this->_config->version->number,
             'pingbackUrl'       => $this->getUrlBase() . 'pingback/ping',
