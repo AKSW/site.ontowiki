@@ -584,7 +584,7 @@ class SiteHelper extends OntoWiki_Component_Helper
     protected function _cacheId($uri)
     {
         if ($uri === null) {
-            $uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            $uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . $this->_config->languages->locale . var_export($_POST, true);
         }
         return 'site_' . md5($uri);
     }
