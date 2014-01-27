@@ -1,0 +1,47 @@
+<?php
+/**
+ * This file is part of the {@link http://ontowiki.net OntoWiki} project.
+ *
+ * @copyright Copyright (c) 2013, {@link http://aksw.org AKSW}
+ * @license   http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
+ */
+
+/**
+ * OntoWiki cacheviewer module template
+ */
+?>
+<?php if ($this->test) { ?>
+
+    <p class="messagebox success"><?php echo sprintf($this->_('Cached at %s'), date('r', $this->test)) ?></p>
+
+    <form method="POST" name="deleteCache" action="<?php echo new OntoWiki_Url(array('controller' => 'site', 'action' => 'deleteCache'), array()) ?>">
+        <a class="button submit" id="deleteCache">
+            <input type="hidden" name="r" value="<?php echo $this->r ?>"/>
+            <input type="hidden" name="uri" value="<?php echo $this->uri ?>"/>
+            <img src="<?php echo $this->themeUrlBase ?>/images/icon-delete.png" alt=""/>
+            <span><?php echo $this->_('Delete') ?></span>
+        </a>
+    </form>
+
+<?php } else { ?>
+
+    <p class="messagebox error"><?php echo $this->_('Not cached') ?></p>
+
+<?php } ?>
+
+<form method="POST" name="regenerateCache" action="<?php echo new OntoWiki_Url(array('controller' => 'site', 'action' => 'regenerateCache'), array()) ?>">
+    <a class="button submit" id="regenerateCache">
+        <input type="hidden" name="r" value="<?php echo $this->r ?>"/>
+        <input type="hidden" name="resourceUri" value="<?php echo $this->resourceUri ?>"/>
+        <img src="<?php echo $this->themeUrlBase ?>/images/icon-save.png" alt=""/>
+        <span><?php echo $this->_('(Re)generate') ?></span>
+    </a>
+</form>
+
+<form method="POST" name="makeSiteCache" action="<?php echo new OntoWiki_Url(array('controller' => 'site', 'action' => 'makeSiteCache'), array()) ?>">
+    <a class="button submit" id="makeSiteCache">
+        <input type="hidden" name="r" value="<?php echo $this->r ?>"/>
+        <img src="<?php echo $this->themeUrlBase ?>/images/icon-save.png" alt=""/>
+        <span><?php echo $this->_('(Re)generate the whole site') ?></span>
+    </a>
+</form>
