@@ -28,11 +28,82 @@ class SiteController extends OntoWiki_Controller_Component
      */
     private $_site = null;
 
+    public function deletecacheAction()
+    {
+        if (!$this->_erfurt->getAc()->isActionAllowed('CacheManagement')) {
+            throw new Erfurt_Ac_Exception("Action 'CacheManagement' not allowed.");
+        }
+
+        $this->getComponentHelper()->removeCache($this->_request->getPost('uri'));
+        $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());
+        $redirect->r = $this->_request->getPost('r');
+        $this->_redirect($redirect);
+    }
+
+    public function exportAllResources($targetPath, $model)
+    {
+        $ontowiki   = OntoWiki::getInstance();
+        $ontowiki->callJob("exportSite", array(
+            'urlBase'       => $model,
+            'targetPath'    => $targetPath,
+            'msg'           => '',
+        ));
+    }
+
+    public function exportResource($targetPath, $model, $resourceUri)
+    {
+        $ontowiki   = OntoWiki::getInstance();
+        $ontowiki->callJob("exportPage", array(
+            'targetPath'    => $targetPath,
+            'urlBase'       => $model,
+            'resourceUri'   => $resourceUri,
+            'msg'           => '',
+        ));
+    }
+
     public function init()
     {
         parent::init();
         $this->_helper->viewRenderer->setNoRender();
         $this->_helper->layout()->disableLayout();
+    }
+
+    public function makesitecacheAction()
+    {
+        if (!$this->_erfurt->getAc()->isActionAllowed('CacheManagement')) {
+            throw new Erfurt_Ac_Exception("Action 'CacheManagement' not allowed.");
+        }
+
+        $helper = $this->getComponentHelper();
+        $siteConfig = $helper->getSiteConfig();
+
+        OntoWiki::getInstance()->callJob('makeSiteCache', array(
+            'urlBase' => $helper->getUrlBase(),
+        ));
+
+        $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());
+        $redirect->r = $this->_request->getPost('r');
+        $this->_redirect($redirect);
+    }
+
+    public function regeneratecacheAction()
+    {
+        if (!$this->_erfurt->getAc()->isActionAllowed('CacheManagement')) {
+            throw new Erfurt_Ac_Exception("Action 'CacheManagement' not allowed.");
+        }
+
+        $helper = $this->getComponentHelper();
+        $this->_model = $helper->loadModel();
+
+        OntoWiki::getInstance()->callJob('makePageCache', array(
+            'resourceUri' => $this->_request->getPost('resourceUri'),
+            'urlBase' => $helper->getUrlBase(),
+            'msg' => '(requested in OntoWiki)',
+        ));
+
+        $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());
+        $redirect->r = $this->_request->getPost('r');
+        $this->_redirect($redirect);
     }
 
     /**
@@ -49,47 +120,6 @@ class SiteController extends OntoWiki_Controller_Component
         exit;
     }
 
-    public function exportResource($targetPath, $model, $resourceUri)
-    {
-        print("ResourceURI: ".$item);
-        die;
-    }
-
-    public function exportAllResourcesByList($targetPath, $model, $list)
-    {
-        foreach ($list as $item) {
-            $this->exportResource($targetPath, $model, $item);
-        }
-    }
-
-    public function exportAllResourcesByQuery($targetPath, $model, $sparqlQuery)
-    {
-        $this->_loadModel();
-        $results    = $this->_model->sparqlQuery($sparqlQuery);
-        $list       = array();
-        foreach ($results as $result) {
-            $list[] = $result['resourceUri'];
-        }
-        return $this->exportAllResourcesByList($targetPath, $model, $list);
-    }
-
-    public function exportAllResources( $targetPath, $model, $types )
-    {
-        $siteConfig = $this->_getSiteConfig();
-        foreach ($types as $nr => $type) {
-            $types[$nr]    = '{?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> '.$type.'}';
-        }
-        $query	= '
-SELECT DISTINCT ?resourceUri
-FROM <http://schema.org/>
-WHERE {
-    '.join(' UNION ', $types).' .
-    FILTER strStarts(str(?resourceUri), "'.$model.'") .
-}
-ORDER BY DESC(?modified)';
-        return $this->exportAllResourcesByQuery($targetPath, $model, $query);
-    }
-
     /**
      *  Renders and prints sitemap XML.
      *  For gzip compression add paramter "compression" with compression method "bzip" or "gzip" as value.
@@ -103,7 +133,8 @@ ORDER BY DESC(?modified)';
      */
     public function sitemapAction()
     {
-        $compression = $this->getParam( 'compression' );
+        $compression    = $this->getParam( 'compression' );
+        $siteConfig     = $this->_getSiteConfig();
 #        $page   = (integer) $this->getParam( 'page' );
 
         $pathGenerator	= __DIR__.'/libraries/SitemapGenerator/classes/';
@@ -122,38 +153,11 @@ ORDER BY DESC(?modified)';
         $sitemapXml         = $erfurtObjectCache->load($sitemapObjectCacheId);
         if ($sitemapXml === false) {
             $erfurtQueryCache->startTransaction($sitemapObjectCacheId);
-            $siteConfig = $this->getComponentHelper()->_getSiteConfig();
-            //$this->_model = $this->getComponentHelper()->loadModel();
-
-            // determine resource types
-            $types  = array('?type');
-            if (!empty($siteConfig['sitemap_types'])) {
-                $types  = explode(',', $siteConfig['sitemap_types']);
-            }
-
-            foreach ($types as $nr => $type) {
-                $types[$nr]    = '{?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> '.$type.'}';
-            }
-
-            // determine sitemap URL extension
             $extension  = "";
             if (!empty($siteConfig['sitemap_url_ext'])) {
                 $extension  = $siteConfig['sitemap_url_ext'];
             }
-
-            $query	= '
-SELECT DISTINCT ?resourceUri ?modified
-FROM <http://schema.org/>
-WHERE {
-    '.join(' UNION ', $types).' .
-    FILTER strStarts(str(?resourceUri), "'.$siteConfig['model'].'") .
-    OPTIONAL {
-        ?resourceUri <http://purl.org/dc/terms/modified> ?modified .
-    }
-}
-ORDER BY DESC(?modified)';
-            $this->_loadModel();
-            $results    = $this->_model->sparqlQuery($query);
+            $results    = $this->getComponentHelper()->getAllSitemapUris();
             $sitemap    = new Sitemap();
             foreach ($results as $result) {
                 $url    = new Sitemap_URL ($result['resourceUri'].$extension);
@@ -187,56 +191,6 @@ ORDER BY DESC(?modified)';
         header("Content-Type: ".$contentType);
         print($sitemapXml);
         exit;
-    }
-
-    public function deletecacheAction()
-    {
-        if (!$this->_erfurt->getAc()->isActionAllowed('CacheManagement')) {
-            throw new Erfurt_Ac_Exception("Action 'CacheManagement' not allowed.");
-        }
-
-        $this->getComponentHelper()->removeCache($this->_request->getPost('uri'));
-        $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());
-        $redirect->r = $this->_request->getPost('r');
-        $this->_redirect($redirect);
-    }
-
-    public function regeneratecacheAction()
-    {
-        if (!$this->_erfurt->getAc()->isActionAllowed('CacheManagement')) {
-            throw new Erfurt_Ac_Exception("Action 'CacheManagement' not allowed.");
-        }
-
-        $helper = $this->getComponentHelper();
-        $this->_model = $helper->loadModel();
-
-        OntoWiki::getInstance()->callJob('makePageCache', array(
-            'resourceUri' => $this->_request->getPost('resourceUri'),
-            'urlBase' => $helper->getUrlBase(),
-            'msg' => '(requested in OntoWiki)',
-        ));
-
-        $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());
-        $redirect->r = $this->_request->getPost('r');
-        $this->_redirect($redirect);
-    }
-
-    public function makesitecacheAction()
-    {
-        if (!$this->_erfurt->getAc()->isActionAllowed('CacheManagement')) {
-            throw new Erfurt_Ac_Exception("Action 'CacheManagement' not allowed.");
-        }
-
-        $helper = $this->getComponentHelper();
-        $siteConfig = $helper->getSiteConfig();
-
-        OntoWiki::getInstance()->callJob('makeSiteCache', array(
-            'urlBase' => $helper->getUrlBase(),
-        ));
-
-        $redirect = new OntoWiki_Url(array('controller' => 'resource', 'action' => 'properties'), array());
-        $redirect->r = $this->_request->getPost('r');
-        $this->_redirect($redirect);
     }
 
     /*

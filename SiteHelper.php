@@ -96,6 +96,16 @@ class SiteHelper extends OntoWiki_Component_Helper
             'extensions/site/jobs/MakeSiteCache.php',
             'Site_Job_MakeSiteCache'
         );
+        $event->registry->registerJob(
+            'exportPage',
+            'extensions/site/jobs/ExportPage.php',
+            'Site_Job_ExportPage'
+        );
+        $event->registry->registerJob(
+            'exportSite',
+            'extensions/site/jobs/ExportSite.php',
+            'Site_Job_ExportSite'
+        );
     }
 
     public function onPostBootstrap($event)
@@ -442,7 +452,7 @@ class SiteHelper extends OntoWiki_Component_Helper
         $classes = array_keys($closure);
 
         // get all resources with templates set directly or with class
-        $URIs = $this->_model->sparqlQuery('
+        $query  = '
             SELECT DISTINCT ?resourceUri
             FROM <http://starpages.dev.eccenca.com/>
             WHERE {
@@ -457,11 +467,40 @@ class SiteHelper extends OntoWiki_Component_Helper
                     )
                 }
             }
-        ');
+        ';
+        $URIs   = $this->_model->sparqlQuery($query);
         $URIs = array_map(function($_) { return $_['resourceUri']; }, $URIs);
         return $URIs;
     }
 
+    public function getAllSitemapUris(){
+        $siteConfig = $this->getSiteConfig();
+
+        // determine resource types
+        $types  = array('?type');
+        if (!empty($siteConfig['sitemap_types'])) {
+            $types  = explode(',', $siteConfig['sitemap_types']);
+        }
+
+        foreach ($types as $nr => $type) {
+            $types[$nr]    = '{?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> '.$type.'}';
+        }
+
+        $query	= '
+SELECT DISTINCT ?resourceUri ?modified
+FROM <http://schema.org/>
+WHERE {
+    '.join(' UNION ', $types).' .
+    FILTER strStarts(str(?resourceUri), "'.$siteConfig['model'].'") .
+    OPTIONAL {
+        ?resourceUri <http://purl.org/dc/terms/modified> ?modified .
+    }
+}
+ORDER BY DESC(?modified)';
+        $this->loadModel();
+        return $this->_model->sparqlQuery($query);
+    }
+    
     public function getPage($uri = null)
     {
         $this->loadModel();

@@ -8,7 +8,7 @@
  * Cache generation job
  */
 
-class Site_Job_MakeSiteCache extends Erfurt_Worker_Job_Abstract
+class Site_Job_ExportSite extends Erfurt_Worker_Job_Abstract
 {
     public function run($workload)
     {
@@ -23,13 +23,15 @@ class Site_Job_MakeSiteCache extends Erfurt_Worker_Job_Abstract
         $helper->setUrlBase($workload->urlBase);
 
         $uris = $helper->getAllURIs();
+        file_put_contents("uris.json", json_encode($uris));
         $count = count($uris);
         $i = 0;
         foreach ($uris as $uri) {
             $i++;
-            OntoWiki::getInstance()->callJob('makePageCache', array(
+            OntoWiki::getInstance()->callJob('exportPage', array(
                 'resourceUri'   => $uri,
                 'urlBase'       => $helper->getUrlBase(),
+                'targetPath'    => $workload->targetPath,
                 'msg'           => sprintf('(%d/%d)', $i, $count),
             ));
         }
