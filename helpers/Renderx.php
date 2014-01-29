@@ -126,11 +126,13 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
             $store = OntoWiki::getInstance()->erfurt->getStore();
             $closure = array();
             $classes = array();
-            foreach($description[self::TYPE_PROP] as $class) {
-                $classUri = $class['value'];
-                $classes[] = $classUri;
-                $newClosure = $store->getTransitiveClosure($this->_model, self::SUBCLASS_PROP, array($classUri), false);
-                $closure = array_merge($closure, $newClosure);
+            if (isset($description[self::TYPE_PROP])) {
+                foreach($description[self::TYPE_PROP] as $class) {
+                    $classUri = $class['value'];
+                    $classes[] = $classUri;
+                    $newClosure = $store->getTransitiveClosure($this->_model, self::SUBCLASS_PROP, array($classUri), false);
+                    $closure = array_merge($closure, $newClosure);
+                }
             }
 
             $nextClasses = array();
