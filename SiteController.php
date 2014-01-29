@@ -134,8 +134,7 @@ class SiteController extends OntoWiki_Controller_Component
     public function sitemapAction()
     {
         $compression    = $this->getParam( 'compression' );
-        $siteConfig     = $this->_getSiteConfig();
-#        $page   = (integer) $this->getParam( 'page' );
+        $siteConfig     = $this->getComponentHelper()->getSiteConfig();
 
         $pathGenerator	= __DIR__.'/libraries/SitemapGenerator/classes/';
         require_once ($pathGenerator.'Sitemap.php');
@@ -187,7 +186,7 @@ class SiteController extends OntoWiki_Controller_Component
                     break;
             }
         }
-        header('Content-Length: '.strlen($sitemapXml));
+        header("Content-Length: ".strlen($sitemapXml));
         header("Content-Type: ".$contentType);
         print($sitemapXml);
         exit;
