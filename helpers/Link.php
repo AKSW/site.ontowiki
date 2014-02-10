@@ -36,6 +36,9 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
      * - isuffix  - string betwee content and tag at the end
      * - direct   - set to something (e.g true) if you do not want OntoWiki URLs
      * - plain    - get the URI straight, not the HTML a tag
+     * - relative - calculate relative path from origin to uri instead of absolute uri
+     * - origin   - source uri to relate to
+     * - ext      - extension of links
      */
     public function link($options = array())
     {
@@ -54,6 +57,9 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         $isuffix  = (isset($options['isuffix']))  ? $options['isuffix']      : '';
         $direct   = (isset($options['direct']))   ? true                     : false;
         $plain    = (isset($options['plain']))    ? true                     : false;
+        $origin   = (isset($options['origin']))   ? $options['origin']       : null;
+        $relative = (isset($options['relative'])) ? true                     : false;
+		$ext      = (!empty($options['ext']))     ? '.'.$optioms['ext']      : '';
 
         // resolve short forms (overwrite full name values with short forms values)
         $uri      = (isset($options['r'])) ? (string)$options['r']  : $uri;
@@ -92,6 +98,9 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
                 $uri   = $result[0]['resourceUri'];
             }
         }
+        if ($relative && $origin){
+            $uri    = Erfurt_Uri::getPathTo( $origin, $uri);
+        }
 
         // generate the link URL from the resource URI
         if ($direct == true) {
@@ -101,7 +110,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
             $url->setParam('r', $uri, true);
             $url = (string)$url;
         }
-        
+		$url	.= $ext;
         if ($plain === true) {
             return $url;
         }
