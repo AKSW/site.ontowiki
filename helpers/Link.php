@@ -59,7 +59,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         $plain    = (isset($options['plain']))    ? true                     : false;
         $origin   = (isset($options['origin']))   ? $options['origin']       : null;
         $relative = (isset($options['relative'])) ? true                     : false;
-		$ext      = (!empty($options['ext']))     ? '.'.$optioms['ext']      : '';
+		$ext      = (!empty($options['ext']))     ? '.'.$options['ext']      : '';
 
         // resolve short forms (overwrite full name values with short forms values)
         $uri      = (isset($options['r'])) ? (string)$options['r']  : $uri;
