@@ -461,7 +461,7 @@ class SiteHelper extends OntoWiki_Component_Helper
                 }
                 UNION
                 {
-                    ?resourceUri rdf:type ?class.
+                    ?resourceUri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?class.
                     FILTER (
                         ?class IN (' . implode(',', array_map(function($_) { return "<$_>"; }, $classes)) . ')
                     )
