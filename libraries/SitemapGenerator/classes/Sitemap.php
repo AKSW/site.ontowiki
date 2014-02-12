@@ -55,7 +55,7 @@ class Sitemap implements Countable{
 			$node	= new XML_Node( 'url' );
 			$node->addChild( new XML_Node( 'loc', $url->getLocation() ) );
 			if( ( $datetime = $url->getDatetime() ) ){
-                $datetime   = date( strtotime( $datetime ), 'c' );
+                $datetime   = date( 'c', strtotime( $datetime ) );
 				$node->addChild( new XML_Node( 'lastmod', $datetime ) );
             }
 			$tree->addChild( $node );
