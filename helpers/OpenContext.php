@@ -142,6 +142,10 @@ class Site_View_Helper_OpenContext extends Zend_View_Helper_Abstract implements 
                     static::$_itemref[$resource] = array();
                 }
             break;
+            case 'NONE':
+            break;
+            default:
+                throw new OntoWiki_Exception('Unknown data markup format specified.');
         }
 
         foreach ($html as $name => $value) {

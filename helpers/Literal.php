@@ -309,6 +309,10 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                         }
                     }
                 break;
+                case 'NONE':
+                break;
+                default:
+                    throw new OntoWiki_Exception('Unknown data markup format specified.');
             }
 
             if ($class !== '') {
