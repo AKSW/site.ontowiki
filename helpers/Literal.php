@@ -49,6 +49,11 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         'param',
     );
 
+    public static $alwaysRemoveNoAttrTags = array(
+        'link',
+        'meta',
+    );
+
     // http://www.whatwg.org/html/microdata.html#values
     public static $microdataPropertyValue = array(
         'meta'   => array('attr' => 'content', 'type' => 'string'),
@@ -340,7 +345,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
 
             $html = sprintf('%s%s%s', $iprefix, $content, $isuffix);
             // don't generate empty elements, if tag is not specified explicitly
-            if ($attr !== '' || isset($options['tag'])) {
+            if ($attr !== '' || (isset($options['tag']) && !in_array($tag, static::$alwaysRemoveNoAttrTags))) {
                 $html = sprintf('<%s%s%s>%s%s', $tag, $attr, $shortTag, $html, $endTag);
             }
 
