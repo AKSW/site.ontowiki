@@ -213,7 +213,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $tmplOpt = $this->view->templateOptions();
         $markup  = (isset($options['markup']))  ? $options['markup']  : $tmplOpt->getValue('http://ns.ontowiki.net/SysOnt/Site/dataMarkupFormat', 'RDFa');
 
-        $attr    = '';
+        $attrs   = array();
         $value   = null;
 
         if (!in_array($tag, static::$htmlForbiddenEndTags)) {
@@ -264,7 +264,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                             $relation = 'property';
                     }
 
-                    $attr .= sprintf(' %s="%s"', $relation, $property);
+                    $attrs[$relation] = $property;
 
                     if ($isUri) {
                         switch ($tag) {
@@ -276,14 +276,14 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                                 $target = 'resource';
                         }
 
-                        $attr .= sprintf(' %s="%s"', $target, $object['value']);
+                        $attrs[$target] = $object['value'];
                         $value = null;
                     }
 
-                    if ($value !== null) $attr .= ' content="'.$value.'"';
+                    if ($value !== null) $attrs['content'] = $value;
                 break;
                 case 'microdata':
-                    $attr .= ' itemprop="'.$property.'"';
+                    $attrs['itemprop'] = $property;
 
                     if ($value !== null) {
                         // microdata does not have one general property for machine-readable value
@@ -296,9 +296,15 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                             $valueInfo !== null // element may have machine-readable values
                             && ($isUri xor $valueInfo['type'] !== 'URI') // element's value type matches
                         ) {
-                            $attr .= ' '.$valueInfo['attr'].'="'.$value.'"';
+                            $attrs[$valueInfo['attr']] = $value;
                         } else {
+                            // microdata does not allow this element with this type of property (URI/non-URI),
                             // supply additional element just to put machine-readable value into it
+                            $attr = '';
+                            foreach ($attrs as $name => $value) {
+                                $attr .= sprintf(' %s="%s"', $name, $value);
+                            }
+
                             if (!$isUri) {
                                 /* non-empty <data/> is reasonable to use here,
                                    but there are many issues in microdata parsers with it */
@@ -310,7 +316,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                             } else {
                                 $prefix .= '<link'.$attr.' href="'.$value.'"/>';
                             }
-                            $attr = '';
+                            $attrs = array();
                         }
                     }
                 break;
@@ -321,7 +327,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
             }
 
             if ($class !== '') {
-                $attr .= ' class="'.$class.'"';
+                $attrs['class'] = $class;
             }
 
             // execute the helper markup on the content (after the extensions)
@@ -332,18 +338,23 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 $datatype = $object['datatype'];
                 $content = $this->view->displayLiteralPropertyValue($content, $property, $datatype);
             } elseif (isset($object['lang'])) {
-                $attr   .= ' xml:lang="'.$object['lang'].'"';
-                $attr   .= ' lang="'.$object['lang'].'"';
+                $attrs['xml:lang'] = $object['lang'];
+                $attrs['lang']     = $object['lang'];
                 $content = $this->view->displayLiteralPropertyValue($content, $property);
             } else {
                 $content = $this->view->displayLiteralPropertyValue($content, $property);
             }
 
             if ($tag === 'img') {
-                $attr .= ' alt="'.$alt.'"';
+                $attrs['alt'] = $alt;
             }
 
             $html = sprintf('%s%s%s', $iprefix, $content, $isuffix);
+
+            $attr = '';
+            foreach ($attrs as $name => $value) {
+                $attr .= sprintf(' %s="%s"', $name, $value);
+            }
             // don't generate empty elements, if tag is not specified explicitly
             if ($attr !== '' || (isset($options['tag']) && !in_array($tag, static::$alwaysRemoveNoAttrTags))) {
                 $html = sprintf('<%s%s%s>%s%s', $tag, $attr, $shortTag, $html, $endTag);
