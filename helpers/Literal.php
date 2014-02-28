@@ -54,6 +54,22 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         'meta',
     );
 
+    public static $htmlPropertyValue = array(
+        'audio'  => array('attr' => 'src',     'type' => 'URI'),
+        'embed'  => array('attr' => 'src',     'type' => 'URI'),
+        'iframe' => array('attr' => 'src',     'type' => 'URI'),
+        'img'    => array('attr' => 'src',     'type' => 'URI'),
+        'source' => array('attr' => 'src',     'type' => 'URI'),
+        'track'  => array('attr' => 'src',     'type' => 'URI'),
+        'video'  => array('attr' => 'src',     'type' => 'URI'),
+        'a'      => array('attr' => 'href',    'type' => 'URI'),
+        'area'   => array('attr' => 'href',    'type' => 'URI'),
+        'link'   => array('attr' => 'href',    'type' => 'URI'),
+        'data'   => array('attr' => 'value',   'type' => 'string'),
+        'meter'  => array('attr' => 'value',   'type' => 'string'),
+        'time'   => array('attr' => 'datetime','type' => 'string'),
+    );
+
     // http://www.whatwg.org/html/microdata.html#values
     public static $microdataPropertyValue = array(
         'meta'   => array('attr' => 'content', 'type' => 'string'),
@@ -330,6 +346,16 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 break;
                 default:
                     throw new OntoWiki_Exception('Unknown data markup format specified.');
+            }
+
+            // add attributes expected in HTML regardless of additional markup (media, links, HTML data)
+            if (isset(static::$htmlPropertyValue[$tag])) {
+                $valueInfo = static::$htmlPropertyValue[$tag];
+                if ($isUri xor $valueInfo['type'] !== 'URI') {
+                    if (!isset($attrs[$valueInfo['attr']])) {
+                        $attrs[$valueInfo['attr']] = $object['value'];
+                    }
+                }
             }
 
             if ($class !== '') {
