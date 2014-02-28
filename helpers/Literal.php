@@ -285,13 +285,19 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 case 'microdata':
                     $attrs['itemprop'] = $property;
 
-                    if ($value !== null) {
-                        // microdata does not have one general property for machine-readable value
-                        $valueInfo = null;
-                        if (isset(static::$microdataPropertyValue[$tag])) {
-                            $valueInfo = static::$microdataPropertyValue[$tag];
-                        }
+                    // microdata does not have one general property for machine-readable value
+                    $valueInfo = null;
+                    if (isset(static::$microdataPropertyValue[$tag])) {
+                        $valueInfo = static::$microdataPropertyValue[$tag];
+                    }
 
+                    if ($valueInfo && $value === null) {
+                        // microdata uses element's textContent only "otherwise";
+                        // for all defined elements an attribute must be used
+                        $value = $object['value'];
+                    }
+
+                    if ($value !== null) {
                         if (
                             $valueInfo !== null // element may have machine-readable values
                             && ($isUri xor $valueInfo['type'] !== 'URI') // element's value type matches
