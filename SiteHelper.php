@@ -160,11 +160,11 @@ class SiteHelper extends OntoWiki_Component_Helper
         $action     = $request->getActionName();
 
         if ($controller === 'resource' && $action === 'properties') {
-            $resourceUri = $this->_owApp->selectedResource;
-
-            if (!empty($resourceUri) && $resourceUri != (string)$this->_owApp->selectedModel) {
-                $resourceUri .= '.html';
-            }
+            $this->setSite($this->_privateConfig->defaultSite);
+            $site = $this->getSiteConfig();
+            $resourceUri = new OntoWiki_Url(array('controller' => 'site', 'action' => $site['id']), array('r'));
+            $resourceUri = (string)$resourceUri; // build URL while site is set
+            $this->setSite(null);
 
             $toolbar = OntoWiki_Toolbar::getInstance();
             $toolbar->prependButton(OntoWiki_Toolbar::SEPARATOR)
