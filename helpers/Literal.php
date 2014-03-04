@@ -179,9 +179,13 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $uri = Erfurt_Uri::getFromQnameOrUri($uri, $model);
 
         // create description from resource URI
-        $resource     = new OntoWiki_Resource($uri, $model);
+        $resource     = $model->getResource($uri);
         $description  = $resource->getDescription();
-        $description  = $description[$uri];
+        if (isset($description[$uri])) {
+            $description  = $description[$uri];
+        } else {
+            $description = array();
+        }
 
         return $description;
     }
