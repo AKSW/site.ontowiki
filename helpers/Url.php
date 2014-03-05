@@ -16,14 +16,57 @@
  */
 class Site_View_Helper_Url extends Zend_View_Helper_Abstract
 {
-    public function url($uri, $additionalParams = array())
+    public function url($options, $additionalParams = array())
     {
-        $url = new OntoWiki_Url(array('route' => 'properties'), array('r'));
-        $url->setParam('r', $uri, true);
+        if (is_string($options)) {
+            /*
+             * compatibility mode: signature is:
+             * public function url($uri, $additionalParams = array())
+             * TODO log a warning
+             */
+            $uri = $options;
+            $options =array(
+                'uri' => $uri,
+                'additionalParams' => $additionalParams
+            );
+        }
+
+        $uri        = (isset($options['uri']))          ? $options['uri']           : '';
+        $route      = (isset($options['route']))        ? $options['route']         : 'properties';
+        $controller = (isset($options['c']))            ? $options['c']             : null;
+        $controller = (isset($options['controller']))   ? $options['controller']    : $controller;
+        $action     = (isset($options['a']))            ? $options['a']             : null;
+        $action     = (isset($options['action']))       ? $options['action']        : $action;
+        $stayOnSite = (isset($options['stayOnSite']))   ? $options['stayOnSite']    : true;
+        $additionalParams   = (isset($options['additionalParams']))     ? $options['additionalParams']  : $additionalParams;
+        $contractNamespace  = (isset($options['contractNamespace']))    ? $options['contractNamespace'] : true;
+
+        $urlOptions = array();
+
+        $export = '';
+        if ($controller !== null && $action !== null) {
+            $urlOptions['controller'] = $controller;
+            $urlOptions['action'] = $action;
+        } else if ($stayOnSite) {
+            $urlOptions['controller'] = 'site';
+            // $this->view->siteId is not set atleast under some circumstances
+            //$urlOptions['action']     = $this->view->siteId;
+            $urlOptions['action']     = 'local';
+        } else {
+            $urlOptions['route'] = $route;
+        }
+
+        $url = new OntoWiki_Url($urlOptions, array('r'));
+
+        $url->setParam('r', $uri, $contractNamespace);
+                    // set the controller and action according to the site to let the site handle
+                    // the URL
 
         foreach ($additionalParams as $name => $value) {
             $url->setParam($name, $value, true);
         }
+
+        $url .= $export;
 
         return (string)$url;
     }
