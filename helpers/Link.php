@@ -2,7 +2,7 @@
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
- * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
+ * @copyright Copyright (c) 2014, {@link http://aksw.org AKSW}
  * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
 
@@ -59,13 +59,13 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         $plain    = (isset($options['plain']))    ? true                     : false;
         $origin   = (isset($options['origin']))   ? $options['origin']       : null;
         $relative = (isset($options['relative'])) ? true                     : false;
-		$ext      = (!empty($options['ext']))     ? '.'.$options['ext']      : '';
+        $ext      = (!empty($options['ext']))     ? '.'.$options['ext']      : '';
 
         // resolve short forms (overwrite full name values with short forms values)
-        $uri      = (isset($options['r'])) ? (string)$options['r']  : $uri;
-        $literal  = (isset($options['l'])) ? $options['l']          : $literal;
-        $text     = (isset($options['t'])) ? $options['t']          : $text;
-        $property = (isset($options['p'])) ? $options['p']          : $property;
+        $uri      = (isset($options['r'])) ? (string)$options['r'] : $uri;
+        $literal  = (isset($options['l'])) ? $options['l']         : $literal;
+        $text     = (isset($options['t'])) ? $options['t']         : $text;
+        $property = (isset($options['p'])) ? $options['p']         : $property;
 
         // if an uri is given, we do not need to search for
         if (isset($uri)) {
@@ -98,8 +98,8 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
                 $uri   = $result[0]['resourceUri'];
             }
         }
-        if ($relative && $origin){
-            $uri    = Erfurt_Uri::getPathTo( $origin, $uri);
+        if ($relative && $origin) {
+            $uri    = Erfurt_Uri::getPathTo($origin, $uri);
         }
 
         // generate the link URL from the resource URI
@@ -110,7 +110,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
             $url->setParam('r', $uri, true);
             $url = (string)$url;
         }
-		$url	.= $ext;
+        $url .= $ext;
         if ($plain === true) {
             return $url;
         }
