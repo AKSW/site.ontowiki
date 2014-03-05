@@ -26,7 +26,6 @@
   owconfig:helperEvent event:onAnnounceWorker ;
   owconfig:helperEvent event:onPostBootstrap ;
   owconfig:helperEvent event:onShouldLinkedDataRedirect ;
-  owconfig:helperEvent event:onBuildUrl ;
   owconfig:helperEvent event:onCreateMenu ;
 
   owconfig:requiresExtension extension:linkeddataserver;
