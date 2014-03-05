@@ -106,9 +106,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         if ($direct == true) {
             $url = $uri;
         } else {
-            $url = new OntoWiki_Url(array('route' => 'properties'), array('r'));
-            $url->setParam('r', $uri, true);
-            $url = (string)$url;
+            $url = $this->view->Url(array('uri' => $uri));
         }
         $url .= $ext;
         if ($plain === true) {
