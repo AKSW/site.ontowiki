@@ -18,6 +18,10 @@ class Site_View_Helper_Url extends Zend_View_Helper_Abstract
 {
     public function url($uri, $additionalParams = array())
     {
+        if (is_array($uri)) {
+            // Forward compatibility, because the first parameter will hopefully become an array
+            $uri = $uri['uri'];
+        }
         $url = new OntoWiki_Url(array('route' => 'properties'), array('r'));
         $url->setParam('r', $uri, true);
 
