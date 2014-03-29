@@ -687,15 +687,11 @@ ORDER BY DESC(?modified)';
 
     private function _getTemplateData($view)
     {
-        // prepare namespace array with presets of rdf, rdfs and owl
-        $namespaces = array(
-            'rdf'    => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-            'rdfs'   => 'http://www.w3.org/2000/01/rdf-schema#',
-            'owl'    => 'http://www.w3.org/2002/07/owl#'
-        );
-        foreach ($this->_model->getNamespaces() as $ns => $prefix) {
-            $namespaces[$prefix] = $ns;
-        }
+        $namespaces = $this->_model->getNamespacePrefixes();
+        // add presets for rdf, rdfs and owl
+        $namespaces['rdf'] = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+        $namespaces['rdfs'] = 'http://www.w3.org/2000/01/rdf-schema#';
+        $namespaces['owl'] = 'http://www.w3.org/2002/07/owl#';
 
         // this template data is given to ALL templates (with renderx)
         $templateData           = array(

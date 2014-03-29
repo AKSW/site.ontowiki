@@ -51,7 +51,7 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
 
         // build the query including PREFIX declarations
         $query = '';
-        foreach ($model->getNamespaces() as $ns => $usedPrefix) {
+        foreach ($model->getNamespacePrefixes() as $usedPrefix => $ns) {
             $query .= 'PREFIX ' . $usedPrefix . ': <' . $ns . '>' . PHP_EOL;
         }
         $query .= 'SELECT DISTINCT ?resourceUri WHERE {' . PHP_EOL;
