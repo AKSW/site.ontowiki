@@ -48,10 +48,24 @@ class Site_View_Helper_Url extends Zend_View_Helper_Abstract
             $urlOptions['controller'] = $controller;
             $urlOptions['action'] = $action;
         } else if ($stayOnSite) {
-            $urlOptions['controller'] = 'site';
-            // $this->view->siteId is not set atleast under some circumstances
-            //$urlOptions['action']     = $this->view->siteId;
-            $urlOptions['action']     = 'local';
+            // better get configured site model
+            $graph = (string)OntoWiki::getInstance()->selectedModel;
+            if (false !== strpos($uri, $graph)) {
+                // LD-capable
+                if ((string) $uri[strlen($uri)-1] == '/') {
+                    // Slash should not get a suffix
+                    $url = (string) $uri;
+                } else {
+                    // $this->getCurrentSuffix();
+                    $url = $uri . '.html';
+                }
+                return $url;
+            } else {
+                $urlOptions['controller'] = 'site';
+                // $this->view->siteId is not set atleast under some circumstances
+                //$urlOptions['action']     = $this->view->siteId;
+                $urlOptions['action']     = 'local';
+            }
         } else {
             $urlOptions['route'] = $route;
         }
