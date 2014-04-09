@@ -41,6 +41,7 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
         $where    = (isset($options['where']))    ? $options['where']    : '?resourceUri a foaf:Project.';
         $template = (isset($options['template'])) ? $options['template'] : 'li';
         $limit    = (isset($options['limit']))    ? $options['limit']    : 100;
+        $offset   = (isset($options['offset']))   ? $options['offset']   : 0;
         $prefix   = (isset($options['prefix']))   ? $options['prefix']   : '';
         $suffix   = (isset($options['suffix']))   ? $options['suffix']   : '';
         $orderby  = (isset($options['orderby']))  ? $options['orderby']  : null;
@@ -62,6 +63,7 @@ class Site_View_Helper_Query extends Zend_View_Helper_Abstract implements Site_V
             $query .= 'ORDER BY ' . $orderby . PHP_EOL;
         }
         $query .= 'LIMIT ' . $limit . PHP_EOL;
+        $query .= 'OFFSET ' . $offset . PHP_EOL;
 
         // prepare the result string
         $result = $this->view->querylist($query, $template, $options);
