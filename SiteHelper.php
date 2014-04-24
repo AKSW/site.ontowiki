@@ -188,7 +188,8 @@ class SiteHelper extends OntoWiki_Component_Helper
         if ($event->type) {
             // Supported type?
             $requestUri = $event->request->getServer('REQUEST_URI');
-            $parts = explode('.', $requestUri);
+            $requestUriPath = parse_url($requestUri, PHP_URL_PATH);
+            $parts = explode('.', $requestUriPath);
             if ($parts[count($parts)-1] != $event->type) {
                 header('Location: ' . $event->uri . '.' . $event->type, true, 302);
                 exit;
