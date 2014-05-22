@@ -36,18 +36,36 @@ class LiteralHelperTest extends Erfurt_TestCase
     {
         // no markup
         $val = $this->_view->literal(array(
+            'markup' => 'NONE',
             'property' => 'http://model.org/prop',
             'value' => '[value]',
             'tag' => 'meta',
         ));
-        $this->assertEquals($val, '<meta property="http://model.org/prop" content="[value]"/>');
+        $this->assertEquals($val, '');
 
         $val = $this->_view->literal(array(
+            'markup' => 'NONE',
             'property' => 'http://model.org/prop',
             'value' => array('value' => '[value]', 'type' => 'uri'),
             'tag' => 'link',
         ));
-        $this->assertEquals($val, '<link rel="http://model.org/prop" href="[value]"/>');
+        $this->assertEquals($val, '<link href="[value]"/>');
+
+        $val = $this->_view->literal(array(
+            'markup' => 'NONE',
+            'property' => 'http://model.org/prop',
+            'value' => array('value' => 'http://value/', 'type' => 'uri'),
+            'label' => '[label]',
+            'tag' => 'data',
+            'class' => 'cssclass',
+            'prefix' => '[prefix]',
+            'suffix' => '[suffix]',
+            'iprefix' => '[iprefix]',
+            'isuffix' => '[isuffix]',
+        ));
+        $this->assertEquals($val, '[prefix]'
+        . '<data class="cssclass">[iprefix][label][isuffix]</data>'
+        . '[suffix]');
 
         // RDFa
         $val = $this->_view->literal(array(
@@ -65,6 +83,22 @@ class LiteralHelperTest extends Erfurt_TestCase
             'tag' => 'link',
         ));
         $this->assertEquals($val, '<link rel="http://model.org/prop" href="[value]"/>');
+
+        $val = $this->_view->literal(array(
+            'markup' => 'RDFa',
+            'property' => 'http://model.org/prop',
+            'value' => array('value' => 'http://value/', 'type' => 'uri'),
+            'label' => '[label]',
+            'tag' => 'data',
+            'class' => 'cssclass',
+            'prefix' => '[prefix]',
+            'suffix' => '[suffix]',
+            'iprefix' => '[iprefix]',
+            'isuffix' => '[isuffix]',
+        ));
+        $this->assertEquals($val, '[prefix]'
+        . '<data property="http://model.org/prop" resource="http://value/" class="cssclass">[iprefix][label][isuffix]</data>'
+        . '[suffix]');
 
         // microdata
         $val = $this->_view->literal(array(
@@ -98,5 +132,22 @@ class LiteralHelperTest extends Erfurt_TestCase
             'tag' => 'meta',
         ));
         $this->assertEquals($val, '<link itemprop="http://model.org/prop" href="[value]"/>');
+
+        $val = $this->_view->literal(array(
+            'markup' => 'microdata',
+            'property' => 'http://model.org/prop',
+            'value' => array('value' => 'http://value/', 'type' => 'uri'),
+            'label' => '[label]',
+            'tag' => 'data',
+            'class' => 'cssclass',
+            'prefix' => '[prefix]',
+            'suffix' => '[suffix]',
+            'iprefix' => '[iprefix]',
+            'isuffix' => '[isuffix]',
+        ));
+        $this->assertEquals($val, '[prefix]'
+        . '<link itemprop="http://model.org/prop" href="http://value/"/>'
+        . '<data class="cssclass">[iprefix][label][isuffix]</data>'
+        . '[suffix]');
     }
 }
