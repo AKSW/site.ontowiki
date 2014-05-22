@@ -68,6 +68,35 @@ class LiteralHelperTest extends Erfurt_TestCase
         . '[suffix]');
 
         // RDFa
+        // simple property
+        $val = $this->_view->literal(array(
+            'markup' => 'RDFa',
+            'property' => 'http://model.org/prop',
+            'value' => 'text',
+            'tag' => 'span',
+        ));
+        $this->assertEquals($val, '<span property="http://model.org/prop">text</span>');
+
+        // iprefix should force property value into the attribute
+        $val = $this->_view->literal(array(
+            'markup' => 'RDFa',
+            'property' => 'http://model.org/prop',
+            'value' => 'text',
+            'tag' => 'span',
+            'iprefix' => '[iprefix]',
+        ));
+        $this->assertEquals($val, '<span property="http://model.org/prop" content="text">[iprefix]text</span>');
+
+        // isuffix should force property value into the attribute
+        $val = $this->_view->literal(array(
+            'markup' => 'RDFa',
+            'property' => 'http://model.org/prop',
+            'value' => 'text',
+            'tag' => 'span',
+            'isuffix' => '[isuffix]',
+        ));
+        $this->assertEquals($val, '<span property="http://model.org/prop" content="text">text[isuffix]</span>');
+
         $val = $this->_view->literal(array(
             'markup' => 'RDFa',
             'property' => 'http://model.org/prop',

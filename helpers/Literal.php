@@ -247,15 +247,18 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $content = $object['value'];
         $alt     = '';
 
-        if ($label !== null) {
+        // provide original value when tag content is replaced or modified
+        $haveLabel = $label !== null;
+        $haveSpecificLabel = isset($labels[$content]);
+        $haveContentModifications = $iprefix !== '' || $isuffix !== '';
+        if ($haveLabel || $haveSpecificLabel || $haveContentModifications) {
             $value   = $object['value'];
-            $content = $label;
-            $alt     = $content;
-        }
-
-        if (isset($labels[$content])) {
-            $value   = $object['value'];
-            $content = $labels[$content];
+            if ($haveLabel) {
+                $content = $label;
+            }
+            if ($haveSpecificLabel) {
+                $content = $labels[$content];
+            }
             $alt     = $content;
         }
 
