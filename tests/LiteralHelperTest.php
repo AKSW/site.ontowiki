@@ -82,5 +82,21 @@ class LiteralHelperTest extends Erfurt_TestCase
             'tag' => 'link',
         ));
         $this->assertEquals($val, '<link itemprop="http://model.org/prop" href="[value]"/>');
+
+        $val = $this->_view->literal(array(
+            'markup' => 'microdata',
+            'property' => 'http://model.org/prop',
+            'value' => '[value]',
+            'tag' => 'link',
+        ));
+        $this->assertEquals($val, '<meta itemprop="http://model.org/prop" content="[value]"/>');
+
+        $val = $this->_view->literal(array(
+            'markup' => 'microdata',
+            'property' => 'http://model.org/prop',
+            'value' => array('value' => '[value]', 'type' => 'uri'),
+            'tag' => 'meta',
+        ));
+        $this->assertEquals($val, '<link itemprop="http://model.org/prop" href="[value]"/>');
     }
 }

@@ -327,8 +327,8 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                             // microdata does not allow this element with this type of property (URI/non-URI),
                             // supply additional element just to put machine-readable value into it
                             $attr = '';
-                            foreach ($attrs as $name => $value) {
-                                $attr .= sprintf(' %s="%s"', $name, $value);
+                            foreach ($attrs as $attrName => $attrValue) {
+                                $attr .= sprintf(' %s="%s"', $attrName, $attrValue);
                             }
 
                             if (!$isUri) {
