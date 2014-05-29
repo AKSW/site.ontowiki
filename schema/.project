@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>site.ontowiki</name>
+	<comment></comment>
+	<projects>
+		<project>starpages.dev.eccenca.com</project>
+		<project>xturtle.core</project>
+		<project>xturtle.dc</project>
+		<project>xturtle.doap</project>
+		<project>xturtle.foaf</project>
+		<project>xturtle.schemaorg</project>
+		<project>xturtle.skos</project>
+		<project>xturtle.voidvann</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.xtext.ui.shared.xtextBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
+	</natures>
+</projectDescription>

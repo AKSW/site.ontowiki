@@ -17,10 +17,9 @@
  */
 class Site_View_Helper_DisplayLiteralPropertyValue extends Zend_View_Helper_Abstract
 {
-    public function displayLiteralPropertyValue($value = null,
-         $property = '', $datatype = 'http://www.w3.org/2001/XMLSchema#string')
+    public function displayLiteralPropertyValue($value = null, $property = '', $datatype = 'http://www.w3.org/2001/XMLSchema#string')
     {
-        if (!$value) {
+        if ($value === null) {
             $newValue = '';
         } else {
             $event           = new Erfurt_Event('onDisplayLiteralPropertyValue');

@@ -17,17 +17,44 @@
  */
 class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
 {
-    /*
+    /**
      * current view, injected with setView from Zend
      */
     public $view;
 
-    public function querylist($query, $template, $templateOptions = array())
+    /**
+     * The TitleHelper object
+     */
+    private $_titleHelper = null;
+
+    public function querylist($query, $template, $templateOptions = array(), $options = array())
     {
-        $owapp       = OntoWiki::getInstance();
-        $store       = $owapp->erfurt->getStore();
-        $model       = $owapp->selectedModel;
-        $titleHelper = new OntoWiki_Model_TitleHelper($model);
+        $owapp      = OntoWiki::getInstance();
+        $store      = $owapp->erfurt->getStore();
+        $model      = $owapp->selectedModel;
+
+        $prefix     = (isset($options['prefix']))       ? $options['prefix']    : '';
+        $suffix     = (isset($options['suffix']))       ? $options['suffix']    : '';
+        $delimiter  = (isset($options['delimiter']))    ? $options['delimiter'] : '';
+        $property   = (isset($options['property']))     ? $options['property']  : '';
+
+        if ($this->_titleHelper == null) {
+            $this->_titleHelper = new OntoWiki_Model_TitleHelper($model);
+        }
+
+        if ($property !== '') {
+            // construct query to retrieve specified property of the current resource
+            $query  = new Erfurt_Sparql_Query2();
+
+            $resourceUriVar = new Erfurt_Sparql_Query2_Var('resourceUri');
+            $query->addProjectionVar($resourceUriVar);
+
+            $query->addTriple(
+                new Erfurt_Sparql_Query2_IriRef($this->view->resourceUri),
+                new Erfurt_Sparql_Query2_IriRef($property),
+                $resourceUriVar
+            );
+        }
 
         try {
             $result = $model->sparqlQuery($query);
@@ -40,9 +67,18 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
         foreach ($result as $row) {
             foreach ($row as $value) {
                 if (Erfurt_Uri::check($value)) {
-                    $titleHelper->addResource($value);
+                    $this->_titleHelper->addResource($value);
                 }
             }
+        }
+
+        /*
+         * If the ordering doesn't work using the 'ORDER BY' clause you should add ASC() around the
+         * variable which should by sorted. E.g. "… } ORDER BY ASC(?start) ASC(?end)"
+         */
+        if (!stristr($query, 'ORDER BY')) {
+            // sort results by resource title
+            usort($result, array('Site_View_Helper_Querylist', '_cmpTitles'));
         }
 
         $return  = '';
@@ -63,11 +99,21 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
             $row['oddclass'] = $odd ? 'odd' : 'even';
             $row['rowcount'] = $count;
             $row['current']  = $current;
-            $row['title']    = $titleHelper->getTitle($row['resourceUri']);
+            if (isset($row['resourceUri'])) {
+                if (!Erfurt_Uri::check($row['resourceUri'])) {
+                    $row['title']    = $row['resourceUri'];
+                } else {
+                    $row['title']    = $this->_titleHelper->getTitle($row['resourceUri']);
+                }
+            }
+
             $row             = array_merge($row, $templateOptions);
 
             // render the template
-            $return         .= $this->view->partial($template, $row);
+            $return         .= $prefix . $this->view->partial($template, $row) . $suffix;
+            if ($current < $count) {
+                $return     .= $delimiter;
+            }
         }
 
         return $return;
@@ -79,5 +125,37 @@ class Site_View_Helper_Querylist extends Zend_View_Helper_Abstract
     public function setView(Zend_View_Interface $view)
     {
         $this->view = $view;
+    }
+
+    /**
+     * This is the sorting function used to sort the result set.
+     * It compares the titles of the resources in $a and $b as returned by the TitleHelper
+     *
+     * @param $a the first row to compare
+     * @param $b the second row to compare
+     * @return int as needed by usort
+     */
+    private function _cmpTitles ($a, $b, $orderBy = 'resourceUri')
+    {
+        $titleA = '';
+        $titleB = '';
+
+        if (isset($a[$orderBy])) {
+            if (!Erfurt_Uri::check($a[$orderBy])) {
+                $titleA    = $a[$orderBy];
+            } else {
+                $titleA    = $this->_titleHelper->getTitle($a[$orderBy]);
+            }
+        }
+
+        if (isset($b[$orderBy])) {
+            if (!Erfurt_Uri::check($b[$orderBy])) {
+                $titleB    = $b[$orderBy];
+            } else {
+                $titleB    = $this->_titleHelper->getTitle($b[$orderBy]);
+            }
+        }
+
+        return strcasecmp($titleA, $titleB);
     }
 }

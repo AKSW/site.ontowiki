@@ -2,7 +2,7 @@
 /**
  * This file is part of the {@link http://ontowiki.net OntoWiki} project.
  *
- * @copyright Copyright (c) 2011, {@link http://aksw.org AKSW}
+ * @copyright Copyright (c) 2014, {@link http://aksw.org AKSW}
  * @license http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
 
@@ -35,6 +35,10 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
      * - iprefix  - string between tag and content at the beginning
      * - isuffix  - string betwee content and tag at the end
      * - direct   - set to something (e.g true) if you do not want OntoWiki URLs
+     * - plain    - get the URI straight, not the HTML a tag
+     * - relative - calculate relative path from origin to uri instead of absolute uri
+     * - origin   - source uri to relate to
+     * - ext      - extension of links
      */
     public function link($options = array())
     {
@@ -42,7 +46,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         $titleHelper = new OntoWiki_Model_TitleHelper($model);
 
         // check for options and assign local vars or null
-        $uri      = (isset($options['uri']))      ? (string) $options['uri'] : null;
+        $uri      = (isset($options['uri']))      ? (string)$options['uri']  : null;
         $literal  = (isset($options['literal']))  ? $options['literal']      : null;
         $text     = (isset($options['text']))     ? $options['text']         : null;
         $property = (isset($options['property'])) ? $options['property']     : null;
@@ -52,17 +56,21 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
         $iprefix  = (isset($options['iprefix']))  ? $options['iprefix']      : '';
         $isuffix  = (isset($options['isuffix']))  ? $options['isuffix']      : '';
         $direct   = (isset($options['direct']))   ? true                     : false;
+        $plain    = (isset($options['plain']))    ? true                     : false;
+        $origin   = (isset($options['origin']))   ? $options['origin']       : null;
+        $relative = (isset($options['relative'])) ? true                     : false;
+        $ext      = (!empty($options['ext']))     ? '.'.$options['ext']      : '';
 
         // resolve short forms (overwrite full name values with short forms values)
-        $uri      = (isset($options['r'])) ? (string) $options['r'] : $uri;
-        $literal  = (isset($options['l'])) ? $options['l']          : $literal;
-        $text     = (isset($options['t'])) ? $options['t']          : $text;
-        $property = (isset($options['p'])) ? $options['p']          : $property;
+        $uri      = (isset($options['r'])) ? (string)$options['r'] : $uri;
+        $literal  = (isset($options['l'])) ? $options['l']         : $literal;
+        $text     = (isset($options['t'])) ? $options['t']         : $text;
+        $property = (isset($options['p'])) ? $options['p']         : $property;
 
         // if an uri is given, we do not need to search for
         if (isset($uri)) {
             // resolve qnames and check uri input
-            $uri = Erfurt_Uri::getFromQnameOrUri((string) $uri, $model);
+            $uri = Erfurt_Uri::getFromQnameOrUri((string)$uri, $model);
         } else {
             // if no uri is given, we need to search by using the literal
             if (!isset($literal)) {
@@ -90,14 +98,19 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
                 $uri   = $result[0]['resourceUri'];
             }
         }
+        if ($relative && $origin) {
+            $uri    = Erfurt_Uri::getPathTo($origin, $uri);
+        }
 
         // generate the link URL from the resource URI
         if ($direct == true) {
             $url = $uri;
         } else {
-            $url = new OntoWiki_Url(array('route' => 'properties'), array('r'));
-            $url->setParam('r', $uri, true);
-            $url = (string) $url;
+            $url = $this->view->Url(array('uri' => $uri));
+        }
+        $url .= $ext;
+        if ($plain === true) {
+            return $url;
         }
 
         // link text comes from title helper or option

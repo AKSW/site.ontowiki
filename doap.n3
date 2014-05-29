@@ -22,14 +22,18 @@
   owconfig:templates "sites" ;
   owconfig:helpers "helpers" ;
 
+  owconfig:helperEvent event:onAnnounceWorker ;
   owconfig:helperEvent event:onPostBootstrap ;
   owconfig:helperEvent event:onShouldLinkedDataRedirect ;
   owconfig:helperEvent event:onBuildUrl ;
   owconfig:helperEvent event:onIsDispatchable ;
+  owconfig:helperEvent event:onCreateMenu ;
 
   owconfig:requiresExtension extension:linkeddataserver;
 
-  :defaultSite "generic" ;
+  owconfig:hasModule :CacheViewer;
+
+  :defaultSite "example" ;
   doap:release :v1-0 .
 
 :v1-0 a doap:Version ;
@@ -43,3 +47,8 @@
   foaf:name "Sebastian Tramp";
   foaf:homepage <http://aksw.org/SebastianTramp>;
   foaf:mbox <mailto:tramp@informatik.uni-leipzig.de> .
+
+:CacheViewer a owconfig:Module;
+  owconfig:priority "30";
+  rdfs:label "Cache";
+  owconfig:context "main.window.modelinfo", "main.window.properties".

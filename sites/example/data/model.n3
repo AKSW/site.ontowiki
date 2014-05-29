@@ -1,0 +1,80 @@
+# Exported with the Erfurt API - http://aksw.org/Projects/Erfurt
+
+@base <http://localhost/Site/> .
+@prefix sysont: <http://ns.ontowiki.net/SysOnt/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix site: <http://ns.ontowiki.net/SysOnt/Site/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+<> a owl:Ontology ;
+   void:rootResource <Navigation/Main> .
+
+<Navigation/Main> a site:Navigation ;
+                  rdf:_1 <Welcome> ;
+                  rdf:_2 <Map> ;
+                  rdf:_3 <About> ;
+                  rdfs:label "Main Navigation" .
+
+<Welcome> a foaf:Document ;
+          rdfs:label "Welcome"@en, "Willkommen"@de ;
+          site:content "Congratulations and welcome to the example for the [site extension](https://github.com/AKSW/site.ontowiki \"OntoWiki Site Extension ong github\") for [OntoWiki](http://ontowiki.net/ \"OntoWiki Homepage\"). This example site demonstrates some functionality which is covered by the site extension. You can take this example as a starting point for your own OntoWiki powered Site."^^sysont:Markdown ;
+          site:template "welcome" .
+
+<Map> a foaf:Document ;
+      rdfs:label "Map Demo" ;
+      site:content """With the map extension and the map module you can show the location of a resource in a map.
+The map reads the longitude and latitude of the resource from the model and displays it on an OpenStreetMap.
+
+This is the location of our working group in the roof of the university church at Augustusplatz in Leipzig."""^^sysont:Markdown ;
+      site:template "map" ;
+      geo:long "12.379438" ;
+      geo:lat "51.338994" .
+
+<About> a foaf:Document ;
+        rdfs:label "About" ;
+        site:content """The site extension enables the OntoWiki to be used as Semantic-CMS. You can create resources and themes and apply the themes to the resources to display them to your readers, while the data and the presentation is completely separated. Besides the HTML representation of your resources with the templates it is also possible to query the RDF data via content-negotiation.
+
+The most advanced demo of a running example of an OntoWiki with this extension in a production environment is [our homepage (aksw.org)](http://aksw.org).
+
+You can find further information about the extension on its [github page](https://github.com/AKSW/site.ontowiki) and in the [wiki](https://github.com/AKSW/site.ontowiki/wiki)."""^^sysont:Markdown .
+
+foaf:Document site:classTemplate "document" .
+
+void:rootResource a site:TemplateOption .
+
+rdf:_1 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "1." .
+
+rdf:_2 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "2." .
+
+rdf:_3 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "3." .
+
+rdf:_4 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "4." .
+
+rdf:_5 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "5." .
+
+rdf:_6 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "6." .
+
+rdf:_7 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "7." .
+
+rdf:_8 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "8." .
+
+rdf:_9 a rdfs:ContainerMembershipProperty ;
+       rdfs:label "9." .
+
+rdf:_10 a rdfs:ContainerMembershipProperty ;
+        rdfs:label "10." .
+
+rdf:type a owl:ObjectProperty ;
+         rdfs:label "typ"@de, "type"@en .

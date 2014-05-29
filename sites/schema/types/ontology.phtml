@@ -1,0 +1,67 @@
+<?php
+$authorsQuery = 'PREFIX foaf: <http://xmlns.com/foaf/0.1/>' . PHP_EOL;
+$authorsQuery.= 'SELECT DISTINCT ?resourceUri' . PHP_EOL;
+$authorsQuery.= 'WHERE {' . PHP_EOL;
+$authorsQuery.= '   <' . $this->resourceUri . '> foaf:maker ?resourceUri ' . PHP_EOL;
+$authorsQuery.= '}' . PHP_EOL;
+
+$classesQuery = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>' . PHP_EOL;
+$classesQuery.= 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>' . PHP_EOL;
+$classesQuery.= 'PREFIX owl: <http://www.w3.org/2002/07/owl#>' . PHP_EOL;
+$classesQuery.= 'SELECT DISTINCT ?resourceUri' . PHP_EOL;
+$classesQuery.= 'WHERE {' . PHP_EOL;
+$classesQuery.= '            { ?resourceUri rdfs:isDefinedBy <' . $this->resourceUri . '> ; a rdfs:Class .' . PHP_EOL;
+$classesQuery.= '    } UNION { ?resourceUri rdfs:isDefinedBy <' . $this->resourceUri . '> ; a owl:Class . }' . PHP_EOL;
+$classesQuery.= '}' . PHP_EOL;
+
+$propertiesQuery = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>' . PHP_EOL;
+$propertiesQuery.= 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>' . PHP_EOL;
+$propertiesQuery.= 'PREFIX owl: <http://www.w3.org/2002/07/owl#>' . PHP_EOL;
+$propertiesQuery.= 'SELECT DISTINCT ?resourceUri' . PHP_EOL;
+$propertiesQuery.= 'WHERE {' . PHP_EOL;
+$propertiesQuery.= '            { ?resourceUri rdfs:isDefinedBy <' . $this->resourceUri . '> ; a rdf:Property .' . PHP_EOL;
+$propertiesQuery.= '    } UNION { ?resourceUri rdfs:isDefinedBy <' . $this->resourceUri . '> ; a owl:DatatypeProperty . ' . PHP_EOL;
+$propertiesQuery.= '    } UNION { ?resourceUri rdfs:isDefinedBy <' . $this->resourceUri . '> ; a owl:ObjectProperty . }' . PHP_EOL;
+$propertiesQuery.= '}' . PHP_EOL;
+
+$comment = $this->literal(array('property' => 'rdfs:comment', 'plain' => true))
+?>
+
+<dl>
+<dt>Namespace URI</dt>
+<dd>
+<code><?= $this->literal(array('property' => 'vann:preferredNamespaceUri')) ?></code>
+</dd>
+<dt>Authors</dt>
+<dd>
+<ul>
+<?= $this->querylist($authorsQuery, 'schema/items/classes.phtml', array(), array('prefix' => '<li>', 'suffix' => '</li>')) ?>
+
+</ul>
+</dd>
+
+<?php if ($comment) : ?>
+<dt>Description</dt>
+<dd>
+<p><?= $description ?></p>
+</dd>
+<?php endif; ?>
+</dl>
+
+<dl>
+<dt>Classes</dt>
+<dd>
+<?= $this->querylist($classesQuery, 'schema/items/classes.phtml', array(), array('delimiter' => ', ')) ?>
+</dd>
+
+<dt>Properties</dt>
+<dd>
+<?= $this->querylist($propertiesQuery, 'schema/items/properties.phtml', array(), array('delimiter' => ', ')) ?>
+</dd>
+</dl>
+
+<h2>Classes</h2>
+<?= $this->querylist($classesQuery, 'schema/items/classesDesc.phtml') ?>
+
+<h2>Properties</h2>
+<?= $this->querylist($propertiesQuery, 'schema/items/propertiesDesc.phtml') ?>

@@ -1,0 +1,163 @@
+@base <http://ns.ontowiki.net/SysOnt/Site/>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix site: <http://ns.ontowiki.net/SysOnt/Site/>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix doap: <http://usefulinc.com/ns/doap#>.
+@prefix vann: <http://purl.org/vocab/vann/>.
+@prefix schema: <http://schema.org/>.
+@prefix dct: <http://purl.org/dc/terms/>.
+
+###
+# Classes
+###
+
+site:Navigation a rdfs:Class ;
+  rdfs:comment "an RDF sequence resource which is used by the site extensions menu helper" ;
+  rdfs:subClassOf rdf:Seq ;
+  schema:isSimilarTo schema:SiteNavigationElement;
+  skos:note "menu items can have a special label with site:menuLabel" ;
+  rdfs:label "Navigation" ;
+  dct:issued "2013-05-28"^^xsd:date ;
+  dct:modified "2013-05-28"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:MovedResource a owl:Class;
+  rdfs:comment "a resource which is moved to another namespace or which URI is changed for some reason." ;
+  skos:note "moved resources should link with site:seeAlso to the new URI" ;
+  rdfs:label "Moved Resource";
+  dct:issued "2013-05-28"^^xsd:date ;
+  dct:modified "2013-05-28"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:DeletedResource a owl:Class;
+  rdfs:comment "a resource which was deleted for some reason." ;
+  skos:note "deleted resources should link with site:seeAlso to more generic resources or similar resources" ;
+  rdfs:label "Deleted Resource";
+  dct:issued "2013-05-28"^^xsd:date ;
+  dct:modified "2013-05-28"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:SiteMap a owl:Class;
+  rdfs:comment "a XML resource according to the specification at sitemap.org" ;
+  rdfs:seeAlso <https://github.com/AKSW/site.ontowiki/wiki/Sitemap>;
+  rdfs:label "Sitemap";
+  dct:issued "2013-07-15"^^xsd:date ;
+  dct:modified "2013-07-15"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:TemplateOption a owl:Class;
+  rdfs:subClassOf rdf:Property;
+  rdfs:comment "the class of site specific template relevant options which can be used on resources, classes and datasets";
+  skos:note "We should consider the usage of owl:hasKey to provide the uniqeness which we need.";
+  <http://ns.ontowiki.net/SysOnt/hidden> "true"^^xsd:boolean;
+  rdfs:seeAlso <https://github.com/AKSW/site.ontowiki/wiki/Template-and-Site-Options>;
+  rdfs:label "Template Option";
+  dct:issued "2013-07-15"^^xsd:date ;
+  dct:modified "2010-08-06"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+###
+# Properties
+###
+
+site:fetchOptionsFrom a owl:ObjectProperty, owl:TransitiveProperty;
+  rdfs:comment "Instead (and in addition) of using TemplateOption properties directly, one can link to another resource to use the values from this resource. This allows for managing different options profiles and switch them easily.";
+  rdfs:seeAlso <https://github.com/AKSW/site.ontowiki/wiki/Template-and-Site-Options>;
+  rdfs:label "fetch options from";
+  dct:issued "2013-08-06"^^xsd:date ;
+  dct:modified "2010-08-06"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:seeAlso a owl:ObjectProperty, owl:FunctionalProperty;
+  rdfs:comment "If a requested resources links with this property to another resource, the server should forward to this resource";
+  rdfs:subPropertyOf rdfs:seeAlso;
+  rdfs:label "seeAlso (site)";
+  dct:issued "2013-05-28"^^xsd:date ;
+  dct:modified "2010-05-06"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:menuLabel a owl:DatatypeProperty, owl:FunctionalProperty ;
+  rdfs:comment "if present, the navigation list helper uses this literal for the display name of the menu item" ;
+  rdfs:subPropertyOf skos:altLabel ;
+  rdfs:label "menu label" ;
+  dct:issued "2013-05-28"^^xsd:date ;
+  dct:modified "2013-05-28"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:content a owl:DatatypeProperty ;
+  rdfs:subPropertyOf <http://purl.org/rss/1.0/modules/content/encoded> ;
+  rdfs:comment "The main content of a resource in an encoded text of a specific encoding datatype, e.g. sysont:Markdown." ;
+  rdfs:label "main content" ;
+  dct:issued "2013-05-28"^^xsd:date ;
+  dct:modified "2013-05-28"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:appendedContent a owl:DatatypeProperty ;
+  rdfs:subPropertyOf site:content ;
+  rdfs:comment "The content below the main content.", "This property is typically used for user addons on generated resources, e.g. menus" ;
+  rdfs:label "appended content" ;
+  dct:issued "2013-09-09"^^xsd:date ;
+  dct:modified "2013-09-09"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:prependedContent a owl:DatatypeProperty ;
+  rdfs:subPropertyOf site:content ;
+  rdfs:comment "The content above the main content.", "This property is typically used for user addons on generated resources, e.g. menus" ;
+  rdfs:label "prepended content" ;
+  dct:issued "2013-09-09"^^xsd:date ;
+  dct:modified "2013-09-09"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:templateOption a owl:DatatypeProperty ;
+  rdfs:comment "Used to forward specific options to the rendering templates." ;
+  rdfs:comment "This is an lightweight version of the TemplateOption property class useful for very small deployments. Basicly, you have just values here, no keys." ;
+  rdfs:label "template option" ;
+  dct:issued "2013-05-28"^^xsd:date ;
+  dct:modified "2013-08-06"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:abbrevation a owl:DatatypeProperty ;
+  rdfs:subPropertyOf skos:altLabel ;
+  rdfs:comment "The abbrevation of a resource is used e.g. as an URL naming part as well as can be used for better searching." ;
+  rdfs:label "abbrevation" ;
+  dct:issued "2013-05-28"^^xsd:date ;
+  dct:modified "2013-05-28"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:classTemplate a owl:DatatypeProperty, owl:FunctionalProperty ;
+  rdfs:comment "Identifies the template which is used to render the HTML representations of the resources of a class" ;
+  rdfs:domain owl:Class ;
+  rdfs:range xsd:string ;
+  rdfs:label "class template" ;
+  dct:issued "2013-05-28"^^xsd:date ;
+  dct:modified "2013-05-28"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+site:template a owl:DatatypeProperty, owl:FunctionalProperty ;
+  rdfs:comment "Identifies the template which is used to render the HTML representation of a specific resources";
+  skos:note "this attribute overwrites the site:classTemplate property" ;
+  rdfs:range xsd:string ;
+  rdfs:label "template" ;
+  dct:issued "2013-05-28"^^xsd:date ;
+  dct:modified "2013-05-28"^^xsd:date ;
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+###
+# Vocabulary description and documentation
+###
+
+<> a owl:Ontology;
+  foaf:maker <http://sebastian.tramp.name>;
+  doap:maintainer <http://sebastian.tramp.name>;
+  doap:homepage <https://github.com/AKSW/site.ontowiki>;
+  vann:preferredNamespacePrefix "site";
+  vann:preferredNamespaceUri "http://ns.ontowiki.net/SysOnt/Site/";
+  vann:changes <https://github.com/AKSW/site.ontowiki/commits/master/schema/schema.ttl>;
+  rdfs:label "OntoWiki site extension domain vocabulary";
+  rdfs:isDefinedBy <http://ns.ontowiki.net/SysOnt/Site/> .
+
+<http://sebastian.tramp.name> a foaf:Person; foaf:name "Sebastian Tramp".

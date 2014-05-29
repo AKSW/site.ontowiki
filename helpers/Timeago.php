@@ -39,8 +39,8 @@ class Site_View_Helper_Timeago extends Zend_View_Helper_Abstract implements Site
         $script = OntoWiki::getInstance()->getUrlBase() . 'extensions/site/js/jquery.timeago.js';
 
         $return  = PHP_EOL;
-        $return .= '<script type="text/javascript" src="'. $script .'"></script>' . PHP_EOL;
-        $return .= '<script type="text/javascript" charset="utf-8">
+        $return .= '<script type="text/javascript" src="'. $script .'" charset="utf-8"></script>' . PHP_EOL;
+        $return .= '<script type="text/javascript">
     $(document).ready(function(){
         $("'.$tag.'.timeago").timeago();
     })
