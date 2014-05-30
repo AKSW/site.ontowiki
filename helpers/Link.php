@@ -82,7 +82,7 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
 
             // build the query including PREFIX declarations
             $query = '';
-            foreach ($model->getNamespaces() as $ns => $nsprefix) {
+            foreach ($model->getNamespacePrefixes() as $nsprefix => $ns) {
                 $query .= 'PREFIX ' . $nsprefix . ': <' . $ns . '>' . PHP_EOL;
             }
             $query .= 'SELECT DISTINCT ?resourceUri WHERE {?resourceUri '.$property.' ?literal
