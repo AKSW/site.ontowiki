@@ -219,7 +219,9 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
         $resourceUri        = $this->templateData['resourceUri'];
         $this->resource     = new OntoWiki_Resource($resourceUri, $this->_model);
         $this->description  = $this->resource->getDescription();
-        $this->description  = $this->description[$resourceUri];
+        if (!empty($this->description[$resourceUri])) {
+            $this->description  = $this->description[$resourceUri];
+        }
         return $this->description;
     }
 
