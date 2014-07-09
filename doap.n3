@@ -20,6 +20,7 @@
   doap:maintainer <http://aksw.org/SebastianTramp>;  
   owconfig:registeredAt <http://extensions.ontowiki.net/repository> ;
   owconfig:templates "sites" ;
+  owconfig:languages "languages" ;
   owconfig:helpers "helpers" ;
 
   owconfig:helperEvent event:onAnnounceWorker ;

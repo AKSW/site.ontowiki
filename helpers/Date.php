@@ -16,9 +16,22 @@
  */
 class Site_View_Helper_Date extends Zend_View_Helper_Abstract
 {
-    public function date($dateString, $formatString = 'j F Y')
+    public function date($dateString, $formatString = null)
     {
-        $date = new DateTime($dateString);
-        return $date->format($formatString);
+        $translate = OntoWiki::getInstance()->translate;
+        if ($formatString == null) {
+            $formatString = (string)$translate->_('DATE_FORMAT');
+        }
+        if (is_object($dateString) && $dateString instanceof Erfurt_Rdf_Literal) {
+            if ($dateString->getDatatype() == 'http://www.w3.org/2001/XMLSchema#gYear') {
+                $formatString = 'Y';
+            }
+            $dateString = $dateString->getLabel();
+        }
+        $date = new Zend_Date();
+        $date->setOptions(array('format_type' => 'php'));
+        $date->set($dateString);
+        $date->setLocale($translate->getLocale());
+        return $date->toString($formatString);
     }
 }
