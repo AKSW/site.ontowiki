@@ -112,6 +112,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
 
         // check for options and assign local vars or default values
         $array   = (isset($options['array']))   ? $options['array']   : false;
+        $node    = (isset($options['node']))    ? $options['node']    : false;
 
         if (!isset($options['value'])) {
             $description = $this->_getDescription($model, $options);
@@ -131,15 +132,21 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         if ($objects) {
             if ($array) {
                 $return = array();
-                foreach ($objects as $object) {
-                    $return[] = $this->_getContent($object, $property, $options);
+                if ($node) {
+                    foreach ($objects as $object) {
+                        $return[] = Erfurt_Rdf_Literal::initWithArray($object);
+                    }
+                } else {
+                    foreach ($objects as $object) {
+                        $return[] = $this->_getContent($object, $property, $options);
+                    }
                 }
                 return $return;
             } else {
                 //search for language tag
                 unset($object);
+                $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
                 foreach ($objects as $literalNumber => $literal) {
-                    $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
                     if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
                         $object = $objects[$literalNumber];
                         break;
@@ -148,8 +155,11 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 if (!isset($object)) {
                     $object = $objects[0];
                 }
-
-                return $this->_getContent($object, $property, $options);
+                if ($node) {
+                    return Erfurt_Rdf_Literal::initWithArray($object);
+                } else {
+                    return $this->_getContent($object, $property, $options);
+                }
             }
         } else {
             if ($array) {
