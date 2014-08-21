@@ -16,6 +16,16 @@
  */
 class Site_View_Helper_Url extends Zend_View_Helper_Abstract
 {
+    /*
+     * view setter (dev zone article: http://devzone.zend.com/article/3412)
+     */
+    public function setView(Zend_View_Interface $view)
+    {
+        $this->view         = $view;
+        $this->_model       = $view->model;
+        $this->templateData = $view->templateData;
+    }
+
     public function url($options, $additionalParams = array())
     {
         if (is_string($options)) {
@@ -62,9 +72,7 @@ class Site_View_Helper_Url extends Zend_View_Helper_Abstract
                 return $url;
             } else {
                 $urlOptions['controller'] = 'site';
-                // $this->view->siteId is not set atleast under some circumstances
-                //$urlOptions['action']     = $this->view->siteId;
-                $urlOptions['action']     = 'local';
+                $urlOptions['action']     = $this->view->siteId;
             }
         } else {
             $urlOptions['route'] = $route;
