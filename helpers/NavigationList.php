@@ -122,9 +122,15 @@ class Site_View_Helper_NavigationList extends Zend_View_Helper_Abstract implemen
      */
     public function navigationList($options = array())
     {
-        $owapp       = OntoWiki::getInstance();
-        $store       = $owapp->erfurt->getStore();
-        $this->model = $owapp->selectedModel;
+        $owApp       = OntoWiki::getInstance();
+        $helper     = $owApp->extensionManager->getComponentHelper('site');
+        $siteConfig = $helper->getSiteConfig();
+        $store       = $owApp->erfurt->getStore();
+        if (isset($siteConfig['model']) && !empty($siteConfig['model'])) {
+            $this->model     = $store->getModel($siteConfig['model']);
+        } else {
+            $this->model     = $owApp->selectedModel;
+        }
         $titleHelper = new OntoWiki_Model_TitleHelper($this->model);
 
         if (!isset($options['navResource']) || !$options['navResource']) {
