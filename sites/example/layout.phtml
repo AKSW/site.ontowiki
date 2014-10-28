@@ -12,35 +12,44 @@
 
 // this is the standard template data
 $templateData           = $this->templateData;
-?><!doctype html>
+?>
+<!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xmlns:dc="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/">
 <head>
-    <meta charset="UTF-8">
-    <title><?php echo $templateData['title'] ?> &mdash; <?php echo $this->siteConfig['name'] ?></title>
+<meta charset="UTF-8">
+<title>
+    <?= $templateData['title'] ?> &mdash; <?= $this->siteConfig['name'] ?>
+</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta name="generator" content="<?php echo $this->generator ?>" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="generator" content="<?= $this->generator ?>" />
 
-    <link rel="alternate" type="application/rdf+xml" href="<?php echo $this->resourceUri ?>.rdf" />
-    <link rel="pingback" href="<?php echo $this->pingbackUrl ?>" />
+<link rel="alternate" type="application/rdf+xml" href="<?= $this->resourceUri ?>.rdf" />
+<link rel="pingback" href="<?= $this->pingbackUrl ?>" />
 
-    <link rel="<?php echo $this->curie('http://xmlns.com/foaf/0.1/primaryTopic') ?>" href="<?php echo $this->resourceUri?>" />
-    <link type="text/css" href="<?php echo $this->baseUri ?>/css/bootstrap.css" rel="stylesheet" />
+<link rel="<?= $this->curie('http://xmlns.com/foaf/0.1/primaryTopic') ?>" href="<?= $this->resourceUri?>" />
+<link type="text/css" href="<?= $this->baseUri ?>/css/bootstrap.css" rel="stylesheet" />
+<link type="text/css" href="<?= $this->baseUri ?>/css/layout.css" rel="stylesheet" />
+<link type="text/css" href="<?= $this->baseUri ?>/css/sticky-footer-navbar.css" rel="stylesheet" />
+<link type="text/css" href="<?= $this->baseUri ?>/css/bootstrap.css.map"/>
+<link type="text/css" href="<?= $this->baseUri ?>/css/bootstrap-theme.css.map"/>
+<link type="text/css" href="<?= $this->baseUri ?>/css/bootstrap-glyphicons.css"/>
 
-    <!-- jQuery -->
-    <script type="text/javascript" src="<?php echo $this->themeUrlBase ?>scripts/libraries/jquery.js"></script>
 
-    <style type="text/css">
-      body {
-        padding-top: 60px;
-        padding-bottom: 40px;
-      }
-    </style>
+<!-- jQuery -->
+<script type="text/javascript" src="<?= $this->baseUri ?>/js/jquery.js"></script>
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
+<style type="text/css">
+body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+}
+</style>
+
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
@@ -52,49 +61,54 @@ $templateData           = $this->templateData;
 ?>
 </head>
 
-<body<?php
-    foreach ($this->namespaces as $prefix => $ns): ?><?php echo ' xmlns:' . $prefix . '="' . $ns . '"' ?><?php endforeach; ?>>
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+<body
+    <?php foreach ($this->namespaces as $prefix => $ns): ?>
+    <?= ' xmlns:' . $prefix . '="' . $ns . '"' ?><?php endforeach; ?>>
+<div id="wrap">
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
-            </a>
-            <a class="brand">OntoWiki Site Extension</a>
-            <!-- TODO build menu -->
-            <?php
-                $navResource = $this->templateOptions()->getValue('http://rdfs.org/ns/void#rootResource');
-                $navOptions = array(
-                    'navResource' => $navResource,
-                    'navId' => 'nav-main',
-                    'suffix'    => '<!-- /#nav-main -->',
-                    'activeUrl' => $this->resourceUri,
-                    'listClass' => 'nav',
-                    'navClass' => 'nav-collapse'
-                );
-                echo $this->navigationList($navOptions);
-            ?>
+            </button>
+            <a class="navbar-brand" href="#">OntoWiki Site Extension</a>
         </div>
+            <?php
+            $navResource = $this->templateOptions()->getValue('http://rdfs.org/ns/void#rootResource');
+            $navOptions = array(
+                'navResource' => $navResource,
+                'navId' => 'navbar-main',
+                'suffix'    => '<!-- /#nav-main -->',
+                'activeUrl' => $this->resourceUri,
+                'listClass' => 'nav navbar-nav',
+                'navClass' => 'navbar-collapse collapse'
+            );
+            echo $this->navigationList($navOptions);
+            ?>
     </div>
 </div>
 
 <div class="container">
-    <?php echo $this->renderx(); ?>
+    <?= $this->renderx(); ?>
     <!-- Example row of columns for a Feed -->
     <div class="row">
-        <?php echo $this->partial('example/types/feed.phtml', $this->templateData) ?>
+        <?= $this->partial('example/types/feed.phtml', $this->templateData) ?>
     </div>
-    <hr>
-    <footer>
-        <p>&copy; AKSW 2013</p>
-    </footer>
 </div> <!-- /container -->
+<div class="pull-right"><button class="btn btn-default toTop"><span class="glyphicon glyphicon-chevron-up"></span></button></div>
+</div>
+    <div id="footer">
+      <div class="container">
+        <p class="text-muted">&copy; AKSW 2014</p>
+      </div>
+    </div>
 
-<script type="text/javascript" src="<?php echo $this->baseUri ?>/js/jquery.js"></script>
-<script type="text/javascript" src="<?php echo $this->baseUri ?>/js/bootstrap.js"></script>
+<script type="text/javascript" src="<?= $this->baseUri ?>/js/jquery.js"></script>
+<script type="text/javascript" src="<?= $this->baseUri ?>/js/bootstrap.js"></script>
+<script type="text/javascript" src="<?= $this->baseUri ?>/js/custom.js"></script>
 
 </body>
 </html>
-
