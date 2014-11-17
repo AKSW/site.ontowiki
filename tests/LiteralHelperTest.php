@@ -6,6 +6,8 @@
  * @license   http://opensource.org/licenses/gpl-license.php GNU General Public License (GPL)
  */
 
+require_once 'site/MarkupInterface.php';
+
 /**
  * Tests the behavior of Literal helper.
  */
