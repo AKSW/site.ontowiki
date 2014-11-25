@@ -222,7 +222,7 @@ class SiteHelper extends OntoWiki_Component_Helper
         if (null === $this->_siteConfig) {
             $this->_siteConfig = array();
             $site = $this->_privateConfig->defaultSite;
-
+            $typesfolder = $this->_privateConfig->subfolderTypes;
             $relativeTemplatePath = OntoWiki::getInstance()->extensionManager->getExtensionConfig('site')->templates;
             // load the site config
             $configFilePath = sprintf('%s/%s/%s/%s', $this->getComponentRoot(), $relativeTemplatePath, $site, self::SITE_CONFIG_FILENAME);
@@ -234,6 +234,11 @@ class SiteHelper extends OntoWiki_Component_Helper
 
             // add the site id to the config in order to allow correct URIs
             $this->_siteConfig['id'] = $site;
+            
+            // subfolder for resource type templates
+            if (!isset($this->_siteConfig['subfolderTypes'])) {
+                $this->_siteConfig['subfolderTypes'] = $typesfolder;
+            }
         }
 
         return $this->_siteConfig;
