@@ -33,6 +33,7 @@
   owconfig:hasModule :CacheViewer;
 
   :defaultSite "example" ;
+  :subfolderTypes "types" ;
   doap:release :v1-0 .
 
 :v1-0 a doap:Version ;
@@ -41,6 +42,7 @@
   doap:file-release <https://github.com/AKSW/site.ontowiki/zipball/master> .
 
 :defaultSite rdfs:label "The site identifier which is used for the site rendering".
+:subfolderTypes rdfs:label "Local name of subfolder in the templates directory, holding templates for resource types.".
 
 <http://aksw.org/SebastianTramp> a foaf:Person;
   foaf:name "Sebastian Tramp";
