@@ -27,6 +27,7 @@
   owconfig:helperEvent event:onPostBootstrap ;
   owconfig:helperEvent event:onShouldLinkedDataRedirect ;
   owconfig:helperEvent event:onCreateMenu ;
+  owconfig:helperEvent event:onResolveDomainAliasInput ;
 
   owconfig:requiresExtension extension:linkeddataserver;
 

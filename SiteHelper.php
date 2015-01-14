@@ -183,6 +183,34 @@ class SiteHelper extends OntoWiki_Component_Helper
         }
     }
 
+    public function onResolveDomainAliasInput($event)
+    {
+        $siteconfig = $this->getSiteConfig();
+        $aliasconfig = array();
+        
+        if (!isset($siteconfig['alias'])) {
+            return;
+        }
+        
+        $siteconfig['alias'];
+        
+        if (!is_array($siteconfig['alias']) && trim($siteconfig['alias'])) {
+            $aliasconfig = array($siteconfig['alias']);
+        }
+        else
+        {
+            $aliasconfig = $siteconfig['alias'];
+        }
+        
+        if (count($aliasconfig) < 1) {
+            return;
+        }
+        
+        $event->uri = str_replace($aliasconfig, $siteconfig['model'], $event->uri);
+        
+        return;
+    }
+    
     public function onShouldLinkedDataRedirect($event)
     {
         if ($event->type) {
