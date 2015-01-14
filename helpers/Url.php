@@ -22,8 +22,12 @@ class Site_View_Helper_Url extends Zend_View_Helper_Abstract
     public function setView(Zend_View_Interface $view)
     {
         $this->view         = $view;
-        $this->_model       = $view->model;
-        $this->templateData = $view->templateData;
+        if (isset($view->model)) {
+            $this->_model       = $view->model;
+        }
+        if (isset($view->templateData)) {
+            $this->templateData = $view->templateData;
+        }
     }
 
     public function url($options, $additionalParams = array())
