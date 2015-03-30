@@ -15,12 +15,14 @@
 // prepare module options
 $map = trim($this->module('map', array('noChrome' => true)));
 ?>
-<h1>Map</h1>
-<div class="row-fluid">
-<div class="span8">
+<div class="page-header">
+  <h1><?php echo $this->title ?> <small>site</small></h1>
+</div>
+<div class="row">
+<div class="col-md-8">
     <?php echo $this->literal(array('class' => 'content')); ?>
 </div>
-<div class="span4">
+<div class="col-md-4">
 <?php if (!empty($map)): ?>
 <?php echo $map; ?>
 <?php else: ?>

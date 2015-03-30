@@ -36,9 +36,15 @@ class TemplateOptionsClass
 
     public function __construct($resourceUri)
     {
-        $owApp     = OntoWiki::getInstance();
-        $store     = $owApp->erfurt->getStore();
-        $model     = $owApp->selectedModel;
+        $owApp      = OntoWiki::getInstance();
+        $helper     = $owApp->extensionManager->getComponentHelper('site');
+        $siteConfig = $helper->getSiteConfig();
+        $store      = $owApp->erfurt->getStore();
+        if (isset($siteConfig['model']) && !empty($siteConfig['model'])) {
+            $model     = $store->getModel($siteConfig['model']);
+        } else {
+            $model     = $owApp->selectedModel;
+        }
         $resource  = new Erfurt_Sparql_Query2_IriRef($resourceUri);
         $ontology  = new Erfurt_Sparql_Query2_IriRef(EF_OWL_ONTOLOGY);
         $fetchFrom = new Erfurt_Sparql_Query2_IriRef(static::SITE_FETCH_OPTIONS_FROM);

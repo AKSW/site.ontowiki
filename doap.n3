@@ -20,20 +20,21 @@
   doap:maintainer <http://aksw.org/SebastianTramp>;  
   owconfig:registeredAt <http://extensions.ontowiki.net/repository> ;
   owconfig:templates "sites" ;
+  owconfig:languages "languages" ;
   owconfig:helpers "helpers" ;
 
   owconfig:helperEvent event:onAnnounceWorker ;
   owconfig:helperEvent event:onPostBootstrap ;
   owconfig:helperEvent event:onShouldLinkedDataRedirect ;
-  owconfig:helperEvent event:onBuildUrl ;
-  owconfig:helperEvent event:onIsDispatchable ;
   owconfig:helperEvent event:onCreateMenu ;
+  owconfig:helperEvent event:onResolveDomainAliasInput ;
 
   owconfig:requiresExtension extension:linkeddataserver;
 
   owconfig:hasModule :CacheViewer;
 
   :defaultSite "example" ;
+  :subfolderTypes "types" ;
   doap:release :v1-0 .
 
 :v1-0 a doap:Version ;
@@ -42,6 +43,7 @@
   doap:file-release <https://github.com/AKSW/site.ontowiki/zipball/master> .
 
 :defaultSite rdfs:label "The site identifier which is used for the site rendering".
+:subfolderTypes rdfs:label "Local name of subfolder in the templates directory, holding templates for resource types.".
 
 <http://aksw.org/SebastianTramp> a foaf:Person;
   foaf:name "Sebastian Tramp";

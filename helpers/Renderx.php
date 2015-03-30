@@ -156,8 +156,21 @@ class Site_View_Helper_Renderx extends Zend_View_Helper_Abstract implements Site
             }
         }
 
+        // set folder for resource type templates
+        $siteConfig = $this->view->templateData['siteConfig'];
+        $foldernameTypes = 'types'; // Fallback for old behaviour
+        if (isset($siteConfig['subfolderTypes'])) {
+            // default setting
+            $foldernameTypes = $siteConfig['subfolderTypes'];
+        }
+        if (isset($siteConfig['private']) && isset($siteConfig['private']['subfolderTypes'])) {
+            // private user setting
+            $foldernameTypes = $siteConfig['private']['subfolderTypes'];
+        }
+        
+        // path name of template
         if ($templateName != null) {
-            $this->_template = $this->view->siteId .'/types/'. $templateName .'.phtml';
+            $this->_template = $this->view->siteId . str_replace('//', '/', '/' . $foldernameTypes . '/') . $templateName .'.phtml';
             return $this->_template;
         } else {
             return false;

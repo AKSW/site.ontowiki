@@ -17,7 +17,7 @@ $tag = 'h2';
 
 foreach ($this->entries as $entry) {
 
-    $moreLink = '<p><a class="btn" href="' . $entry['link'] . '">Read more &raquo;</a></p>';
+    $moreLink = '<p><a class="btn btn-default" href="' . $entry['link'] . '">Read more &raquo;</a></p>‘;
 
     // prepare the heading (link) and more link
     if ( (isset($entry['link'])) && (isset($entry['title'])) ) {
@@ -75,7 +75,7 @@ foreach ($this->entries as $entry) {
 ?>
 <!-- feed entry start -->
 
-<?php echo '<div class="span4">'
+<?php echo '<div class="col-md-4">'
     . "<$tag>"
     . $heading
     . "</$tag>"

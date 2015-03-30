@@ -112,6 +112,7 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
 
         // check for options and assign local vars or default values
         $array   = (isset($options['array']))   ? $options['array']   : false;
+        $node    = (isset($options['node']))    ? $options['node']    : false;
 
         if (!isset($options['value'])) {
             $description = $this->_getDescription($model, $options);
@@ -131,15 +132,21 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         if ($objects) {
             if ($array) {
                 $return = array();
-                foreach ($objects as $object) {
-                    $return[] = $this->_getContent($object, $property, $options);
+                if ($node) {
+                    foreach ($objects as $object) {
+                        $return[] = Erfurt_Rdf_Literal::initWithArray($object);
+                    }
+                } else {
+                    foreach ($objects as $object) {
+                        $return[] = $this->_getContent($object, $property, $options);
+                    }
                 }
                 return $return;
             } else {
                 //search for language tag
                 unset($object);
+                $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
                 foreach ($objects as $literalNumber => $literal) {
-                    $currentLanguage = OntoWiki::getInstance()->getConfig()->languages->locale;
                     if (isset($literal['lang']) && $currentLanguage == $literal['lang']) {
                         $object = $objects[$literalNumber];
                         break;
@@ -148,8 +155,11 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
                 if (!isset($object)) {
                     $object = $objects[0];
                 }
-
-                return $this->_getContent($object, $property, $options);
+                if ($node) {
+                    return Erfurt_Rdf_Literal::initWithArray($object);
+                } else {
+                    return $this->_getContent($object, $property, $options);
+                }
             }
         } else {
             if ($array) {
@@ -247,157 +257,160 @@ class Site_View_Helper_Literal extends Zend_View_Helper_Abstract implements Site
         $content = $object['value'];
         $alt     = '';
 
-        if ($label !== null) {
+        // provide original value when tag content is replaced or modified
+        $haveLabel = $label !== null;
+        $haveSpecificLabel = isset($labels[$content]);
+        $haveContentModifications = $iprefix !== '' || $isuffix !== '';
+        if ($haveLabel || $haveSpecificLabel || $haveContentModifications) {
             $value   = $object['value'];
-            $content = $label;
-            $alt     = $content;
-        }
-
-        if (isset($labels[$content])) {
-            $value   = $object['value'];
-            $content = $labels[$content];
+            if ($haveLabel) {
+                $content = $label;
+            }
+            if ($haveSpecificLabel) {
+                $content = $labels[$content];
+            }
             $alt     = $content;
         }
 
         if ($plain) {
             return $content;
-        } else {
-            //$property = $this->view->curie($property);
-
-            if ($endTag === '') {
-                $value   = $object['value'];
-                $content = '';
-
-                if ($iprefix !== '' || $isuffix !== '') {
-                    throw new OntoWiki_Exception('Attempting to use literal helper\'s iprefix and isuffix with '.$tag.' tag.');
-                }
-            }
-
-            $isUri = isset($object['type']) && $object['type'] === 'uri';
-
-            switch ($markup) {
-                case 'RDFa':
-                    switch ($tag) {
-                        case 'link':
-                            $relation = 'rel';
-                        break; default:
-                            $relation = 'property';
-                    }
-
-                    $attrs[$relation] = $property;
-
-                    if ($isUri) {
-                        switch ($tag) {
-                            case 'img':
-                                $target = 'src';
-                            break; case 'link':
-                                $target = 'href';
-                            break; default:
-                                $target = 'resource';
-                        }
-
-                        $attrs[$target] = $object['value'];
-                        $value = null;
-                    }
-
-                    if ($value !== null) $attrs['content'] = $value;
-                break;
-                case 'microdata':
-                    $attrs['itemprop'] = $property;
-
-                    // microdata does not have one general property for machine-readable value
-                    $valueInfo = null;
-                    if (isset(static::$microdataPropertyValue[$tag])) {
-                        $valueInfo = static::$microdataPropertyValue[$tag];
-                    }
-
-                    if ($valueInfo && $value === null) {
-                        // microdata uses element's textContent only "otherwise";
-                        // for all defined elements an attribute must be used
-                        $value = $object['value'];
-                    }
-
-                    if ($value !== null) {
-                        if (
-                            $valueInfo !== null // element may have machine-readable values
-                            && ($isUri xor $valueInfo['type'] !== 'URI') // element's value type matches
-                        ) {
-                            $attrs[$valueInfo['attr']] = $value;
-                        } else {
-                            // microdata does not allow this element with this type of property (URI/non-URI),
-                            // supply additional element just to put machine-readable value into it
-                            $attr = '';
-                            foreach ($attrs as $name => $value) {
-                                $attr .= sprintf(' %s="%s"', $name, $value);
-                            }
-
-                            if (!$isUri) {
-                                /* non-empty <data/> is reasonable to use here,
-                                   but there are many issues in microdata parsers with it */
-                                /*
-                                $prefix .= '<data'.$attr.' value="'.$value.'">';
-                                $suffix  = '</data>'.$suffix;
-                                */
-                                $prefix .= '<meta'.$attr.' content="'.$value.'"/>';
-                            } else {
-                                $prefix .= '<link'.$attr.' href="'.$value.'"/>';
-                            }
-                            $attrs = array();
-                        }
-                    }
-                break;
-                case 'NONE':
-                break;
-                default:
-                    throw new OntoWiki_Exception('Unknown data markup format specified.');
-            }
-
-            // add attributes expected in HTML regardless of additional markup (media, links, HTML data)
-            if (isset(static::$htmlPropertyValue[$tag])) {
-                $valueInfo = static::$htmlPropertyValue[$tag];
-                if ($isUri xor $valueInfo['type'] !== 'URI') {
-                    if (!isset($attrs[$valueInfo['attr']])) {
-                        $attrs[$valueInfo['attr']] = $object['value'];
-                    }
-                }
-            }
-
-            if ($class !== '') {
-                $attrs['class'] = $class;
-            }
-
-            // execute the helper markup on the content (after the extensions)
-            $content = $this->view->executeHelperMarkup($content);
-
-            // filter by using available extensions
-            if (isset($object['datatype'])) {
-                $datatype = $object['datatype'];
-                $content = $this->view->displayLiteralPropertyValue($content, $property, $datatype);
-            } elseif (isset($object['lang'])) {
-                $attrs['xml:lang'] = $object['lang'];
-                $attrs['lang']     = $object['lang'];
-                $content = $this->view->displayLiteralPropertyValue($content, $property);
-            } else {
-                $content = $this->view->displayLiteralPropertyValue($content, $property);
-            }
-
-            if ($tag === 'img') {
-                $attrs['alt'] = $alt;
-            }
-
-            $html = sprintf('%s%s%s', $iprefix, $content, $isuffix);
-
-            $attr = '';
-            foreach ($attrs as $name => $value) {
-                $attr .= sprintf(' %s="%s"', $name, $value);
-            }
-            // don't generate empty elements, if tag is not specified explicitly
-            if ($attr !== '' || (isset($options['tag']) && !in_array($tag, static::$alwaysRemoveNoAttrTags))) {
-                $html = sprintf('<%s%s%s>%s%s', $tag, $attr, $shortTag, $html, $endTag);
-            }
-
-            return sprintf('%s%s%s', $prefix, $html, $suffix);
         }
+
+        //$property = $this->view->curie($property);
+
+        if ($endTag === '') {
+            $value   = $object['value'];
+            $content = '';
+
+            if ($iprefix !== '' || $isuffix !== '') {
+                throw new OntoWiki_Exception('Attempting to use literal helper\'s iprefix and isuffix with '.$tag.' tag.');
+            }
+        }
+
+        $isUri = isset($object['type']) && $object['type'] === 'uri';
+
+        switch ($markup) {
+            case 'RDFa':
+                switch ($tag) {
+                    case 'link':
+                        $relation = 'rel';
+                    break; default:
+                        $relation = 'property';
+                }
+
+                $attrs[$relation] = $property;
+
+                if ($isUri) {
+                    switch ($tag) {
+                        case 'img':
+                            $target = 'src';
+                        break; case 'link':
+                            $target = 'href';
+                        break; default:
+                            $target = 'resource';
+                    }
+
+                    $attrs[$target] = $object['value'];
+                    $value = null;
+                }
+
+                if ($value !== null) $attrs['content'] = $value;
+            break;
+            case 'microdata':
+                $attrs['itemprop'] = $property;
+
+                // microdata does not have one general property for machine-readable value
+                $valueInfo = null;
+                if (isset(static::$microdataPropertyValue[$tag])) {
+                    $valueInfo = static::$microdataPropertyValue[$tag];
+                }
+
+                if ($valueInfo && $value === null) {
+                    // microdata uses element's textContent only "otherwise";
+                    // for all defined elements an attribute must be used
+                    $value = $object['value'];
+                }
+
+                if ($value !== null) {
+                    if (
+                        $valueInfo !== null // element may have machine-readable values
+                        && ($isUri xor $valueInfo['type'] !== 'URI') // element's value type matches
+                    ) {
+                        $attrs[$valueInfo['attr']] = $value;
+                    } else {
+                        // microdata does not allow this element with this type of property (URI/non-URI),
+                        // supply additional element just to put machine-readable value into it
+                        $attr = '';
+                        foreach ($attrs as $attrName => $attrValue) {
+                            $attr .= sprintf(' %s="%s"', $attrName, $attrValue);
+                        }
+
+                        if (!$isUri) {
+                            /* non-empty <data/> is reasonable to use here,
+                               but there are many issues in microdata parsers with it */
+                            /*
+                            $prefix .= '<data'.$attr.' value="'.$value.'">';
+                            $suffix  = '</data>'.$suffix;
+                            */
+                            $prefix .= '<meta'.$attr.' content="'.$value.'"/>';
+                        } else {
+                            $prefix .= '<link'.$attr.' href="'.$value.'"/>';
+                        }
+                        $attrs = array();
+                    }
+                }
+            break;
+            case 'NONE':
+            break;
+            default:
+                throw new OntoWiki_Exception('Unknown data markup format specified.');
+        }
+
+        // add attributes expected in HTML regardless of additional markup (media, links, HTML data)
+        if (isset(static::$htmlPropertyValue[$tag])) {
+            $valueInfo = static::$htmlPropertyValue[$tag];
+            if ($isUri xor $valueInfo['type'] !== 'URI') {
+                if (!isset($attrs[$valueInfo['attr']])) {
+                    $attrs[$valueInfo['attr']] = $object['value'];
+                }
+            }
+        }
+
+        if ($class !== '') {
+            $attrs['class'] = $class;
+        }
+
+        // execute the helper markup on the content (after the extensions)
+        $content = $this->view->executeHelperMarkup($content);
+
+        // filter by using available extensions
+        if (isset($object['datatype'])) {
+            $datatype = $object['datatype'];
+            $content = $this->view->displayLiteralPropertyValue($content, $property, $datatype);
+        } elseif (isset($object['lang'])) {
+            $attrs['xml:lang'] = $object['lang'];
+            $attrs['lang']     = $object['lang'];
+            $content = $this->view->displayLiteralPropertyValue($content, $property);
+        } else {
+            $content = $this->view->displayLiteralPropertyValue($content, $property);
+        }
+
+        if ($tag === 'img') {
+            $attrs['alt'] = $alt;
+        }
+
+        $html = sprintf('%s%s%s', $iprefix, $content, $isuffix);
+
+        $attr = '';
+        foreach ($attrs as $name => $value) {
+            $attr .= sprintf(' %s="%s"', $name, $value);
+        }
+        // don't generate empty elements, if tag is not specified explicitly
+        if ($attr !== '' || (isset($options['tag']) && !in_array($tag, static::$alwaysRemoveNoAttrTags))) {
+            $html = sprintf('<%s%s%s>%s%s', $tag, $attr, $shortTag, $html, $endTag);
+        }
+
+        return sprintf('%s%s%s', $prefix, $html, $suffix);
     }
 
 }
