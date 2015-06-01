@@ -52,6 +52,7 @@ class Site_View_Helper_Url extends Zend_View_Helper_Abstract
         $action     = (isset($options['a']))            ? $options['a']             : null;
         $action     = (isset($options['action']))       ? $options['action']        : $action;
         $stayOnSite = (isset($options['stayOnSite']))   ? $options['stayOnSite']    : true;
+        $siteId     = (isset($options['siteId']))       ? $options['siteId']        : null;
         $additionalParams   = (isset($options['additionalParams']))     ? $options['additionalParams']  : $additionalParams;
         $contractNamespace  = (isset($options['contractNamespace']))    ? $options['contractNamespace'] : true;
 
@@ -75,8 +76,11 @@ class Site_View_Helper_Url extends Zend_View_Helper_Abstract
                 }
                 return $url;
             } else {
+                if ($siteId == null && isset($this->templateData)) {
+                    $siteId = $this->templateData['siteId'];
+                }
                 $urlOptions['controller'] = 'site';
-                $urlOptions['action']     = $this->view->siteId;
+                $urlOptions['action']     = $siteId;
             }
         } else {
             $urlOptions['route'] = $route;

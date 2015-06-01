@@ -124,6 +124,12 @@ class Site_View_Helper_Link extends Zend_View_Helper_Abstract implements Site_Vi
      */
     public function setView(Zend_View_Interface $view)
     {
-        $this->view = $view;
+        $this->view         = $view;
+        if (isset($view->model)) {
+            $this->_model       = $view->model;
+        }
+        if (isset($view->templateData)) {
+            $this->templateData = $view->templateData;
+        }
     }
 }

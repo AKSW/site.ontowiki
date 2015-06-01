@@ -16,6 +16,19 @@
  */
 class Site_View_Helper_Lastchange extends Zend_View_Helper_Abstract
 {
+    /*
+     * view setter (dev zone article: http://devzone.zend.com/article/3412)
+     */
+    public function setView(Zend_View_Interface $view)
+    {
+        $this->view         = $view;
+        if (isset($view->model)) {
+            $this->_model       = $view->model;
+        }
+        if (isset($view->templateData)) {
+            $this->templateData = $view->templateData;
+        }
+    }
     public function lastchange($uri)
     {
         // TODO: fill this value with the erfurt versioning api
