@@ -16,7 +16,7 @@
  */
 class Site_View_Helper_Date extends Zend_View_Helper_Abstract
 {
-    public function date($dateString, $formatString = null, $debug = false)
+    public function date($dateString, $formatString = null)
     {
         $translate = OntoWiki::getInstance()->translate;
         if ($formatString == null) {
