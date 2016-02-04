@@ -660,6 +660,7 @@ ORDER BY DESC(?modified)';
                 $site = $this->_privateConfig->defaultSite;
                 $root = $this->getComponentRoot();
                 $configFilePath = sprintf('%s%s/%s/%s', $root, $this->_relativeTemplatePath, $site, SiteHelper::SITE_CONFIG_FILENAME);
+
                 throw new OntoWiki_Exception(
                     'No model selected! Please, configure a site model by setting the option '
                     . '"model=..." in "' . $configFilePath . '" or specify parameter m in the URL.'
