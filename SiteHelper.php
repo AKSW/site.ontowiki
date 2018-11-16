@@ -81,7 +81,8 @@ class SiteHelper extends OntoWiki_Component_Helper
 
     public function init()
     {
-        $this->_relativeTemplatePath = $this->_owApp->extensionManager->getExtensionConfig('site')->templates;
+        //removing possible trailing slash with rtrim
+        $this->_relativeTemplatePath = rtrim($this->_owApp->extensionManager->getExtensionConfig('site')->templates, '/');
     }
 
     public function onAnnounceWorker($event)
@@ -657,8 +658,9 @@ ORDER BY DESC(?modified)';
             // TODO: what if no site model configured?
             if (!Erfurt_Uri::check($siteConfig['model'])) {
                 $site = $this->_privateConfig->defaultSite;
-                $root = $this->getComponentHelper()->getComponentRoot();
+                $root = $this->getComponentRoot();
                 $configFilePath = sprintf('%s%s/%s/%s', $root, $this->_relativeTemplatePath, $site, SiteHelper::SITE_CONFIG_FILENAME);
+
                 throw new OntoWiki_Exception(
                     'No model selected! Please, configure a site model by setting the option '
                     . '"model=..." in "' . $configFilePath . '" or specify parameter m in the URL.'
